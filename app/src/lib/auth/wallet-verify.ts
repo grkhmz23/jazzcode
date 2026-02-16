@@ -1,5 +1,7 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
+import { prisma } from "@/lib/db/client";
+import { createWalletSignInMessage } from "@/lib/auth/wallet-message";
 
 /**
  * Verify an ed25519 signature for wallet authentication
@@ -46,4 +48,70 @@ export function verifyWalletSignature(
     console.error("Wallet signature verification error:", error);
     return false;
   }
+}
+
+export interface WalletAuthVerificationInput {
+  address: string;
+  signature: string;
+  nonce: string;
+}
+
+export interface WalletAuthVerificationResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * Verify wallet auth payload:
+ * - nonce exists for address
+ * - nonce is not expired / used
+ * - signature matches message format
+ * - nonce is marked used after success
+ */
+export async function verifyWalletAuth(
+  input: WalletAuthVerificationInput
+): Promise<WalletAuthVerificationResult> {
+  const { address, signature, nonce } = input;
+
+  if (!address || !signature || !nonce) {
+    return { ok: false, error: "Missing wallet auth fields" };
+  }
+
+  const nonceRecord = await prisma.walletNonce.findFirst({
+    where: { address, nonce },
+    orderBy: { expiresAt: "desc" },
+  });
+
+  if (!nonceRecord) {
+    return { ok: false, error: "Invalid or missing nonce" };
+  }
+
+  if (nonceRecord.used) {
+    return { ok: false, error: "Nonce has already been used" };
+  }
+
+  if (nonceRecord.expiresAt <= new Date()) {
+    return { ok: false, error: "Nonce has expired" };
+  }
+
+  const message = createWalletSignInMessage(nonce);
+  const signatureIsValid = verifyWalletSignature(address, signature, message);
+  if (!signatureIsValid) {
+    return { ok: false, error: "Invalid wallet signature" };
+  }
+
+  const markUsed = await prisma.walletNonce.updateMany({
+    where: {
+      id: nonceRecord.id,
+      used: false,
+      expiresAt: { gt: new Date() },
+    },
+    data: { used: true },
+  });
+
+  if (markUsed.count !== 1) {
+    return { ok: false, error: "Nonce is no longer valid" };
+  }
+
+  return { ok: true };
 }

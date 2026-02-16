@@ -7,8 +7,10 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import { BackpackWalletAdapter } from "@solana/wallet-adapter-backpack";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
+import { toast } from "sonner";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 interface WalletProviderProps {
@@ -31,6 +33,7 @@ export function WalletProviderComponent({ children }: WalletProviderProps) {
     () => [
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
+      new BackpackWalletAdapter(),
     ],
     []
   );
@@ -38,6 +41,9 @@ export function WalletProviderComponent({ children }: WalletProviderProps) {
   // Handle wallet errors gracefully
   const onError = useCallback((error: Error) => {
     console.error("Wallet error:", error);
+    toast.error("Wallet error", {
+      description: error.message || "Please try reconnecting your wallet.",
+    });
   }, []);
 
   return (

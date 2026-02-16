@@ -28,13 +28,14 @@ import {
   Shield,
 } from "lucide-react";
 import bs58 from "bs58";
+import { toast } from "sonner";
 
 interface SettingsData {
   username: string;
   displayName: string;
   bio: string;
   linkedProviders: string[];
-  linkedWallets: Array<{ address: string; isPrimary: boolean }>;
+  linkedWallets: string[];
   preferredLocale: string;
   theme: string;
   isPublic: boolean;
@@ -101,9 +102,12 @@ function SettingsContent() {
       }
 
       setSaveMessage(t("saved"));
+      toast.success(t("saved"));
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      const message = err instanceof Error ? err.message : "Failed to save";
+      setError(message);
+      toast.error("Failed to save settings", { description: message });
     } finally {
       setIsSaving(false);
     }
@@ -156,9 +160,12 @@ function SettingsContent() {
       }
 
       setSaveMessage(t("saved"));
+      toast.success(t("saved"));
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to link wallet");
+      const message = err instanceof Error ? err.message : "Failed to link wallet";
+      setError(message);
+      toast.error("Failed to link wallet", { description: message });
     } finally {
       setIsLinkingWallet(false);
     }
@@ -186,9 +193,12 @@ function SettingsContent() {
       }
 
       setSaveMessage(t("saved"));
+      toast.success(t("saved"));
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to unlink wallet");
+      const message = err instanceof Error ? err.message : "Failed to unlink wallet";
+      setError(message);
+      toast.error("Failed to unlink wallet", { description: message });
     } finally {
       setIsLinkingWallet(false);
     }
@@ -207,7 +217,9 @@ function SettingsContent() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Export failed");
+      const message = err instanceof Error ? err.message : "Export failed";
+      setError(message);
+      toast.error("Failed to export data", { description: message });
     }
   }, []);
 
@@ -341,7 +353,7 @@ function SettingsContent() {
                     <p className="text-sm font-medium">Solana Wallet</p>
                     <p className="text-xs text-muted-foreground">
                       {settings?.linkedWallets && settings.linkedWallets.length > 0
-                        ? `${settings.linkedWallets[0].address.slice(0, 6)}...${settings.linkedWallets[0].address.slice(-4)}`
+                        ? `${settings.linkedWallets[0].slice(0, 6)}...${settings.linkedWallets[0].slice(-4)}`
                         : t("walletLinkDesc")}
                     </p>
                   </div>

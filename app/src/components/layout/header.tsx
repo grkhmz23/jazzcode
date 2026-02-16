@@ -4,7 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Code2, Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Code2, Menu, X, LogOut, User, Settings, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { WalletButton } from "@/components/auth/WalletButton";
@@ -68,6 +68,12 @@ export function Header() {
                       <Button variant="ghost" size="sm" className="gap-1">
                         <User className="h-4 w-4" />
                         {t("profile")}
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard">
+                      <Button variant="ghost" size="sm" className="gap-1">
+                        <LayoutDashboard className="h-4 w-4" />
+                        {t("dashboard")}
                       </Button>
                     </Link>
                     <Link href="/settings">
@@ -168,6 +174,13 @@ export function Header() {
                     </AvatarFallback>
                   </Avatar>
                   {session?.user?.name}
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="block py-2 text-sm font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {t("dashboard")}
                 </Link>
                 <Link
                   href="/settings"

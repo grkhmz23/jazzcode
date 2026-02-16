@@ -10,6 +10,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/sonner";
 
 interface LocaleLayoutProps {
   children: React.ReactNode;
@@ -62,6 +63,7 @@ export default async function LocaleLayout({ children, params: { locale } }: Loc
               </NextIntlClientProvider>
             </WalletProvider>
           </SessionProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

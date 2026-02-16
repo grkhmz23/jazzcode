@@ -61,22 +61,51 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Check if wallet is already linked to a DIFFERENT user
-    const existingUser = await prisma.user.findUnique({
-      where: { walletAddress },
-    });
+    // Check if wallet is already linked to a different user
+    const [existingUserByWalletField, existingWalletLink] = await Promise.all([
+      prisma.user.findUnique({
+        where: { walletAddress },
+        select: { id: true },
+      }),
+      prisma.userWallet.findUnique({
+        where: { address: walletAddress },
+        select: { userId: true },
+      }),
+    ]);
 
-    if (existingUser && existingUser.id !== session.user.id) {
+    const walletOwnerId =
+      existingUserByWalletField?.id ?? existingWalletLink?.userId ?? null;
+
+    if (walletOwnerId && walletOwnerId !== session.user.id) {
       return NextResponse.json(
         { error: "This wallet is already linked to another account" },
         { status: 409 }
       );
     }
 
-    // Update the user's wallet address
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: { walletAddress },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: { walletAddress },
+      });
+
+      await tx.userWallet.updateMany({
+        where: { userId: session.user.id },
+        data: { isPrimary: false },
+      });
+
+      await tx.userWallet.upsert({
+        where: { address: walletAddress },
+        create: {
+          address: walletAddress,
+          userId: session.user.id,
+          isPrimary: true,
+        },
+        update: {
+          userId: session.user.id,
+          isPrimary: true,
+        },
+      });
     });
 
     logger.info("Wallet linked to user", {
@@ -86,7 +115,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     return NextResponse.json({
       success: true,
-      walletAddress: updatedUser.walletAddress,
+      walletAddress,
     });
   } catch (error) {
     logger.error("Error linking wallet", { error });
@@ -113,10 +142,15 @@ export async function DELETE(): Promise<Response> {
       );
     }
 
-    // Remove the wallet address from the user
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { walletAddress: null },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: { walletAddress: null },
+      });
+
+      await tx.userWallet.deleteMany({
+        where: { userId: session.user.id },
+      });
     });
 
     logger.info("Wallet unlinked from user", {

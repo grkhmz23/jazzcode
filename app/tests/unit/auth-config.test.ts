@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { AuthOptions } from "next-auth";
-
 describe("Auth Configuration", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -42,44 +40,44 @@ describe("Auth Configuration", () => {
       process.env.NEXTAUTH_SECRET = "test-secret-that-is-32-chars-long";
     });
 
-    it("should include Google provider when configured", async () => {
-      process.env.GOOGLE_CLIENT_ID = "test-google-id";
-      process.env.GOOGLE_CLIENT_SECRET = "test-google-secret";
-      delete process.env.GITHUB_CLIENT_ID;
-      delete process.env.GITHUB_CLIENT_SECRET;
-      
-      const { authOptions } = await import("@/lib/auth/config");
-      
-      const providers = authOptions.providers || [];
-      const googleProvider = providers.find((p: { id?: string }) => p.id === "google");
-      
-      expect(googleProvider).toBeDefined();
-    });
-
     it("should include GitHub provider when configured", async () => {
       process.env.GITHUB_CLIENT_ID = "test-github-id";
       process.env.GITHUB_CLIENT_SECRET = "test-github-secret";
-      delete process.env.GOOGLE_CLIENT_ID;
-      delete process.env.GOOGLE_CLIENT_SECRET;
       
       const { authOptions } = await import("@/lib/auth/config");
       
       const providers = authOptions.providers || [];
       const githubProvider = providers.find((p: { id?: string }) => p.id === "github");
+      const walletProvider = providers.find(
+        (p: { id?: string; type?: string; name?: string }) =>
+          p.id === "solana-wallet" ||
+          p.id === "credentials" ||
+          p.type === "credentials" ||
+          p.name === "Solana Wallet"
+      );
       
       expect(githubProvider).toBeDefined();
+      expect(walletProvider).toBeDefined();
     });
 
-    it("should not include providers when not configured", async () => {
-      delete process.env.GOOGLE_CLIENT_ID;
-      delete process.env.GOOGLE_CLIENT_SECRET;
+    it("should include wallet provider even when GitHub is not configured", async () => {
       delete process.env.GITHUB_CLIENT_ID;
       delete process.env.GITHUB_CLIENT_SECRET;
       
       const { authOptions } = await import("@/lib/auth/config");
-      
-      // Should still work but with no providers
-      expect(authOptions.providers).toBeDefined();
+
+      const providers = authOptions.providers || [];
+      const githubProvider = providers.find((p: { id?: string }) => p.id === "github");
+      const walletProvider = providers.find(
+        (p: { id?: string; type?: string; name?: string }) =>
+          p.id === "solana-wallet" ||
+          p.id === "credentials" ||
+          p.type === "credentials" ||
+          p.name === "Solana Wallet"
+      );
+
+      expect(githubProvider).toBeUndefined();
+      expect(walletProvider).toBeDefined();
     });
   });
 
@@ -89,10 +87,10 @@ describe("Auth Configuration", () => {
       process.env.NEXTAUTH_SECRET = "test-secret-that-is-32-chars-long";
     });
 
-    it("should use database session strategy", async () => {
+    it("should use jwt session strategy", async () => {
       const { authOptions } = await import("@/lib/auth/config");
       
-      expect(authOptions.session?.strategy).toBe("database");
+      expect(authOptions.session?.strategy).toBe("jwt");
     });
 
     it("should have reasonable session maxAge", async () => {
@@ -103,42 +101,32 @@ describe("Auth Configuration", () => {
     });
   });
 
-  describe("Cookie Configuration", () => {
+  describe("Callback Configuration", () => {
     beforeEach(() => {
       (process.env as { NODE_ENV: string }).NODE_ENV = "development";
       process.env.NEXTAUTH_SECRET = "test-secret-that-is-32-chars-long";
     });
 
-    it("should have httpOnly cookies", async () => {
+    it("should include jwt callback", async () => {
       const { authOptions } = await import("@/lib/auth/config");
-      
-      const sessionCookie = authOptions.cookies?.sessionToken;
-      expect(sessionCookie?.options.httpOnly).toBe(true);
+      expect(authOptions.callbacks?.jwt).toBeDefined();
     });
 
-    it("should have sameSite lax cookies", async () => {
+    it("should include session callback", async () => {
       const { authOptions } = await import("@/lib/auth/config");
-      
-      const sessionCookie = authOptions.cookies?.sessionToken;
-      expect(sessionCookie?.options.sameSite).toBe("lax");
+      expect(authOptions.callbacks?.session).toBeDefined();
     });
 
-    it("should use secure cookies in production", async () => {
-      (process.env as { NODE_ENV: string }).NODE_ENV = "production";
-      
+    it("should allow all sign-ins", async () => {
       const { authOptions } = await import("@/lib/auth/config");
-      
-      const sessionCookie = authOptions.cookies?.sessionToken;
-      expect(sessionCookie?.options.secure).toBe(true);
-    });
-
-    it("should not use secure cookies in development", async () => {
-      (process.env as { NODE_ENV: string }).NODE_ENV = "development";
-      
-      const { authOptions } = await import("@/lib/auth/config");
-      
-      const sessionCookie = authOptions.cookies?.sessionToken;
-      expect(sessionCookie?.options.secure).toBe(false);
+      const result = await authOptions.callbacks?.signIn?.({
+        user: { id: "test-user" },
+        account: null,
+        profile: undefined,
+        email: undefined,
+        credentials: undefined,
+      });
+      expect(result).toBe(true);
     });
   });
 

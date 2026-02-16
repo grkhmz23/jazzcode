@@ -1,46 +1,46 @@
-import { z } from "zod";
 import crypto from "crypto";
-import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
-import { validate } from "@/lib/api/validation";
-import { Schemas } from "@/lib/api/validation";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db/client";
+import { Schemas, validate } from "@/lib/api/validation";
 import { logger } from "@/lib/logging/logger";
-
 
 export const runtime = "nodejs";
 
 const BodySchema = z.object({
-  wallet: Schemas.walletAddress,
+  address: Schemas.walletAddress,
 });
 
-export const POST = createApiHandler(
-  async (request) => {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
     const body = await request.json();
-    const { wallet } = validate(BodySchema, body);
+    const { address } = validate(BodySchema, body);
 
-    logger.info("Generating nonce", { wallet });
-
-    const nonce = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min expiry
+    const nonce = crypto.randomBytes(24).toString("hex");
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     await prisma.walletNonce.create({
-      data: { address: wallet, nonce, expiresAt },
+      data: {
+        address,
+        nonce,
+        expiresAt,
+      },
     });
 
-    // Clean up expired nonces (fire and forget)
-    prisma.walletNonce.deleteMany({
-      where: { expiresAt: { lt: new Date() } },
-    }).catch((err: Error) => {
-      logger.warn("Failed to clean up expired nonces", { error: err.message });
-    });
+    prisma.walletNonce
+      .deleteMany({ where: { expiresAt: { lt: new Date() } } })
+      .catch((error: Error) => {
+        logger.warn("Failed to cleanup expired wallet nonces", {
+          error: error.message,
+        });
+      });
 
-    return createApiResponse({
-      nonce,
-      message: `Sign this message to verify your wallet ownership.
-
-Nonce: ${nonce}
-App: Superteam Academy`,
-    });
-  },
-  { rateLimit: true }
-);
+    return NextResponse.json({ nonce });
+  } catch (error) {
+    logger.error("Failed to generate wallet nonce", { error });
+    return NextResponse.json(
+      { error: "Unable to generate wallet nonce" },
+      { status: 400 }
+    );
+  }
+}
