@@ -101,7 +101,7 @@ export function LessonChallenge({
       ) : (
         <ChallengeRunner
           starterCode={starterCode}
-          language={challenge.language === "json" ? "typescript" : challenge.language}
+          language={challenge.language}
           testCases={challenge.testCases}
           hints={challenge.hints}
           solution={challenge.solution}

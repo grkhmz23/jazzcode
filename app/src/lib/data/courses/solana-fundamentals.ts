@@ -1,8 +1,5 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
-const createdAt = '2024-01-15T00:00:00Z';
-const updatedAt = '2024-01-15T00:00:00Z';
-
 const lesson1: Lesson = {
   id: 'lesson-1-what-is-solana',
   title: 'What is Solana?',
@@ -58,8 +55,7 @@ Ethereum processes one transaction at a time, reading and writing to the world s
 Understanding these fundamental differences is essential for becoming an effective Solana developer.
 `,
   xpReward: 20,
-  order: 1,
-  moduleId: 'module-1-getting-started',
+  duration: '30 min',
 };
 
 const lesson2: Lesson = {
@@ -135,8 +131,7 @@ When you create an account and assign it to a program (like the Token Program), 
 Understanding account ownership is crucial for security. Never trust an account that claims to be a token account but isn't owned by the Token Program—this is a common attack vector in phishing attempts.
 `,
   xpReward: 20,
-  order: 2,
-  moduleId: 'module-1-getting-started',
+  duration: '30 min',
 };
 
 const lesson3: Lesson = {
@@ -260,8 +255,7 @@ Compute units measure computational work. Simple transfers cost ~450 CU, while c
 Understanding these constraints is essential for designing efficient Solana applications that fit within network limits.
 `,
   xpReward: 20,
-  order: 3,
-  moduleId: 'module-1-getting-started',
+  duration: '30 min',
 };
 
 const lesson4: Challenge = {
@@ -285,8 +279,7 @@ Complete the \`transferSOL\` function below. The function signature and connecti
 The function should transfer the specified amount of SOL from the sender to the recipient.
 `,
   xpReward: 50,
-  order: 4,
-  moduleId: 'module-1-getting-started',
+  duration: '30 min',
   starterCode: `import { 
   Connection, 
   Keypair, 
@@ -490,8 +483,7 @@ This separation allows the program account address to remain constant while the 
 Understanding program architecture is essential for building composable, upgradeable protocols on Solana.
 `,
   xpReward: 25,
-  order: 1,
-  moduleId: 'module-2-programs-and-pdas',
+  duration: '30 min',
 };
 
 const lesson6: Lesson = {
@@ -576,8 +568,7 @@ invoke_signed(
 The runtime verifies the PDA was correctly derived before allowing the signature. PDAs are fundamental to building secure, composable DeFi protocols on Solana.
 `,
   xpReward: 25,
-  order: 2,
-  moduleId: 'module-2-programs-and-pdas',
+  duration: '30 min',
 };
 
 const lesson7: Lesson = {
@@ -690,8 +681,7 @@ These extensions are opt-in and provide functionality similar to ERC-1400 securi
 Mastering SPL tokens is essential for building DeFi applications, NFT marketplaces, and any application involving value transfer on Solana.
 `,
   xpReward: 25,
-  order: 3,
-  moduleId: 'module-2-programs-and-pdas',
+  duration: '30 min',
 };
 
 const lesson8: Challenge = {
@@ -714,8 +704,7 @@ Complete the \`createTokenAndMint\` function. The connection and payer are alrea
 The function should return an object containing the mint address and the associated token account address.
 `,
   xpReward: 100,
-  order: 4,
-  moduleId: 'module-2-programs-and-pdas',
+  duration: '30 min',
   starterCode: `import {
   Connection,
   Keypair,
@@ -833,14 +822,14 @@ async function createTokenAndMint(
 const module1: Module = {
   id: 'module-1-getting-started',
   title: 'Getting Started',
-  order: 1,
+  description: '',
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: 'module-2-programs-and-pdas',
   title: 'Programs & PDAs',
-  order: 2,
+  description: '',
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -853,15 +842,7 @@ export const solanaFundamentalsCourse: Course = {
   difficulty: 'beginner',
   duration: '8 hours',
   totalXP: 285,
-  thumbnailUrl: '/images/courses/solana-fundamentals.jpg',
-  instructor: {
-    name: 'Superteam Academy',
-    avatarUrl: '/images/instructors/default.svg',
-    bio: 'Official Superteam Brazil education content',
-  },
+  imageUrl: '/images/courses/solana-fundamentals.jpg',
   modules: [module1, module2],
   tags: ['solana', 'blockchain', 'web3', 'fundamentals'],
-  language: 'en',
-  createdAt,
-  updatedAt,
 };

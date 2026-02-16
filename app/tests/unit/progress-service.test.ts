@@ -107,16 +107,15 @@ function createMockCourse(xpReward = 50): Course {
     title: "Lesson 1",
     slug: "lesson-1",
     type: "content",
-    order: 1,
     xpReward,
     content: "Test content",
-    moduleId: "mod-1",
+    duration: "30 min",
   };
 
   const mockModule: Module = {
     id: "mod-1",
     title: "Module 1",
-    order: 1,
+    description: "Module description",
     lessons: [mockLesson],
   };
 
@@ -128,17 +127,9 @@ function createMockCourse(xpReward = 50): Course {
     difficulty: "beginner",
     duration: "8 hours",
     totalXP: 1000,
-    thumbnailUrl: "test.jpg",
-    instructor: {
-      name: "Test",
-      avatarUrl: "test.jpg",
-      bio: "Test bio",
-    },
+    imageUrl: "test.jpg",
     modules: [mockModule],
     tags: [],
-    language: "en",
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-01",
   };
 }
 

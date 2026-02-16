@@ -12,6 +12,7 @@
  */
 
 import { createClient } from "next-sanity";
+import type { Challenge, Course as LocalCourse } from "@/types/content";
 
 const projectId = process.env.SANITY_PROJECT_ID ?? process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 const dataset = process.env.SANITY_DATASET ?? "production";
@@ -35,51 +36,6 @@ const client = createClient({
   useCdn: false,
 });
 
-// Type matching the new Course structure from src/types/content.ts
-interface LocalLesson {
-  id: string;
-  title: string;
-  slug: string;
-  type: "content" | "challenge";
-  order: number;
-  xpReward: number;
-  content: string;
-  moduleId: string;
-  starterCode?: string;
-  language?: string;
-  testCases?: Array<{ name: string; input: string; expectedOutput: string }>;
-  hints?: string[];
-  solution?: string;
-}
-
-interface LocalModule {
-  id: string;
-  title: string;
-  order: number;
-  lessons: LocalLesson[];
-}
-
-interface LocalCourse {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  duration: string;
-  totalXP: number;
-  thumbnailUrl: string;
-  instructor: {
-    name: string;
-    avatarUrl: string;
-    bio: string;
-  };
-  modules: LocalModule[];
-  tags: string[];
-  language: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 async function importCourses(): Promise<void> {
   // Dynamic import of the course data
   const { courses: COURSES } = await import("../src/lib/data/courses") as { courses: LocalCourse[] };
@@ -90,8 +46,8 @@ async function importCourses(): Promise<void> {
 
   for (const course of COURSES) {
     // Create lesson documents first
-    for (const mod of course.modules) {
-      for (const lesson of mod.lessons) {
+    for (const [moduleIndex, mod] of course.modules.entries()) {
+      for (const [lessonIndex, lesson] of mod.lessons.entries()) {
         const lessonDoc = {
           _id: `lesson-${lesson.id}`,
           _type: "lesson" as const,
@@ -100,22 +56,23 @@ async function importCourses(): Promise<void> {
           content: lesson.content,
           type: lesson.type,
           xpReward: lesson.xpReward,
-          order: lesson.order,
-          moduleId: lesson.moduleId,
+          order: lessonIndex + 1,
+          moduleId: mod.id,
         };
         transaction.createOrReplace(lessonDoc);
 
         // If it's a challenge, create challenge document
-        if (lesson.type === "challenge" && lesson.starterCode) {
+        if (lesson.type === "challenge") {
+          const challengeLesson = lesson as Challenge;
           const challengeDoc = {
             _id: `challenge-${lesson.id}`,
             _type: "challenge" as const,
             lesson: { _type: "reference" as const, _ref: `lesson-${lesson.id}` },
-            starterCode: lesson.starterCode,
-            language: lesson.language,
-            testCases: lesson.testCases ?? [],
-            hints: lesson.hints ?? [],
-            solution: lesson.solution,
+            starterCode: challengeLesson.starterCode,
+            language: challengeLesson.language,
+            testCases: challengeLesson.testCases ?? [],
+            hints: challengeLesson.hints ?? [],
+            solution: challengeLesson.solution,
           };
           transaction.createOrReplace(challengeDoc);
         }
@@ -126,7 +83,7 @@ async function importCourses(): Promise<void> {
         _id: `module-${mod.id}`,
         _type: "module" as const,
         title: mod.title,
-        order: mod.order,
+        order: moduleIndex + 1,
         lessons: mod.lessons.map((l) => ({
           _type: "reference" as const,
           _ref: `lesson-${l.id}`,
@@ -145,14 +102,18 @@ async function importCourses(): Promise<void> {
       difficulty: course.difficulty,
       duration: course.duration,
       totalXP: course.totalXP,
-      thumbnailUrl: course.thumbnailUrl,
-      instructor: course.instructor,
+      thumbnailUrl: course.imageUrl,
+      instructor: {
+        name: "Superteam Academy",
+        avatarUrl: "/images/instructors/default.svg",
+        bio: "Official Superteam Brazil education content",
+      },
       modules: course.modules.map((m) => ({
         _type: "reference" as const,
         _ref: `module-${m.id}`,
       })),
       tags: course.tags,
-      language: course.language,
+      language: "en",
     };
     transaction.createOrReplace(courseDoc);
   }

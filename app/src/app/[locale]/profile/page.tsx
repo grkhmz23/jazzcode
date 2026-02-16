@@ -170,7 +170,7 @@ function ProfileContent() {
     profileData?.displayName ??
     profileData?.username ??
     session?.user?.name ??
-    "Learner";
+    t("defaultName");
 
   return (
     <div className="container py-8 md:py-12">
@@ -238,7 +238,9 @@ function ProfileContent() {
                   onChainXP?.onChainAvailable ? (
                     <div className="space-y-1">
                       <p className="text-xs text-solana-green">
-                        On-chain: {(onChainXP.balance ?? 0).toLocaleString()} XP
+                        {t("onChainXPLabel", {
+                          amount: (onChainXP.balance ?? 0).toLocaleString(),
+                        })}
                       </p>
                       {onChainXP.tokenAccount && (
                         <a
@@ -247,14 +249,14 @@ function ProfileContent() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         >
-                          View token account
+                          {t("viewTokenAccount")}
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      On-chain XP after program deployment
+                      {t("onChainPending")}
                     </p>
                   )
                 ) : (
@@ -263,7 +265,7 @@ function ProfileContent() {
                     className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                   >
                     <Wallet className="h-3 w-3" />
-                    Link wallet for on-chain XP
+                    {t("linkWalletPromptShort")}
                   </Link>
                 )}
               </div>
@@ -282,7 +284,7 @@ function ProfileContent() {
               <Flame className="h-5 w-5 text-orange-500" />
               <p className="text-2xl font-bold">{streak.currentStreak}</p>
             </div>
-            <p className="text-xs text-muted-foreground">Day Streak</p>
+            <p className="text-xs text-muted-foreground">{t("dayStreak")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -290,7 +292,7 @@ function ProfileContent() {
             <p className="text-2xl font-bold">
               {userRank ? `#${userRank}` : "—"}
             </p>
-            <p className="text-xs text-muted-foreground">Rank</p>
+            <p className="text-xs text-muted-foreground">{tc("rank")}</p>
           </CardContent>
         </Card>
       </div>
@@ -301,11 +303,10 @@ function ProfileContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-solana-purple" />
-              <span className="font-medium">Level {level}</span>
+              <span className="font-medium">{tc("level")} {level}</span>
             </div>
             <span className="text-sm text-muted-foreground">
-              {Math.round(levelProgress.current)} / {levelProgress.required} XP
-              to Level {level + 1}
+              {Math.round(levelProgress.current)} / {levelProgress.required} {tc("xp")} · {t("xpToLevel", { level: level + 1 })}
             </span>
           </div>
           <Progress value={levelProgress.percent} className="mt-2 h-2" />
@@ -315,16 +316,16 @@ function ProfileContent() {
       {/* Skills Section */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="text-base">Skills</CardTitle>
+          <CardTitle className="text-base">{t("skills")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <SkillBar label="Solana Fundamentals" value={skillData.fundamentals} />
-            <SkillBar label="Rust & Anchor" value={skillData.rust} />
-            <SkillBar label="Frontend" value={skillData.frontend} />
-            <SkillBar label="DeFi" value={skillData.defi} />
-            <SkillBar label="Security" value={skillData.security} />
-            <SkillBar label="Testing" value={skillData.testing} />
+            <SkillBar label={t("skillsFundamentals")} value={skillData.fundamentals} />
+            <SkillBar label={t("skillsRust")} value={skillData.rust} />
+            <SkillBar label={t("skillsFrontend")} value={skillData.frontend} />
+            <SkillBar label={t("skillsDeFi")} value={skillData.defi} />
+            <SkillBar label={t("skillsSecurity")} value={skillData.security} />
+            <SkillBar label={t("skillsTesting")} value={skillData.testing} />
           </div>
         </CardContent>
       </Card>
@@ -334,7 +335,7 @@ function ProfileContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Calendar className="h-4 w-4" />
-            Learning Streak
+            {t("learningStreak")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -360,10 +361,10 @@ function ProfileContent() {
             <Card>
               <CardContent className="flex flex-col items-center py-12 text-center text-muted-foreground">
                 <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/30" />
-                <p>You haven&apos;t started any courses yet</p>
+                <p>{t("noCoursesStarted")}</p>
                 <Link href="/courses" className="mt-4">
                   <Button variant="solana" size="sm">
-                    Browse Courses
+                    {tc("exploreCourses")}
                   </Button>
                 </Link>
               </CardContent>
@@ -381,7 +382,7 @@ function ProfileContent() {
                     <div className="flex-1">
                       <p className="font-medium">{cp.courseSlug}</p>
                       <p className="text-xs text-muted-foreground">
-                        {cp.completedLessons.length} / {cp.totalLessons} lessons
+                        {cp.completedLessons.length} / {cp.totalLessons} {tc("lessons")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

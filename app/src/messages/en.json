@@ -150,7 +150,8 @@
     "aboutCourse": "About This Course",
     "courseContent": "Course Content",
     "completeLesson": "Mark as Complete",
-    "dayStreak": "Day Streak"
+    "dayStreak": "Day Streak",
+    "signInToTrack": "Sign in to track progress"
   },
   "lesson": {
     "content": "Content",
@@ -183,7 +184,14 @@
     "moduleComplete": "Module complete! Keep going!",
     "runToSeeResults": "Run your code to see test results",
     "noOutput": "No output yet",
-    "checkCode": "Check Code"
+    "checkCode": "Check Code",
+    "firstCompletionBonus": "+25 XP first completion today!",
+    "levelUp": "Level up! You are now Level {level}",
+    "courseCompleteTitle": "Course complete!",
+    "courseCompleteDescription": "Congratulations! You completed every lesson in this course.",
+    "courseCompleteTotalXp": "Total XP earned",
+    "markingComplete": "Marking complete...",
+    "signInToTrack": "Sign in to track progress"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -213,8 +221,10 @@
     "locked": "Locked",
     "yourRank": "Your Rank",
     "onChainXP": "On-chain",
+    "onChainPending": "On-chain XP will be available after program deployment.",
     "viewTokenAccount": "View token account",
-    "linkWalletForXP": "Link wallet for on-chain XP"
+    "linkWalletForXP": "Link wallet for on-chain XP",
+    "activityCompletedIn": "Lesson completed in {course}"
   },
   "profile": {
     "title": "Profile",
@@ -235,14 +245,25 @@
     "privateDesc": "Only you can see your profile details",
     "memberSince": "Member since",
     "viewOnExplorer": "View on Explorer",
+    "viewTokenAccount": "View token account",
     "linkWalletPrompt": "Link a wallet in {link} to view your on-chain credentials",
+    "linkWalletPromptShort": "Link wallet for on-chain XP",
     "settingsLink": "Settings",
     "skillsFundamentals": "Solana Fundamentals",
     "skillsRust": "Rust & Anchor",
     "skillsFrontend": "Frontend",
     "skillsDeFi": "DeFi",
     "skillsSecurity": "Security",
-    "skillsTesting": "Testing"
+    "skillsTesting": "Testing",
+    "notFoundTitle": "Profile Not Found",
+    "notFoundDescription": "This user does not exist or their profile is private.",
+    "defaultName": "Learner",
+    "onChainXPLabel": "On-chain: {amount} XP",
+    "onChainPending": "On-chain XP will be available after program deployment.",
+    "dayStreak": "Day Streak",
+    "xpToLevel": "to Level {level}",
+    "learningStreak": "Learning Streak",
+    "noCoursesStarted": "You haven't started any courses yet"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -264,7 +285,11 @@
     "showOnChainDesc": "Display XP balances from Solana devnet",
     "onChainUnavailable": "On-chain leaderboard available after XP program deployment on devnet.",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "learnerCount": "{count} learners",
+    "loadError": "Failed to load leaderboard",
+    "you": "You",
+    "onChainLabel": "on-chain"
   },
   "settings": {
     "title": "Settings",
@@ -304,7 +329,10 @@
     "publicProfile": "Public Profile",
     "publicProfileDesc": "Allow others to view your profile and achievements",
     "exportDataDesc": "Download all your data as JSON",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "usernamePlaceholder": "your_username",
+    "displayNamePlaceholder": "Display Name",
+    "bioPlaceholder": "Tell us about yourself..."
   },
   "certificate": {
     "title": "Certificate of Completion",

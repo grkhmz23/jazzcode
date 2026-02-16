@@ -28,7 +28,7 @@ import { CodeEditor, CodeEditorHandle } from "@/components/editor/CodeEditor";
 import { playgroundTemplates, getTemplateById } from "@/lib/data/playground-templates";
 import { cn } from "@/lib/utils";
 
-// Mock run function for playground (simulated execution)
+// Sandbox run function for playground (simulated execution)
 interface RunResult {
   success: boolean;
   output: string;
@@ -36,7 +36,7 @@ interface RunResult {
 }
 
 /**
- * Mock runner for playground code - simulates execution with mock Solana APIs
+ * Sandbox runner for playground code - simulates execution with Solana-like APIs
  */
 async function runPlaygroundCode(code: string): Promise<RunResult> {
   const logs: string[] = [];
@@ -49,7 +49,7 @@ async function runPlaygroundCode(code: string): Promise<RunResult> {
   };
 
   try {
-    // Create mock Solana Web3.js module
+    // Create Solana Web3.js test module
     const mockPublicKey = class MockPublicKey {
       _value: string;
       constructor(value: string) {
@@ -107,7 +107,7 @@ async function runPlaygroundCode(code: string): Promise<RunResult> {
 
     return {
       success: true,
-      output: logs.join("\n") || "Code executed successfully (no output)",
+      output: logs.join("\n"),
       error: null,
     };
   } catch (error) {
@@ -238,7 +238,7 @@ function PlaygroundContent() {
 
   // Clear code
   const handleClear = useCallback(() => {
-    setCode("// Start coding...\n");
+    setCode("");
     setCurrentTemplate(null);
     setOutput(null);
     router.push("/playground");

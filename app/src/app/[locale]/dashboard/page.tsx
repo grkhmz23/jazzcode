@@ -172,11 +172,11 @@ function DashboardContent() {
                   {walletAddress ? (
                     onChainXP?.onChainAvailable ? (
                       <p className="text-xs text-solana-green">
-                        On-chain: {(onChainXP.balance ?? 0).toLocaleString()} XP
+                        {t("onChainXP")}: {(onChainXP.balance ?? 0).toLocaleString()} {tc("xp")}
                       </p>
                     ) : (
                       <p className="text-xs text-muted-foreground">
-                        On-chain XP after program deployment
+                        {t("onChainPending")}
                       </p>
                     )
                   ) : (
@@ -185,7 +185,7 @@ function DashboardContent() {
                       className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                     >
                       <Wallet className="h-3 w-3" />
-                      Link wallet for on-chain XP
+                      {t("linkWalletForXP")}
                     </Link>
                   )}
                 </div>
@@ -206,8 +206,8 @@ function DashboardContent() {
               <div className="mt-1">
                 <Progress value={levelProgress.percent} className="h-1" />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {Math.round(levelProgress.current)} / {levelProgress.required}{" "}
-                  XP to Level {level + 1}
+                  {t("xpToNext")}:{" "}
+                  {Math.max(levelProgress.required - Math.round(levelProgress.current), 0)} ({tc("level")} {level + 1})
                 </p>
               </div>
             </div>
@@ -311,7 +311,7 @@ function DashboardContent() {
             {activity.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  Complete a lesson to start your journey
+                  {t("noActivity")}
                 </CardContent>
               </Card>
             ) : (
@@ -327,7 +327,7 @@ function DashboardContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm truncate">
-                          Lesson completed in {item.courseSlug}
+                          {t("activityCompletedIn", { course: item.courseSlug })}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(item.completedAt).toLocaleDateString()}
@@ -384,7 +384,7 @@ function DashboardContent() {
             <CardContent>
               {achievements.filter((a) => a.unlocked).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Complete lessons to unlock achievements!
+                  {t("noAchievements")}
                 </p>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
@@ -402,7 +402,7 @@ function DashboardContent() {
               )}
               <div className="mt-3 text-center text-xs text-muted-foreground">
                 {achievements.filter((a) => a.unlocked).length} /{" "}
-                {achievements.length} unlocked
+                {achievements.length} {tc("unlocked").toLowerCase()}
               </div>
             </CardContent>
           </Card>

@@ -15,6 +15,10 @@ export const courses: Course[] = [
   defiSolanaCourse,
 ];
 
+if (courses.length !== 4) {
+  throw new Error(`Expected 4 courses, received ${courses.length}`);
+}
+
 /**
  * Export individual courses for direct access
  */

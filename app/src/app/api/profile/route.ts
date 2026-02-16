@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/db/client";
 import { AchievementEngine } from "@/lib/services/achievements";
+import { getCredentials } from "@/lib/services/onchain";
 import type { AchievementWithStatus } from "@/types/achievements";
 
 export interface ProfileResponse {
@@ -68,8 +69,15 @@ export async function GET(): Promise<NextResponse> {
     const walletAddresses = wallets.map((w: { address: string }) => w.address);
     const linkedProviders = accounts.map((a: { provider: string }) => a.provider);
 
-    // TODO: Fetch real credentials from on-chain when available
-    const credentials: CredentialData[] = [];
+    const credentials = primaryWallet
+      ? (await getCredentials(primaryWallet)).map((credential) => ({
+          mintAddress: credential.mintAddress,
+          trackId: credential.trackName.toLowerCase().replace(/\s+/g, "-"),
+          trackName: credential.trackName || credential.name,
+          level: Number.parseInt(credential.level, 10) || 1,
+          acquiredAt: new Date().toISOString(),
+        }))
+      : [];
 
     const response: ProfileResponse = {
       username: user.username,

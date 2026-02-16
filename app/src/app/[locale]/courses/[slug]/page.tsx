@@ -197,9 +197,9 @@ export default function CourseDetailPage() {
             {isEnrolled && (
               <div className="mt-4 rounded-lg border bg-muted/50 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium">{completionPercent}% complete</span>
+                  <span className="text-sm font-medium">{t("progress", { percent: completionPercent })}</span>
                   <span className="text-xs text-muted-foreground">
-                    {progress?.completedLessons.length ?? 0} / {totalLessons} lessons
+                    {progress?.completedLessons.length ?? 0} / {totalLessons} {tc("lessons")}
                   </span>
                 </div>
                 <Progress value={completionPercent} className="h-2" />
@@ -327,7 +327,7 @@ export default function CourseDetailPage() {
                 <Link href="/auth/signin">
                   <Button className="w-full gap-2" size="lg" variant="outline">
                     <LogIn className="h-4 w-4" />
-                    Sign in to track progress
+                    {t("signInToTrack")}
                   </Button>
                 </Link>
               ) : isEnrolled ? (
@@ -337,7 +337,7 @@ export default function CourseDetailPage() {
                   variant="solana"
                   onClick={handleContinue}
                 >
-                  {completionPercent > 0 ? "Continue Learning" : "Start Course"}
+                  {completionPercent > 0 ? t("continue") : t("startCourse")}
                 </Button>
               ) : (
                 <Button
@@ -350,7 +350,7 @@ export default function CourseDetailPage() {
                   {isEnrolling ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enrolling...
+                      {t("enrolled")}
                     </>
                   ) : (
                     t("enrollCTA")

@@ -1,8 +1,5 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
-const createdAt = '2024-02-01T00:00:00Z';
-const updatedAt = '2024-02-01T00:00:00Z';
-
 const lesson1: Lesson = {
   id: 'lesson-1-what-is-anchor',
   title: 'What is Anchor?',
@@ -99,8 +96,7 @@ my-project/
 Anchor handles serialization, account validation, and error handling automatically—letting you write secure programs with significantly less code than raw Solana programming.
 `,
   xpReward: 25,
-  order: 1,
-  moduleId: 'module-1-anchor-basics',
+  duration: '30 min',
 };
 
 const lesson2: Lesson = {
@@ -248,8 +244,7 @@ pub struct Deposit<'info> {
 These constraints execute in order, and if any fail, the transaction reverts before your instruction logic runs—providing security by default.
 `,
   xpReward: 30,
-  order: 2,
-  moduleId: 'module-1-anchor-basics',
+  duration: '30 min',
 };
 
 const lesson3: Lesson = {
@@ -374,8 +369,7 @@ require!(account.status == Status::Active, ErrorCode::AccountInactive);
 Good error handling makes programs easier to debug and provides clear feedback when transactions fail—essential for production applications.
 `,
   xpReward: 25,
-  order: 3,
-  moduleId: 'module-1-anchor-basics',
+  duration: '30 min',
 };
 
 
@@ -592,8 +586,7 @@ pub struct UserVault {
 Effective state management requires careful planning of account structure, seed derivation, and space allocation.
 `,
   xpReward: 30,
-  order: 1,
-  moduleId: 'module-2-building-programs',
+  duration: '30 min',
 };
 
 const lesson5: Lesson = {
@@ -734,8 +727,7 @@ use anchor_spl::associated_token::AssociatedToken;
 Mastering CPIs is essential for building composable DeFi protocols that leverage Solana's ecosystem of battle-tested programs.
 `,
   xpReward: 30,
-  order: 2,
-  moduleId: 'module-2-building-programs',
+  duration: '30 min',
 };
 
 const lesson6: Challenge = {
@@ -758,8 +750,7 @@ Complete the counter program below. The Counter account struct is already define
 The Counter account uses a PDA with seeds \`[b"counter", user.key()]\` so each user has their own counter.
 `,
   xpReward: 100,
-  order: 3,
-  moduleId: 'module-2-building-programs',
+  duration: '30 min',
   starterCode: `use anchor_lang::prelude::*;
 
 declare_id!("CounterProgram111111111111111111111111111");
@@ -921,14 +912,14 @@ pub enum ErrorCode {
 const module1: Module = {
   id: 'module-1-anchor-basics',
   title: 'Anchor Basics',
-  order: 1,
+  description: '',
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: 'module-2-building-programs',
   title: 'Building Programs',
-  order: 2,
+  description: '',
   lessons: [lesson4, lesson5, lesson6],
 };
 
@@ -941,15 +932,7 @@ export const anchorDevelopmentCourse: Course = {
   difficulty: 'intermediate',
   duration: '10 hours',
   totalXP: 240,
-  thumbnailUrl: '/images/courses/anchor-development.jpg',
-  instructor: {
-    name: 'Superteam Academy',
-    avatarUrl: '/images/instructors/default.svg',
-    bio: 'Official Superteam Brazil education content',
-  },
+  imageUrl: '/images/courses/anchor-development.jpg',
   modules: [module1, module2],
   tags: ['anchor', 'rust', 'solana', 'programs'],
-  language: 'en',
-  createdAt,
-  updatedAt,
 };

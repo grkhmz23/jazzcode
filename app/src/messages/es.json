@@ -150,7 +150,8 @@
     "aboutCourse": "Acerca de Este Curso",
     "courseContent": "Contenido del Curso",
     "completeLesson": "Marcar como Completada",
-    "dayStreak": "Días en Racha"
+    "dayStreak": "Días en Racha",
+    "signInToTrack": "Inicia sesión para seguir tu progreso"
   },
   "lesson": {
     "content": "Contenido",
@@ -183,7 +184,14 @@
     "moduleComplete": "¡Módulo completo! ¡Sigue así!",
     "runToSeeResults": "Ejecuta tu código para ver los resultados",
     "noOutput": "Sin salida aún",
-    "checkCode": "Verificar Código"
+    "checkCode": "Verificar Código",
+    "firstCompletionBonus": "¡+25 XP por primera finalización del día!",
+    "levelUp": "¡Subiste de nivel! Ahora eres Nivel {level}",
+    "courseCompleteTitle": "¡Curso completado!",
+    "courseCompleteDescription": "¡Felicidades! Completaste todas las lecciones de este curso.",
+    "courseCompleteTotalXp": "XP total ganado",
+    "markingComplete": "Marcando como completo...",
+    "signInToTrack": "Inicia sesión para seguir tu progreso"
   },
   "dashboard": {
     "title": "Tablero",
@@ -213,8 +221,10 @@
     "locked": "Bloqueado",
     "yourRank": "Tu Clasificación",
     "onChainXP": "On-chain",
+    "onChainPending": "El XP on-chain estará disponible después del despliegue del programa.",
     "viewTokenAccount": "Ver cuenta de token",
-    "linkWalletForXP": "Vincular billetera para XP on-chain"
+    "linkWalletForXP": "Vincular billetera para XP on-chain",
+    "activityCompletedIn": "Lección completada en {course}"
   },
   "profile": {
     "title": "Perfil",
@@ -235,14 +245,25 @@
     "privateDesc": "Solo tú puedes ver los detalles de tu perfil",
     "memberSince": "Miembro desde",
     "viewOnExplorer": "Ver en Explorador",
+    "viewTokenAccount": "Ver cuenta de token",
     "linkWalletPrompt": "Vincula una billetera en {link} para ver tus credenciales on-chain",
+    "linkWalletPromptShort": "Vincula billetera para XP on-chain",
     "settingsLink": "Configuración",
     "skillsFundamentals": "Fundamentos Solana",
     "skillsRust": "Rust & Anchor",
     "skillsFrontend": "Frontend",
     "skillsDeFi": "DeFi",
     "skillsSecurity": "Seguridad",
-    "skillsTesting": "Pruebas"
+    "skillsTesting": "Pruebas",
+    "notFoundTitle": "Perfil no encontrado",
+    "notFoundDescription": "Este usuario no existe o su perfil es privado.",
+    "defaultName": "Estudiante",
+    "onChainXPLabel": "On-chain: {amount} XP",
+    "onChainPending": "El XP on-chain estará disponible después del despliegue del programa.",
+    "dayStreak": "Racha diaria",
+    "xpToLevel": "al Nivel {level}",
+    "learningStreak": "Racha de aprendizaje",
+    "noCoursesStarted": "Aún no has comenzado ningún curso"
   },
   "leaderboard": {
     "title": "Clasificación",
@@ -264,7 +285,11 @@
     "showOnChainDesc": "Mostrar balances de XP de Solana devnet",
     "onChainUnavailable": "Clasificación on-chain disponible después del deploy del programa XP en devnet.",
     "on": "Encendido",
-    "off": "Apagado"
+    "off": "Apagado",
+    "learnerCount": "{count} estudiantes",
+    "loadError": "Error al cargar la clasificación",
+    "you": "Tú",
+    "onChainLabel": "on-chain"
   },
   "settings": {
     "title": "Configuración",
@@ -304,7 +329,10 @@
     "publicProfile": "Perfil Público",
     "publicProfileDesc": "Permitir que otros vean tu perfil y logros",
     "exportDataDesc": "Descarga todos tus datos como JSON",
-    "saveChanges": "Guardar Cambios"
+    "saveChanges": "Guardar Cambios",
+    "usernamePlaceholder": "tu_usuario",
+    "displayNamePlaceholder": "Nombre para mostrar",
+    "bioPlaceholder": "Cuéntanos sobre ti..."
   },
   "certificate": {
     "title": "Certificado de Finalización",

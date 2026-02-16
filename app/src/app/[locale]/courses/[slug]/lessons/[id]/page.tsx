@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,9 +44,15 @@ interface LessonApiResponse {
 function XPTOast({
   result,
   onDismiss,
+  labels,
 }: {
   result: CompletionResult;
   onDismiss: () => void;
+  labels: {
+    xpEarned: string;
+    firstCompletionBonus: string;
+    levelUp: (level: number) => string;
+  };
 }) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, 5000);
@@ -61,18 +68,18 @@ function XPTOast({
           </div>
           <div>
             <p className="font-medium text-solana-green">
-              +{result.xpAwarded} XP Earned!
+              {labels.xpEarned}
             </p>
             {result.isFirstOfDay && (
               <p className="text-sm text-solana-green/80">
-                +25 XP First completion today!
+                {labels.firstCompletionBonus}
               </p>
             )}
             {result.leveledUp && (
               <div className="mt-2 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
                 <Trophy className="h-4 w-4 text-amber-500" />
                 <span className="text-sm font-medium text-amber-500">
-                  Level Up! You&apos;re now Level {result.newLevel}
+                  {labels.levelUp(result.newLevel ?? 0)}
                 </span>
               </div>
             )}
@@ -87,9 +94,16 @@ function XPTOast({
 function CourseCompleteBanner({
   totalXP,
   onBackToCourse,
+  labels,
 }: {
   totalXP: number;
   onBackToCourse: () => void;
+  labels: {
+    title: string;
+    description: string;
+    totalXpLabel: string;
+    backToCourse: string;
+  };
 }) {
   return (
     <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-6 text-center">
@@ -99,19 +113,19 @@ function CourseCompleteBanner({
         </div>
       </div>
       <h2 className="mb-2 text-2xl font-bold text-green-700">
-        Course Complete! 🎉
+        {labels.title}
       </h2>
       <p className="mb-4 text-green-600">
-        Congratulations! You&apos;ve completed all lessons in this course.
+        {labels.description}
       </p>
       <div className="mb-4 flex justify-center gap-4">
         <div className="rounded-lg bg-green-500/10 px-4 py-2">
-          <p className="text-sm text-green-600">Total XP Earned</p>
+          <p className="text-sm text-green-600">{labels.totalXpLabel}</p>
           <p className="text-xl font-bold text-green-700">{totalXP}</p>
         </div>
       </div>
       <Button onClick={onBackToCourse} variant="solana">
-        Back to Course
+        {labels.backToCourse}
       </Button>
     </div>
   );
@@ -119,6 +133,8 @@ function CourseCompleteBanner({
 
 export default function LessonPage() {
   const params = useParams<{ slug: string; id: string }>();
+  const t = useTranslations("lesson");
+  const tc = useTranslations("common");
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
 
@@ -271,7 +287,15 @@ export default function LessonPage() {
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* XP Toast */}
       {showToast && completionResult && (
-        <XPTOast result={completionResult} onDismiss={dismissToast} />
+        <XPTOast
+          result={completionResult}
+          onDismiss={dismissToast}
+          labels={{
+            xpEarned: t("xpEarned", { xp: completionResult.xpAwarded }),
+            firstCompletionBonus: t("firstCompletionBonus"),
+            levelUp: (level) => t("levelUp", { level }),
+          }}
+        />
       )}
 
       {/* Achievement Toasts */}
@@ -312,6 +336,12 @@ export default function LessonPage() {
                 onBackToCourse={() =>
                   (window.location.href = `/courses/${courseSlug}`)
                 }
+                labels={{
+                  title: t("courseCompleteTitle"),
+                  description: t("courseCompleteDescription"),
+                  totalXpLabel: t("courseCompleteTotalXp"),
+                  backToCourse: t("backToCourse"),
+                }}
               />
             </div>
           )}
@@ -324,7 +354,7 @@ export default function LessonPage() {
                 {/* Left: Content */}
                 <div className="h-1/2 overflow-y-auto border-b p-6 md:h-full md:w-2/5 md:border-b-0 md:border-r">
                   <Badge variant="outline" className="mb-4">
-                    {lesson.xpReward} XP
+                    {lesson.xpReward} {tc("xp")}
                   </Badge>
                   <h1 className="mb-4 text-2xl font-bold">{lesson.title}</h1>
                   <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
@@ -351,7 +381,7 @@ export default function LessonPage() {
                 <div className="flex-1 overflow-y-auto p-6 md:p-8">
                   <div className="mx-auto max-w-3xl">
                     <Badge variant="outline" className="mb-4">
-                      {lesson.xpReward} XP
+                      {lesson.xpReward} {tc("xp")}
                     </Badge>
                     <h1 className="mb-6 text-3xl font-bold">{lesson.title}</h1>
                     <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
@@ -366,7 +396,7 @@ export default function LessonPage() {
                         isLessonCompleted ? (
                           <div className="flex items-center gap-2 text-solana-green">
                             <CheckCircle2 className="h-5 w-5" />
-                            <span className="font-medium">Completed</span>
+                            <span className="font-medium">{tc("completed")}</span>
                           </div>
                         ) : (
                           <Button
@@ -378,12 +408,12 @@ export default function LessonPage() {
                             {isCompleting ? (
                               <>
                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                Marking Complete...
+                                {t("markingComplete")}
                               </>
                             ) : (
                               <>
                                 <CheckCircle2 className="h-4 w-4" />
-                                Mark Complete
+                                {t("markComplete")}
                               </>
                             )}
                           </Button>
@@ -391,7 +421,7 @@ export default function LessonPage() {
                       ) : (
                         <Link href="/auth/signin">
                           <Button variant="outline" className="gap-2">
-                            Sign in to track progress
+                            {t("signInToTrack")}
                           </Button>
                         </Link>
                       )}

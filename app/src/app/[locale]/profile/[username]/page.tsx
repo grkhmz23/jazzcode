@@ -60,9 +60,9 @@ export default function PublicProfilePage({ params }: { params: { username: stri
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
         <UserX className="mb-4 h-16 w-16 text-muted-foreground/30" />
-        <h1 className="text-2xl font-bold">Profile Not Found</h1>
+        <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
         <p className="mt-2 text-muted-foreground">
-          This user does not exist or their profile is private.
+          {t("notFoundDescription")}
         </p>
       </div>
     );

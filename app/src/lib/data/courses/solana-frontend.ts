@@ -1,8 +1,5 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
-const createdAt = '2024-02-15T00:00:00Z';
-const updatedAt = '2024-02-15T00:00:00Z';
-
 const lesson1: Lesson = {
   id: 'lesson-1-wallet-adapter-setup',
   title: 'Wallet Adapter Setup',
@@ -113,8 +110,7 @@ function WalletSection() {
 This provider setup is the foundation—all other wallet functionality builds on these contexts.
 `,
   xpReward: 25,
-  order: 1,
-  moduleId: 'module-1-wallet-integration',
+  duration: '30 min',
 };
 
 const lesson2: Lesson = {
@@ -289,8 +285,7 @@ function useWalletCleanup() {
 Understanding these hooks is essential for building responsive, wallet-aware dApp UIs.
 `,
   xpReward: 25,
-  order: 2,
-  moduleId: 'module-1-wallet-integration',
+  duration: '30 min',
 };
 
 const lesson3: Lesson = {
@@ -481,8 +476,7 @@ function OptimisticTransfer({ onTransfer }: { onTransfer: (amount: number) => vo
 Great transaction UX builds user trust through transparency and graceful handling of the blockchain's asynchronous nature.
 `,
   xpReward: 25,
-  order: 3,
-  moduleId: 'module-1-wallet-integration',
+  duration: '30 min',
 };
 
 
@@ -662,8 +656,7 @@ connection.removeAccountChangeListener(subscriptionId);
 Efficient data reading requires understanding these RPC methods and when to use batching vs subscriptions.
 `,
   xpReward: 25,
-  order: 1,
-  moduleId: 'module-2-reading-on-chain-data',
+  duration: '30 min',
 };
 
 const lesson5: Lesson = {
@@ -811,8 +804,7 @@ const accountSchema = struct([
 Proper deserialization transforms raw blockchain data into usable TypeScript objects that your UI components can render directly.
 `,
   xpReward: 25,
-  order: 2,
-  moduleId: 'module-2-reading-on-chain-data',
+  duration: '30 min',
 };
 
 const lesson6: Challenge = {
@@ -843,8 +835,7 @@ Token accounts contain:
 For this challenge, you can display raw amounts and just show the mint address alongside.
 `,
   xpReward: 100,
-  order: 3,
-  moduleId: 'module-2-reading-on-chain-data',
+  duration: '30 min',
   starterCode: `import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { TOKEN_PROGRAM_ID, getAccount, getMint } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
@@ -1063,14 +1054,14 @@ export function TokenDashboard() {
 const module1: Module = {
   id: 'module-1-wallet-integration',
   title: 'Wallet Integration',
-  order: 1,
+  description: '',
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: 'module-2-reading-on-chain-data',
   title: 'Reading On-Chain Data',
-  order: 2,
+  description: '',
   lessons: [lesson4, lesson5, lesson6],
 };
 
@@ -1083,15 +1074,7 @@ export const solanaFrontendCourse: Course = {
   difficulty: 'intermediate',
   duration: '8 hours',
   totalXP: 225,
-  thumbnailUrl: '/images/courses/solana-frontend.jpg',
-  instructor: {
-    name: 'Superteam Academy',
-    avatarUrl: '/images/instructors/default.svg',
-    bio: 'Official Superteam Brazil education content',
-  },
+  imageUrl: '/images/courses/solana-frontend.jpg',
   modules: [module1, module2],
   tags: ['frontend', 'react', 'wallet', 'dapp'],
-  language: 'en',
-  createdAt,
-  updatedAt,
 };

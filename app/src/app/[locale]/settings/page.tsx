@@ -258,11 +258,11 @@ function SettingsContent() {
           <CardContent className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium">{t("username")}</label>
-              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="your_username" />
+              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t("usernamePlaceholder")} />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">{t("displayName")}</label>
-              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display Name" />
+              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("displayNamePlaceholder")} />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">{t("bio")}</label>
@@ -270,7 +270,7 @@ function SettingsContent() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                placeholder="Tell us about yourself..."
+                placeholder={t("bioPlaceholder")}
                 maxLength={280}
               />
             </div>

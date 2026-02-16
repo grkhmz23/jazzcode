@@ -1,121 +1,91 @@
-/**
- * Challenge Worker - Sandboxed code execution environment
- * Runs in a Web Worker context, isolated from the main thread
- */
+/* eslint-disable no-restricted-globals */
 
-// Block dangerous globals to create a sandbox
+// Sandboxed execution: block network and dynamic imports.
 self.fetch = undefined;
 self.XMLHttpRequest = undefined;
 self.importScripts = undefined;
-self.WebSocket = undefined;
-self.localStorage = undefined;
-self.sessionStorage = undefined;
-self.indexedDB = undefined;
-self.openDatabase = undefined;
 
-// Block timers that could be used for attacks
-self.setInterval = undefined;
-self.clearInterval = undefined;
+const DEFAULT_TIMEOUT_MS = 5000;
 
-// Block other potentially dangerous APIs
-self.navigator = undefined;
-self.location = undefined;
-self.document = undefined;
-self.window = undefined;
-self.parent = undefined;
-self.top = undefined;
-self.self = self;
-
-/**
- * Execute a single test case
- */
-function runTestCase(code, testCase) {
-  const startTime = Date.now();
+function createMockConsole() {
   const logs = [];
+  return {
+    console: {
+      log: (...args) => logs.push(args.map((arg) => String(arg)).join(" ")),
+      error: (...args) =>
+        logs.push(`[ERROR] ${args.map((arg) => String(arg)).join(" ")}`),
+      warn: (...args) =>
+        logs.push(`[WARN] ${args.map((arg) => String(arg)).join(" ")}`),
+      info: (...args) =>
+        logs.push(`[INFO] ${args.map((arg) => String(arg)).join(" ")}`),
+    },
+    logs,
+  };
+}
+
+function runWithTimeout(testFn, timeoutMs) {
+  return Promise.race([
+    Promise.resolve().then(testFn),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`Execution timed out after ${timeoutMs}ms`)), timeoutMs);
+    }),
+  ]);
+}
+
+function parseInput(rawInput) {
+  if (typeof rawInput !== "string") {
+    return rawInput;
+  }
 
   try {
-    // Create mock console for capturing output
-    const mockConsole = {
-      log: (...args) => logs.push(args.map((a) => String(a)).join(" ")),
-      error: (...args) =>
-        logs.push("[ERROR] " + args.map((a) => String(a)).join(" ")),
-      warn: (...args) =>
-        logs.push("[WARN] " + args.map((a) => String(a)).join(" ")),
-      info: (...args) =>
-        logs.push("[INFO] " + args.map((a) => String(a)).join(" ")),
-    };
+    return JSON.parse(rawInput);
+  } catch {
+    return rawInput;
+  }
+}
 
-    // Parse input - it comes as a JSON string
-    let parsedInput;
-    try {
-      parsedInput = JSON.parse(testCase.input);
-    } catch {
-      // If parsing fails, use the raw input string
-      parsedInput = testCase.input;
-    }
+async function runTest(code, testCase, timeoutMs) {
+  const { console: mockConsole, logs } = createMockConsole();
 
-    // Create the user function
-    // The code should define a function that we can call
-    const wrappedCode = `
-      ${code}
-      
-      // Try to detect the main function
-      // If the user defined a function, we call it with the input
-      // Otherwise, we assume the code produces a return value
-    `;
+  try {
+    const input = parseInput(testCase.input);
 
-    // Create a function from the code
-    const userFn = new Function("console", "input", wrappedCode + "\n//# sourceURL=user-code.js");
+    const execute = new Function(
+      "console",
+      "input",
+      `${code}\n//# sourceURL=challenge-user-code.js`
+    );
 
-    // Execute the function
-    const result = userFn(mockConsole, parsedInput);
-
-    // Determine the actual output
-    let actualOutput;
-    if (result !== undefined) {
-      actualOutput = String(result);
-    } else if (logs.length > 0) {
-      actualOutput = logs.join("\n");
-    } else {
-      actualOutput = "";
-    }
-
-    const passed = actualOutput.trim() === testCase.expectedOutput.trim();
-    const executionTime = Date.now() - startTime;
+    const value = await runWithTimeout(() => execute(mockConsole, input), timeoutMs);
+    const actualOutput =
+      value !== undefined ? String(value) : logs.join("\n");
+    const expectedOutput = String(testCase.expectedOutput ?? "");
 
     return {
       name: testCase.name,
-      passed,
+      passed: actualOutput.trim() === expectedOutput.trim(),
       actualOutput,
-      expectedOutput: testCase.expectedOutput,
-      logs,
-      executionTime,
+      expectedOutput,
       error: null,
     };
   } catch (error) {
-    const executionTime = Date.now() - startTime;
     return {
       name: testCase.name,
       passed: false,
-      actualOutput: "",
-      expectedOutput: testCase.expectedOutput,
-      logs,
-      executionTime,
+      actualOutput: logs.join("\n"),
+      expectedOutput: String(testCase.expectedOutput ?? ""),
       error: error instanceof Error ? error.message : String(error),
     };
   }
 }
 
-/**
- * Handle messages from the main thread
- */
-self.onmessage = function (e) {
-  const { code, testCases, timeoutMs } = e.data;
+self.onmessage = async (event) => {
+  const { code, testCases } = event.data ?? {};
 
-  if (!code || !Array.isArray(testCases)) {
+  if (typeof code !== "string" || !Array.isArray(testCases)) {
     self.postMessage({
       type: "error",
-      error: "Invalid input: code and testCases are required",
+      error: "Invalid payload. Expected { code, testCases }.",
     });
     return;
   }
@@ -123,21 +93,7 @@ self.onmessage = function (e) {
   const results = [];
 
   for (const testCase of testCases) {
-    // Check for timeout (simple check, not precise)
-    if (Date.now() - e.timeStamp > (timeoutMs || 5000)) {
-      results.push({
-        name: testCase.name,
-        passed: false,
-        actualOutput: "",
-        expectedOutput: testCase.expectedOutput,
-        logs: [],
-        executionTime: timeoutMs || 5000,
-        error: "Execution timed out",
-      });
-      break;
-    }
-
-    const result = runTestCase(code, testCase);
+    const result = await runTest(code, testCase, DEFAULT_TIMEOUT_MS);
     results.push(result);
   }
 

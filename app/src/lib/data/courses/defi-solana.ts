@@ -1,8 +1,5 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
-const createdAt = '2024-03-01T00:00:00Z';
-const updatedAt = '2024-03-01T00:00:00Z';
-
 const lesson1: Lesson = {
   id: 'lesson-1-token-swaps-amms',
   title: 'Token Swaps & AMMs',
@@ -75,8 +72,7 @@ Maximum Extractable Value (MEV) includes:
 Understanding these mechanics is essential for building trading interfaces that protect users from excessive losses.
 `,
   xpReward: 30,
-  order: 1,
-  moduleId: 'module-1-defi-primitives',
+  duration: '30 min',
 };
 
 const lesson2: Lesson = {
@@ -144,8 +140,7 @@ Solana supports flash loans—borrow assets without collateral, use them in same
 Lending protocol integration requires careful monitoring of health factors and liquidation risks.
 `,
   xpReward: 30,
-  order: 2,
-  moduleId: 'module-1-defi-primitives',
+  duration: '30 min',
 };
 
 const lesson3: Lesson = {
@@ -239,8 +234,7 @@ Switchboard uses a **push model** where oracles continuously update on-chain:
 - Validate price freshness with publishTime
 `,
   xpReward: 30,
-  order: 3,
-  moduleId: 'module-1-defi-primitives',
+  duration: '30 min',
 };
 
 
@@ -409,8 +403,7 @@ onlyDirectRoutes=true
 Jupiter's aggregation provides better prices than any single DEX, making it essential for DeFi applications.
 `,
   xpReward: 35,
-  order: 1,
-  moduleId: 'module-2-building-defi',
+  duration: '30 min',
 };
 
 const lesson5: Lesson = {
@@ -562,8 +555,7 @@ let performance_fee = yield_earned
 Vaults abstract yield complexity from users while taking fees for management—a sustainable DeFi business model.
 `,
   xpReward: 35,
-  order: 2,
-  moduleId: 'module-2-building-defi',
+  duration: '30 min',
 };
 
 const lesson6: Challenge = {
@@ -592,8 +584,7 @@ Complete the SwapComponent below. The wallet connection and basic UI structure a
 - Display a link to the transaction on Solana Explorer after success
 `,
   xpReward: 150,
-  order: 3,
-  moduleId: 'module-2-building-defi',
+  duration: '30 min',
   starterCode: `import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { VersionedTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { useState, useCallback } from 'react';
@@ -870,14 +861,14 @@ interface QuoteResponse {
 const module1: Module = {
   id: 'module-1-defi-primitives',
   title: 'DeFi Primitives',
-  order: 1,
+  description: '',
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: 'module-2-building-defi',
   title: 'Building DeFi',
-  order: 2,
+  description: '',
   lessons: [lesson4, lesson5, lesson6],
 };
 
@@ -890,15 +881,7 @@ export const defiSolanaCourse: Course = {
   difficulty: 'advanced',
   duration: '12 hours',
   totalXP: 310,
-  thumbnailUrl: '/images/courses/defi-solana.jpg',
-  instructor: {
-    name: 'Superteam Academy',
-    avatarUrl: '/images/instructors/default.svg',
-    bio: 'Official Superteam Brazil education content',
-  },
+  imageUrl: '/images/courses/defi-solana.jpg',
   modules: [module1, module2],
   tags: ['defi', 'jupiter', 'trading', 'advanced'],
-  language: 'en',
-  createdAt,
-  updatedAt,
 };

@@ -134,9 +134,9 @@ export default function LeaderboardPage() {
           <div className="flex items-center gap-3">
             <Database className="h-5 w-5 text-solana-green" />
             <div>
-              <p className="font-medium">Show on-chain data</p>
+              <p className="font-medium">{t("showOnChain")}</p>
               <p className="text-xs text-muted-foreground">
-                Display XP balances from Solana devnet
+                {t("showOnChainDesc")}
               </p>
             </div>
           </div>
@@ -150,12 +150,12 @@ export default function LeaderboardPage() {
             {showOnChain ? (
               <>
                 <Eye className="h-4 w-4" />
-                On
+                {t("on")}
               </>
             ) : (
               <>
                 <EyeOff className="h-4 w-4" />
-                Off
+                {t("off")}
               </>
             )}
           </Button>
@@ -168,7 +168,7 @@ export default function LeaderboardPage() {
           <CardContent className="flex items-center gap-3 p-4">
             <Info className="h-5 w-5 text-amber-600" />
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              On-chain leaderboard available after XP program deployment on devnet.
+              {t("onChainUnavailable")}
             </p>
           </CardContent>
         </Card>
@@ -180,7 +180,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">{t("title")}</CardTitle>
             <span className="text-xs text-muted-foreground">
-              {entries.length > 0 && `${entries.length} learners`}
+              {entries.length > 0 && t("learnerCount", { count: entries.length })}
             </span>
           </div>
         </CardHeader>
@@ -189,14 +189,12 @@ export default function LeaderboardPage() {
             <SkeletonEntries />
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-muted-foreground">Failed to load leaderboard</p>
+              <p className="text-muted-foreground">{t("loadError")}</p>
             </div>
           ) : entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Trophy className="mb-4 h-12 w-12 text-muted-foreground/30" />
-              <p className="text-muted-foreground">
-                No activity yet. Be the first to earn XP!
-              </p>
+              <p className="text-muted-foreground">{t("noData")}</p>
             </div>
           ) : (
             entries.map((entry) => {
@@ -223,7 +221,7 @@ export default function LeaderboardPage() {
                       {entry.username}
                       {isCurrentUser && (
                         <Badge variant="outline" className="ml-2 text-[10px]">
-                          You
+                          {t("you")}
                         </Badge>
                       )}
                     </p>
@@ -254,7 +252,7 @@ export default function LeaderboardPage() {
                         <span className="text-sm font-medium text-muted-foreground">
                           {entry.onChainXP?.toLocaleString() ?? "—"}
                         </span>
-                        <span className="text-xs text-muted-foreground">on-chain</span>
+                        <span className="text-xs text-muted-foreground">{t("onChainLabel")}</span>
                       </div>
                     )}
                   </div>

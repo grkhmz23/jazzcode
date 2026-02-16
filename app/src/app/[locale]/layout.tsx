@@ -7,6 +7,7 @@ import { SessionProvider } from "@/components/layout/session-provider";
 import { WalletProvider } from "@/components/layout/wallet-provider";
 import { AnalyticsProvider } from "@/lib/analytics/provider";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -21,8 +22,16 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params: { locale } }: LocaleLayoutProps) {
   const t = await getTranslations({ locale, namespace: "common" });
+  const appName = t("appName");
+  const description = t("tagline");
+
   return {
-    title: t("appName"),
+    title: appName,
+    description,
+    openGraph: {
+      title: appName,
+      description,
+    },
   };
 }
 
@@ -48,6 +57,7 @@ export default async function LocaleLayout({ children, params: { locale } }: Loc
                     <Footer />
                   </div>
                   <GoogleAnalytics />
+                  <PostHogProvider />
                 </AnalyticsProvider>
               </NextIntlClientProvider>
             </WalletProvider>
