@@ -1,0 +1,496 @@
+import { Quest } from "@/lib/devlab/types";
+
+const builderTrack: Quest = {
+  id: "builder-track",
+  track: "builder",
+  title: "From Zero to Deploy",
+  description: "Build, test, and deploy your first Anchor program on devnet.",
+  missions: [
+    {
+      id: "builder-1",
+      title: "Verify Your Environment",
+      difficulty: "easy",
+      description: "Confirm the toolchain versions used in Solana development.",
+      xpReward: 50,
+      objectives: [
+        { id: "b1-o1", text: "Run rustc --version", type: "command", validation: { type: "command_match", pattern: "^rustc\\s+--version$" }, completed: false },
+        { id: "b1-o2", text: "Run cargo --version", type: "command", validation: { type: "command_match", pattern: "^cargo\\s+--version$" }, completed: false },
+        { id: "b1-o3", text: "Run solana --version", type: "command", validation: { type: "command_match", pattern: "^solana\\s+--version$" }, completed: false },
+        { id: "b1-o4", text: "Run anchor --version", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+--version$" }, completed: false },
+      ],
+      hints: ["Type each version command exactly", "These commands validate your environment", "Try: rustc --version"],
+      successMessage: "Toolchain verified.",
+    },
+    {
+      id: "builder-2",
+      title: "Configure for Devnet",
+      difficulty: "easy",
+      description: "Set Solana CLI to the devnet cluster and confirm settings.",
+      xpReward: 75,
+      objectives: [
+        { id: "b2-o1", text: "Run solana config set --url devnet", type: "command", validation: { type: "command_match", pattern: "^solana\\s+config\\s+set\\s+--url\\s+devnet$" }, completed: false },
+        { id: "b2-o2", text: "Run solana config get", type: "command", validation: { type: "command_match", pattern: "^solana\\s+config\\s+get$" }, completed: false },
+      ],
+      hints: ["Devnet is the test network", "Use config set then config get", "Command: solana config set --url devnet"],
+      chaosVariants: [
+        {
+          trigger: "config\\s+set\\s+--url\\s+mainnet",
+          condition: "always",
+          errorOutput: "Warning: You are connecting to mainnet-beta. Transactions will use real SOL!",
+          hint: "Use devnet for development",
+        },
+      ],
+      successMessage: "Devnet configured.",
+    },
+    {
+      id: "builder-3",
+      title: "Create Your Identity",
+      difficulty: "easy",
+      description: "Generate a keypair, check address, then request an airdrop.",
+      xpReward: 100,
+      objectives: [
+        { id: "b3-o1", text: "Run solana-keygen new --outfile ~/.config/solana/id.json", type: "command", validation: { type: "command_match", pattern: "^solana-keygen\\s+new\\s+--outfile\\s+~/.config/solana/id.json$" }, completed: false },
+        { id: "b3-o2", text: "Run solana address", type: "command", validation: { type: "command_match", pattern: "^solana\\s+address$" }, completed: false },
+        { id: "b3-o3", text: "Run solana airdrop 2", type: "command", validation: { type: "command_match", pattern: "^solana\\s+airdrop\\s+2$" }, completed: false },
+        { id: "b3-o4", text: "Run solana balance", type: "command", validation: { type: "command_match", pattern: "^solana\\s+balance$" }, completed: false },
+      ],
+      hints: ["Create your keypair first", "Airdrop max per request is 5 SOL", "Use: solana airdrop 2"],
+      chaosVariants: [
+        {
+          trigger: "airdrop\\s+10",
+          condition: "always",
+          errorOutput: "Error: airdrop request failed. This can happen when the rate limit is reached.",
+          hint: "Max 5 SOL per request on devnet",
+        },
+      ],
+      successMessage: "Identity ready.",
+    },
+    {
+      id: "builder-4",
+      title: "Your First Transfer",
+      difficulty: "easy",
+      description: "Send SOL to another address and confirm the transaction.",
+      xpReward: 100,
+      objectives: [
+        { id: "b4-o1", text: "Run solana transfer GrAkKfEpTKQuHh9p7zM8nq9w7M4f6GQ9x3W5j8dL2fV 0.5", type: "command", validation: { type: "command_match", pattern: "^solana\\s+transfer\\s+GrAkKfEpTKQuHh9p7zM8nq9w7M4f6GQ9x3W5j8dL2fV\\s+0.5$" }, completed: false },
+        { id: "b4-o2", text: "Run solana balance", type: "command", validation: { type: "command_match", pattern: "^solana\\s+balance$" }, completed: false },
+        { id: "b4-o3", text: "Run solana confirm <signature>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+confirm\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Transfer deducts amount + fee", "Use signature output from transfer", "Check balance before and after"],
+      chaosVariants: [
+        {
+          trigger: "transfer.*100",
+          condition: "balance < 100",
+          errorOutput: "Error: Dynamic program error: InsufficientFunds",
+          hint: "Check your balance first with solana balance",
+        },
+      ],
+      successMessage: "Transfer confirmed.",
+    },
+    {
+      id: "builder-5",
+      title: "Initialize Anchor Project",
+      difficulty: "medium",
+      description: "Scaffold an Anchor project and inspect generated config/code.",
+      xpReward: 150,
+      objectives: [
+        { id: "b5-o1", text: "Run anchor init my_program", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+init\\s+my_program$" }, completed: false },
+        { id: "b5-o2", text: "Run cat Anchor.toml", type: "command", validation: { type: "command_match", pattern: "^cat\\s+Anchor.toml$" }, completed: false },
+        { id: "b5-o3", text: "Run cat programs/my_program/src/lib.rs", type: "command", validation: { type: "command_match", pattern: "^cat\\s+programs/my_program/src/lib.rs$" }, completed: false },
+      ],
+      hints: ["Anchor init bootstraps your project", "Read config to understand cluster and wallet", "Inspect lib.rs entrypoint"],
+      successMessage: "Anchor project initialized.",
+    },
+    {
+      id: "builder-6",
+      title: "Understand the Code",
+      difficulty: "medium",
+      description: "Open core files in the editor to understand project structure.",
+      xpReward: 100,
+      objectives: [
+        { id: "b6-o1", text: "Open programs/my_program/src/lib.rs", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: ".+" }, completed: false },
+        { id: "b6-o2", text: "Open Anchor.toml", type: "edit", validation: { type: "file_contains", path: "my-solana-project/Anchor.toml", pattern: ".+" }, completed: false },
+        { id: "b6-o3", text: "Open tests/my_program.ts", type: "edit", validation: { type: "file_contains", path: "my-solana-project/tests/my_program.ts", pattern: ".+" }, completed: false },
+      ],
+      hints: ["Use file explorer clicks", "You only need to open files", "Check open tabs"],
+      successMessage: "Project structure understood.",
+    },
+    {
+      id: "builder-7",
+      title: "Build Your Program",
+      difficulty: "medium",
+      description: "Compile your Anchor program and inspect build artifacts.",
+      xpReward: 150,
+      objectives: [
+        { id: "b7-o1", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+build$" }, completed: false },
+        { id: "b7-o2", text: "Run ls target/deploy/", type: "command", validation: { type: "command_match", pattern: "^ls\\s+target/deploy/?$" }, completed: false },
+        { id: "b7-o3", text: "Run ls target/idl/", type: "command", validation: { type: "command_match", pattern: "^ls\\s+target/idl/?$" }, completed: false },
+      ],
+      hints: ["Build generates .so and IDL", "Inspect target folders with ls", "Fix syntax issues in lib.rs if needed"],
+      chaosVariants: [
+        {
+          trigger: "anchor\\s+build",
+          condition: "lib.rs has syntax error",
+          errorOutput: "error[E0432]: unresolved import...",
+          hint: "Check your lib.rs for syntax errors",
+        },
+      ],
+      successMessage: "Build artifacts created.",
+    },
+    {
+      id: "builder-8",
+      title: "Write and Run Tests",
+      difficulty: "medium",
+      description: "Add a test assertion and run the Anchor test suite.",
+      xpReward: 200,
+      objectives: [
+        { id: "b8-o1", text: "Edit tests/my_program.ts to include assert/expect", type: "edit", validation: { type: "file_contains", path: "my-solana-project/tests/my_program.ts", pattern: "assert|expect" }, completed: false },
+        { id: "b8-o2", text: "Run anchor test", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+test$" }, completed: false },
+      ],
+      hints: ["Use chai expect/assert", "Save the file before running tests", "Then run anchor test"],
+      chaosVariants: [
+        {
+          trigger: "anchor\\s+test",
+          condition: "test has wrong assertion",
+          errorOutput: "AssertionError: expected...",
+          hint: "Check expected values in your assertion",
+        },
+      ],
+      successMessage: "Tests passed.",
+    },
+    {
+      id: "builder-9",
+      title: "Deploy to Devnet",
+      difficulty: "hard",
+      description: "Ensure funds are available and deploy your program.",
+      xpReward: 250,
+      objectives: [
+        { id: "b9-o1", text: "Run solana balance", type: "state_check", validation: { type: "state_predicate", check: "balance > 2" }, completed: false },
+        { id: "b9-o2", text: "Run anchor deploy", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+deploy$" }, completed: false },
+        { id: "b9-o3", text: "Run solana program show <programId>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+program\\s+show\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Deploy needs enough SOL", "Top up with airdrop if needed", "Use program id from deploy output"],
+      chaosVariants: [
+        {
+          trigger: "anchor\\s+deploy",
+          condition: "balance < 2",
+          errorOutput: "Error: Account ... has insufficient funds for spend",
+          hint: "You need at least 2 SOL. Try: solana airdrop 2",
+        },
+      ],
+      successMessage: "Program deployed.",
+    },
+    {
+      id: "builder-10",
+      title: "Full Stack Verification",
+      difficulty: "hard",
+      description: "Initialize IDL on-chain and verify your deployed program.",
+      xpReward: 300,
+      objectives: [
+        { id: "b10-o1", text: "Run anchor idl init <programId> --filepath target/idl/my_program.json", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+idl\\s+init\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+--filepath\\s+target/idl/my_program.json$" }, completed: false },
+        { id: "b10-o2", text: "Run solana program show <programId>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+program\\s+show\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+        { id: "b10-o3", text: "Run anchor verify <programId>", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+verify\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Use the same deployed program id", "IDL path should exist in target/idl", "anchor verify checks deterministic build"],
+      successMessage: "Congratulations! You deployed your first Solana program!",
+    },
+  ],
+};
+
+const tokenTrack: Quest = {
+  id: "token-track",
+  track: "token",
+  title: "Token Mastery",
+  description: "Create, mint, transfer, and manage SPL tokens.",
+  missions: [
+    {
+      id: "token-1",
+      title: "Create a Fungible Token",
+      difficulty: "easy",
+      description: "Create your first SPL token and verify supply starts at zero.",
+      xpReward: 75,
+      objectives: [
+        { id: "t1-o1", text: "Run spl-token create-token", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+create-token$" }, completed: false },
+        { id: "t1-o2", text: "Run spl-token supply <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+supply\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Create token first", "Supply should be 0 initially", "Use returned mint address"],
+      successMessage: "Token created.",
+    },
+    {
+      id: "token-2",
+      title: "Create Token Account",
+      difficulty: "easy",
+      description: "Create an account to hold your new token.",
+      xpReward: 75,
+      objectives: [
+        { id: "t2-o1", text: "Run spl-token create-account <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+create-account\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Use the mint address from mission 1", "Token accounts are required to hold balances", "Run create-account with mint"],
+      successMessage: "Token account created.",
+    },
+    {
+      id: "token-3",
+      title: "Mint Your First Tokens",
+      difficulty: "easy",
+      description: "Mint tokens and validate account balance and total supply.",
+      xpReward: 100,
+      objectives: [
+        { id: "t3-o1", text: "Run spl-token mint <mint> 1000", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+mint\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+1000$" }, completed: false },
+        { id: "t3-o2", text: "Run spl-token balance <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+balance\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+        { id: "t3-o3", text: "Run spl-token supply <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+supply\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Mint increases supply", "Balance and supply should reflect minted amount", "Keep using same mint"],
+      successMessage: "Tokens minted.",
+    },
+    {
+      id: "token-4",
+      title: "Transfer Tokens",
+      difficulty: "medium",
+      description: "Send tokens to another account and validate the resulting balance.",
+      xpReward: 125,
+      objectives: [
+        { id: "t4-o1", text: "Run spl-token transfer <mint> 100 <recipient> --fund-recipient", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+transfer\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+100\\s+[1-9A-HJ-NP-Za-km-z]{20,}(\\s+--fund-recipient)?$" }, completed: false },
+        { id: "t4-o2", text: "Run spl-token balance <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+balance\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Recipient can be a token account address", "Transfer reduces sender balance", "Use --fund-recipient when needed"],
+      chaosVariants: [{ trigger: "spl-token\\s+transfer", condition: "token balance < amount", errorOutput: "Error: insufficient token balance", hint: "Mint more first" }],
+      successMessage: "Tokens transferred.",
+    },
+    {
+      id: "token-5",
+      title: "Token with Custom Decimals",
+      difficulty: "medium",
+      description: "Create a token with 6 decimals and understand precision.",
+      xpReward: 125,
+      objectives: [
+        { id: "t5-o1", text: "Run spl-token create-token --decimals 6", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+create-token\\s+--decimals\\s+6$" }, completed: false },
+      ],
+      hints: ["Decimals control smallest unit", "6 is common for stable assets", "Use --decimals 6"],
+      successMessage: "Custom decimal token created.",
+    },
+    {
+      id: "token-6",
+      title: "Manage Token Authority",
+      difficulty: "medium",
+      description: "Change and revoke token authorities.",
+      xpReward: 150,
+      objectives: [
+        { id: "t6-o1", text: "Run spl-token authorize <mint> mint --new-authority <new>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+authorize\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+mint\\s+--new-authority\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+        { id: "t6-o2", text: "Run spl-token authorize <mint> freeze --disable", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+authorize\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+freeze\\s+--disable$" }, completed: false },
+      ],
+      hints: ["Authority controls mint/freeze actions", "Use new authority for mint", "Disable freeze when done"],
+      chaosVariants: [{ trigger: "authorize.*--disable", condition: "authority already revoked", errorOutput: "Error: authority already disabled", hint: "Skip duplicate revoke" }],
+      successMessage: "Authorities updated.",
+    },
+    {
+      id: "token-7",
+      title: "Create NFT (Supply 1)",
+      difficulty: "hard",
+      description: "Create a zero-decimal token and mint exactly one unit.",
+      xpReward: 200,
+      objectives: [
+        { id: "t7-o1", text: "Run spl-token create-token --decimals 0", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+create-token\\s+--decimals\\s+0$" }, completed: false },
+        { id: "t7-o2", text: "Run spl-token mint <mint> 1", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+mint\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+1$" }, completed: false },
+        { id: "t7-o3", text: "Disable mint authority", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+authorize\\s+[1-9A-HJ-NP-Za-km-z]{20,}\\s+mint\\s+--disable$" }, completed: false },
+      ],
+      hints: ["NFT-like token uses 0 decimals", "Mint only 1", "Then revoke mint authority"],
+      successMessage: "NFT pattern complete.",
+    },
+    {
+      id: "token-8",
+      title: "Token Account Cleanup",
+      difficulty: "hard",
+      description: "Close unused token accounts and reclaim rent.",
+      xpReward: 150,
+      objectives: [
+        { id: "t8-o1", text: "Run spl-token close <account>", type: "command", validation: { type: "command_match", pattern: "^spl-token\\s+close\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Close empty accounts to reclaim SOL", "Ensure account has zero balance first", "Use account address from prior outputs"],
+      successMessage: "Cleanup complete.",
+    },
+  ],
+};
+
+const opsTrack: Quest = {
+  id: "ops-track",
+  track: "ops",
+  title: "DevOps & Monitoring",
+  description: "Operate deployed Solana programs safely and reliably.",
+  missions: [
+    {
+      id: "ops-1",
+      title: "Stream Program Logs",
+      difficulty: "easy",
+      description: "Inspect logs to understand live runtime behavior.",
+      xpReward: 80,
+      objectives: [
+        { id: "o1-o1", text: "Run solana logs", type: "command", validation: { type: "command_match", pattern: "^solana\\s+logs$" }, completed: false },
+      ],
+      hints: ["Logs show instruction traces", "Use logs after deploy", "Command is solana logs"],
+      successMessage: "Logs inspected.",
+    },
+    {
+      id: "ops-2",
+      title: "Confirm Transaction Health",
+      difficulty: "easy",
+      description: "Validate that submitted transactions are confirmed.",
+      xpReward: 100,
+      objectives: [
+        { id: "o2-o1", text: "Run solana confirm <signature>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+confirm\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Use a recent signature from transfers", "Confirmed means final at current commitment", "Run solana confirm <sig>"],
+      successMessage: "Transaction health verified.",
+    },
+    {
+      id: "ops-3",
+      title: "Validate Program Metadata",
+      difficulty: "medium",
+      description: "Check the deployed program owner and authority.",
+      xpReward: 120,
+      objectives: [
+        { id: "o3-o1", text: "Run solana program show <programId>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+program\\s+show\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Program show returns owner + authority", "Use deployed program id", "Keep authority secure"],
+      successMessage: "Program metadata validated.",
+    },
+    {
+      id: "ops-4",
+      title: "Rollback Readiness",
+      difficulty: "medium",
+      description: "Take a snapshot checkpoint before risky changes.",
+      xpReward: 130,
+      objectives: [
+        { id: "o4-o1", text: "Run git status", type: "command", validation: { type: "command_match", pattern: "^git\\s+status$" }, completed: false },
+        { id: "o4-o2", text: "Run git log", type: "command", validation: { type: "command_match", pattern: "^git\\s+log$" }, completed: false },
+      ],
+      hints: ["Always inspect state before updates", "Log confirms rollback points", "Use git status then git log"],
+      successMessage: "Rollback posture established.",
+    },
+    {
+      id: "ops-5",
+      title: "Upgrade Checklist",
+      difficulty: "hard",
+      description: "Verify build, funds, and deployment conditions before upgrade.",
+      xpReward: 180,
+      objectives: [
+        { id: "o5-o1", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+build$" }, completed: false },
+        { id: "o5-o2", text: "Run solana balance", type: "state_check", validation: { type: "state_predicate", check: "balance > 2" }, completed: false },
+        { id: "o5-o3", text: "Run anchor deploy", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+deploy$" }, completed: false },
+      ],
+      hints: ["Never deploy without a fresh build", "Ensure deploy wallet funded", "Then run anchor deploy"],
+      successMessage: "Upgrade checklist complete.",
+    },
+    {
+      id: "ops-6",
+      title: "Ops Incident Drill",
+      difficulty: "hard",
+      description: "Diagnose and recover from simulated deployment failure.",
+      xpReward: 200,
+      objectives: [
+        { id: "o6-o1", text: "Run anchor deploy", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+deploy$" }, completed: false },
+        { id: "o6-o2", text: "Run solana logs", type: "command", validation: { type: "command_match", pattern: "^solana\\s+logs$" }, completed: false },
+        { id: "o6-o3", text: "Run anchor verify <programId>", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+verify\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Read logs to pinpoint failure", "Redeploy if needed", "Verify once healthy"],
+      successMessage: "Incident drill passed.",
+    },
+  ],
+};
+
+const securityTrack: Quest = {
+  id: "security-track",
+  track: "security",
+  title: "Security Patterns",
+  description: "Practice secure Solana development patterns in code and CLI.",
+  missions: [
+    {
+      id: "sec-1",
+      title: "Missing Signer Check",
+      difficulty: "medium",
+      description: "Ensure signer constraints are present in account validation.",
+      xpReward: 120,
+      objectives: [
+        { id: "s1-o1", text: "Edit lib.rs to include signer validation", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "Signer|signer" }, completed: false },
+        { id: "s1-o2", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+build$" }, completed: false },
+      ],
+      hints: ["Use Signer in Accounts struct", "Compile to validate fix", "Search for missing authority checks"],
+      successMessage: "Signer check added.",
+    },
+    {
+      id: "sec-2",
+      title: "Wrong Owner Validation",
+      difficulty: "medium",
+      description: "Prevent account substitution by validating ownership.",
+      xpReward: 130,
+      objectives: [
+        { id: "s2-o1", text: "Edit account constraints for owner checks", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "owner" }, completed: false },
+        { id: "s2-o2", text: "Run anchor test", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+test$" }, completed: false },
+      ],
+      hints: ["Verify account owner program", "Tests should catch spoofed accounts", "Use constraint attributes"],
+      successMessage: "Owner validation fixed.",
+    },
+    {
+      id: "sec-3",
+      title: "Integer Overflow Guard",
+      difficulty: "medium",
+      description: "Add checked arithmetic for balance/amount updates.",
+      xpReward: 140,
+      objectives: [
+        { id: "s3-o1", text: "Edit code to use checked_add or checked_sub", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "checked_add|checked_sub" }, completed: false },
+        { id: "s3-o2", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+build$" }, completed: false },
+      ],
+      hints: ["Never trust unchecked arithmetic", "Use Rust checked_* methods", "Propagate custom error on overflow"],
+      successMessage: "Overflow protections added.",
+    },
+    {
+      id: "sec-4",
+      title: "Authority Mistake",
+      difficulty: "hard",
+      description: "Fix authority logic to prevent privilege escalation.",
+      xpReward: 170,
+      objectives: [
+        { id: "s4-o1", text: "Edit authority checks", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "has_one|authority" }, completed: false },
+        { id: "s4-o2", text: "Run anchor test", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+test$" }, completed: false },
+      ],
+      hints: ["Use has_one constraints", "Ensure signer matches authority key", "Tests should validate unauthorized paths"],
+      successMessage: "Authority checks hardened.",
+    },
+    {
+      id: "sec-5",
+      title: "Replay Protection",
+      difficulty: "hard",
+      description: "Add nonce/sequence validation for repeated instruction calls.",
+      xpReward: 180,
+      objectives: [
+        { id: "s5-o1", text: "Edit code to include nonce/sequence checks", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "nonce|sequence" }, completed: false },
+        { id: "s5-o2", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+build$" }, completed: false },
+      ],
+      hints: ["Prevent duplicated signed payload usage", "Store and increment nonce", "Reject stale inputs"],
+      successMessage: "Replay protections applied.",
+    },
+    {
+      id: "sec-6",
+      title: "Secure Release Verification",
+      difficulty: "hard",
+      description: "Verify secure build and deployment state before release.",
+      xpReward: 220,
+      objectives: [
+        { id: "s6-o1", text: "Run anchor deploy", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+deploy$" }, completed: false },
+        { id: "s6-o2", text: "Run anchor verify <programId>", type: "command", validation: { type: "command_match", pattern: "^anchor\\s+verify\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+        { id: "s6-o3", text: "Run solana program show <programId>", type: "command", validation: { type: "command_match", pattern: "^solana\\s+program\\s+show\\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Deploy only after secure code passes", "Verify deterministic binary", "Confirm owner/authority in program show"],
+      successMessage: "Security track complete.",
+    },
+  ],
+};
+
+export const devlabQuests: Quest[] = [builderTrack, tokenTrack, opsTrack, securityTrack];
+
+export function getQuestByTrack(track: Quest["track"]): Quest {
+  const quest = devlabQuests.find((item) => item.track === track);
+  if (!quest) {
+    return builderTrack;
+  }
+  return quest;
+}

@@ -298,6 +298,47 @@ main();`}
         </div>
       </section>
 
+      <section className="border-t py-20 md:py-28">
+        <div className="container">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <Badge variant="outline" className="mb-4">
+                DevLab
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Solana DevLab
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Interactive CLI simulator. Learn by doing in a VS Code-like environment. 30+ guided missions.
+              </p>
+              <div className="mt-8">
+                <Link href="/devlab">
+                  <Button variant="solana" className="gap-2">
+                    <Terminal className="h-4 w-4" />
+                    Launch DevLab
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <Card className="overflow-hidden border-primary/30 bg-card/80 shadow-lg">
+              <CardContent className="p-0">
+                <div className="border-b bg-muted/70 px-4 py-2 text-xs text-muted-foreground">
+                  solana-devlab://builder-track/mission-1
+                </div>
+                <div className="grid grid-cols-3 bg-[#1e1e1e] text-[#d4d4d4]">
+                  <div className="border-r border-[#343434] p-3 text-[11px] text-[#9d9d9d]">Explorer</div>
+                  <div className="col-span-2 p-3 text-[11px]">programs/my_program/src/lib.rs</div>
+                </div>
+                <div className="border-t bg-[#1a1a1a] px-4 py-3 font-mono text-xs text-[#d4d4d4]">
+                  <span className="text-[#4ec9b0]">user@solana-devlab</span>
+                  <span className="text-[#9cdcfe]">:~/my-solana-project$</span> solana config set --url devnet
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-20 md:py-28">
         <div className="container">

@@ -64,6 +64,7 @@
     "courses": "Courses",
     "components": "Components",
     "playground": "Playground",
+    "devlab": "DevLab",
     "dashboard": "Dashboard",
     "leaderboard": "Leaderboard",
     "profile": "Profile",
@@ -72,6 +73,22 @@
     "language": "Language",
     "signIn": "Sign In",
     "signOut": "Sign Out"
+  },
+  "devlab": {
+    "title": "Solana DevLab",
+    "description": "Interactive CLI simulator with quest-based progression.",
+    "tracks": {
+      "builder": "Builder",
+      "token": "Token",
+      "ops": "Ops",
+      "security": "Security"
+    },
+    "missions": "Missions",
+    "objectives": "Objectives",
+    "hints": "Hints",
+    "score": "Score",
+    "nextMission": "Next Mission",
+    "complete": "Complete"
   },
   "landing": {
     "heroTitle": "Master Solana Development",

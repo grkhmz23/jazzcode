@@ -64,6 +64,7 @@
     "courses": "Cursos",
     "components": "Componentes",
     "playground": "Playground",
+    "devlab": "DevLab",
     "dashboard": "Painel",
     "leaderboard": "Classificação",
     "profile": "Perfil",
@@ -72,6 +73,22 @@
     "language": "Idioma",
     "signIn": "Entrar",
     "signOut": "Sair"
+  },
+  "devlab": {
+    "title": "Solana DevLab",
+    "description": "Simulador CLI interativo com progressão por missões.",
+    "tracks": {
+      "builder": "Builder",
+      "token": "Token",
+      "ops": "Ops",
+      "security": "Segurança"
+    },
+    "missions": "Missões",
+    "objectives": "Objetivos",
+    "hints": "Dicas",
+    "score": "Pontuação",
+    "nextMission": "Próxima missão",
+    "complete": "Concluir"
   },
   "landing": {
     "heroTitle": "Domine o Desenvolvimento Solana",
