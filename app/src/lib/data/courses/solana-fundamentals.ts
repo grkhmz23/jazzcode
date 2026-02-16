@@ -1,7 +1,7 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
 const lesson1: Lesson = {
-  id: 'lesson-1-what-is-solana',
+  id: 'what-is-solana',
   title: 'What is Solana?',
   slug: 'what-is-solana',
   type: 'content',
@@ -59,7 +59,7 @@ Understanding these fundamental differences is essential for becoming an effecti
 };
 
 const lesson2: Lesson = {
-  id: 'lesson-2-accounts-model',
+  id: 'accounts-model',
   title: 'The Accounts Model',
   slug: 'the-accounts-model',
   type: 'content',
@@ -135,7 +135,7 @@ Understanding account ownership is crucial for security. Never trust an account 
 };
 
 const lesson3: Lesson = {
-  id: 'lesson-3-transactions-instructions',
+  id: 'transactions-instructions',
   title: 'Transactions & Instructions',
   slug: 'transactions-and-instructions',
   type: 'content',
@@ -259,7 +259,7 @@ Understanding these constraints is essential for designing efficient Solana appl
 };
 
 const lesson4: Challenge = {
-  id: 'lesson-4-first-transaction',
+  id: 'first-transaction',
   title: 'Your First Transaction',
   slug: 'your-first-transaction',
   type: 'challenge',
@@ -384,7 +384,7 @@ async function transferSOL(
 
 
 const lesson5: Lesson = {
-  id: 'lesson-5-programs-on-solana',
+  id: 'programs-on-solana',
   title: 'Programs on Solana',
   slug: 'programs-on-solana',
   type: 'content',
@@ -487,7 +487,7 @@ Understanding program architecture is essential for building composable, upgrade
 };
 
 const lesson6: Lesson = {
-  id: 'lesson-6-program-derived-addresses',
+  id: 'program-derived-addresses',
   title: 'Program Derived Addresses',
   slug: 'program-derived-addresses',
   type: 'content',
@@ -572,7 +572,7 @@ The runtime verifies the PDA was correctly derived before allowing the signature
 };
 
 const lesson7: Lesson = {
-  id: 'lesson-7-spl-token-program',
+  id: 'spl-token-program',
   title: 'SPL Token Program',
   slug: 'spl-token-program',
   type: 'content',
@@ -685,7 +685,7 @@ Mastering SPL tokens is essential for building DeFi applications, NFT marketplac
 };
 
 const lesson8: Challenge = {
-  id: 'lesson-8-create-a-token',
+  id: 'create-a-token',
   title: 'Create a Token',
   slug: 'create-a-token',
   type: 'challenge',

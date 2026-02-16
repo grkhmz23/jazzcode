@@ -1,7 +1,7 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
 const lesson1: Lesson = {
-  id: 'lesson-1-wallet-adapter-setup',
+  id: 'wallet-adapter-setup',
   title: 'Wallet Adapter Setup',
   slug: 'wallet-adapter-setup',
   type: 'content',
@@ -114,7 +114,7 @@ This provider setup is the foundation—all other wallet functionality builds on
 };
 
 const lesson2: Lesson = {
-  id: 'lesson-2-connecting-signing',
+  id: 'connecting-signing',
   title: 'Connecting & Signing',
   slug: 'connecting-and-signing',
   type: 'content',
@@ -289,7 +289,7 @@ Understanding these hooks is essential for building responsive, wallet-aware dAp
 };
 
 const lesson3: Lesson = {
-  id: 'lesson-3-transaction-ux',
+  id: 'transaction-ux',
   title: 'Transaction UX Patterns',
   slug: 'transaction-ux-patterns',
   type: 'content',
@@ -481,7 +481,7 @@ Great transaction UX builds user trust through transparency and graceful handlin
 
 
 const lesson4: Lesson = {
-  id: 'lesson-4-rpc-methods',
+  id: 'rpc-methods',
   title: 'RPC Methods',
   slug: 'rpc-methods',
   type: 'content',
@@ -660,7 +660,7 @@ Efficient data reading requires understanding these RPC methods and when to use 
 };
 
 const lesson5: Lesson = {
-  id: 'lesson-5-account-deserialization',
+  id: 'account-deserialization',
   title: 'Account Deserialization',
   slug: 'account-deserialization',
   type: 'content',
@@ -808,7 +808,7 @@ Proper deserialization transforms raw blockchain data into usable TypeScript obj
 };
 
 const lesson6: Challenge = {
-  id: 'lesson-6-token-dashboard',
+  id: 'token-dashboard',
   title: 'Build a Token Dashboard',
   slug: 'build-a-token-dashboard',
   type: 'challenge',

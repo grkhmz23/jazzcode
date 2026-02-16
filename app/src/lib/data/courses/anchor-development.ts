@@ -1,7 +1,7 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
 const lesson1: Lesson = {
-  id: 'lesson-1-what-is-anchor',
+  id: 'what-is-anchor',
   title: 'What is Anchor?',
   slug: 'what-is-anchor',
   type: 'content',
@@ -100,7 +100,7 @@ Anchor handles serialization, account validation, and error handling automatical
 };
 
 const lesson2: Lesson = {
-  id: 'lesson-2-account-constraints',
+  id: 'account-constraints',
   title: 'Account Constraints & Macros',
   slug: 'account-constraints-and-macros',
   type: 'content',
@@ -248,7 +248,7 @@ These constraints execute in order, and if any fail, the transaction reverts bef
 };
 
 const lesson3: Lesson = {
-  id: 'lesson-3-error-handling',
+  id: 'error-handling',
   title: 'Error Handling',
   slug: 'error-handling',
   type: 'content',
@@ -374,7 +374,7 @@ Good error handling makes programs easier to debug and provides clear feedback w
 
 
 const lesson4: Lesson = {
-  id: 'lesson-4-state-management',
+  id: 'state-management',
   title: 'State Management',
   slug: 'state-management',
   type: 'content',
@@ -590,7 +590,7 @@ Effective state management requires careful planning of account structure, seed 
 };
 
 const lesson5: Lesson = {
-  id: 'lesson-5-cross-program-invocations',
+  id: 'cross-program-invocations',
   title: 'Cross-Program Invocations',
   slug: 'cross-program-invocations',
   type: 'content',
@@ -731,7 +731,7 @@ Mastering CPIs is essential for building composable DeFi protocols that leverage
 };
 
 const lesson6: Challenge = {
-  id: 'lesson-6-counter-program',
+  id: 'counter-program',
   title: 'Build a Counter Program',
   slug: 'build-a-counter-program',
   type: 'challenge',

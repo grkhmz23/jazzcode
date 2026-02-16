@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Search, Clock, BookOpen, Zap, Filter, Loader2 } from "lucide-react";
-import type { Course, Difficulty } from "@/types";
+import type { Course, CourseDifficulty } from "@/types/content";
 
 export default function CourseCatalogPage() {
   const t = useTranslations("courses");
@@ -63,7 +63,7 @@ export default function CourseCatalogPage() {
 
   const totalLessons = (c: Course) => c.modules.reduce((sum, m) => sum + m.lessons.length, 0);
 
-  const difficultyColor = (d: Difficulty) => {
+  const difficultyColor = (d: CourseDifficulty) => {
     switch (d) {
       case "beginner":
         return "text-emerald-500 bg-emerald-500/10";
@@ -133,7 +133,7 @@ export default function CourseCatalogPage() {
                     </Badge>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {t("duration", { minutes: course.durationMinutes })}
+                      {course.duration}
                     </span>
                   </div>
                   <h3 className="mt-3 font-semibold transition-colors group-hover:text-primary">

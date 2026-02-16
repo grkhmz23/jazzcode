@@ -16,7 +16,6 @@ interface LessonNavigationProps {
 interface LessonInfo {
   id: string;
   title: string;
-  slug: string;
   moduleId: string;
   moduleTitle: string;
   moduleIndex: number;
@@ -35,7 +34,6 @@ function flattenLessons(modules: Module[], completedLessons: string[]): LessonIn
       lessons.push({
         id: lesson.id,
         title: lesson.title,
-        slug: lesson.slug,
         moduleId: module.id,
         moduleTitle: module.title,
         moduleIndex,
@@ -79,7 +77,7 @@ export function LessonNavigation({
       <div className="flex w-1/3 justify-start">
         {prevLesson ? (
           <Link
-            href={`/courses/${courseSlug}/lessons/${prevLesson.slug}`}
+            href={`/courses/${courseSlug}/lessons/${prevLesson.id}`}
           >
             <Button variant="ghost" size="sm" className="gap-1">
               <ChevronLeft className="h-4 w-4" />
@@ -119,7 +117,7 @@ export function LessonNavigation({
       <div className="flex w-1/3 justify-end">
         {nextLesson ? (
           <Link
-            href={`/courses/${courseSlug}/lessons/${nextLesson.slug}`}
+            href={`/courses/${courseSlug}/lessons/${nextLesson.id}`}
           >
             <Button variant="ghost" size="sm" className="gap-1">
               <span className="hidden sm:inline">Next Lesson</span>

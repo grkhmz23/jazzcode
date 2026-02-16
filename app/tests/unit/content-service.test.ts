@@ -7,9 +7,9 @@ describe('CourseContentService', () => {
   const service = new LocalContentService();
 
   describe('getCourses', () => {
-    it('returns exactly 4 courses', async () => {
+    it('returns exactly 8 courses', async () => {
       const courses = await service.getCourses();
-      expect(courses.length).toBe(4);
+      expect(courses.length).toBe(8);
     });
 
     it('returns all available courses', async () => {
@@ -66,7 +66,7 @@ describe('CourseContentService', () => {
   describe('searchCourses', () => {
     it('returns all courses with empty query', async () => {
       const results = await service.searchCourses('', {});
-      expect(results.length).toBe(4);
+      expect(results.length).toBe(8);
     });
 
     it('filters by difficulty correctly', async () => {
@@ -118,9 +118,9 @@ describe('CourseContentService', () => {
 
   describe('getLesson', () => {
     it('returns lesson by id', async () => {
-      const lesson = await service.getLesson('solana-fundamentals', 'lesson-1-what-is-solana');
+      const lesson = await service.getLesson('solana-fundamentals', 'what-is-solana');
       expect(lesson).not.toBeNull();
-      expect(lesson?.id).toBe('lesson-1-what-is-solana');
+      expect(lesson?.id).toBe('what-is-solana');
       expect(lesson?.title).toBe('What is Solana?');
     });
 
@@ -135,7 +135,7 @@ describe('CourseContentService', () => {
     });
 
     it('returns challenge lesson with additional fields', async () => {
-      const lesson = await service.getLesson('solana-fundamentals', 'lesson-4-first-transaction');
+      const lesson = await service.getLesson('solana-fundamentals', 'first-transaction');
       expect(lesson).not.toBeNull();
       expect(lesson?.type).toBe('challenge');
       const challenge = lesson as Lesson & { 
@@ -192,7 +192,7 @@ describe('CourseContentService', () => {
     });
   });
 
-  describe('All 4 Courses', () => {
+  describe('All Courses', () => {
     it('includes Solana Fundamentals', async () => {
       const course = await service.getCourse('solana-fundamentals');
       expect(course).not.toBeNull();
@@ -219,6 +219,34 @@ describe('CourseContentService', () => {
       expect(course).not.toBeNull();
       expect(course?.title).toBe('DeFi on Solana');
       expect(course?.difficulty).toBe('advanced');
+    });
+
+    it('includes Solana Security & Auditing', async () => {
+      const course = await service.getCourse('solana-security');
+      expect(course).not.toBeNull();
+      expect(course?.title).toBe('Solana Security & Auditing');
+      expect(course?.difficulty).toBe('advanced');
+    });
+
+    it('includes Token Engineering on Solana', async () => {
+      const course = await service.getCourse('token-engineering');
+      expect(course).not.toBeNull();
+      expect(course?.title).toBe('Token Engineering on Solana');
+      expect(course?.difficulty).toBe('intermediate');
+    });
+
+    it('includes Solana Mobile Development', async () => {
+      const course = await service.getCourse('solana-mobile');
+      expect(course).not.toBeNull();
+      expect(course?.title).toBe('Solana Mobile Development');
+      expect(course?.difficulty).toBe('intermediate');
+    });
+
+    it('includes Testing Solana Programs', async () => {
+      const course = await service.getCourse('solana-testing');
+      expect(course).not.toBeNull();
+      expect(course?.title).toBe('Testing Solana Programs');
+      expect(course?.difficulty).toBe('intermediate');
     });
 
     it('has correct total lesson counts', async () => {

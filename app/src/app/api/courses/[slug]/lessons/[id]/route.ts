@@ -36,14 +36,16 @@ export async function GET(
       );
     }
 
+    const resolvedLessonId = lesson.id;
+
     // Find the module containing this lesson
-    const containingModule = course.modules.find(m =>
-      m.lessons.some(l => l.id === params.id)
+    const containingModule = course.modules.find((m) =>
+      m.lessons.some((l) => l.id === resolvedLessonId)
     );
 
     // Flatten all lessons to find prev/next
-    const allLessons = course.modules.flatMap(m => m.lessons);
-    const currentIndex = allLessons.findIndex(l => l.id === params.id);
+    const allLessons = course.modules.flatMap((m) => m.lessons);
+    const currentIndex = allLessons.findIndex((l) => l.id === resolvedLessonId);
     const prevLessonId = currentIndex > 0 ? allLessons[currentIndex - 1].id : null;
     const nextLessonId = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1].id : null;
 

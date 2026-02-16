@@ -1,7 +1,7 @@
 import type { Course, Module, Lesson, Challenge } from '@/types/content';
 
 const lesson1: Lesson = {
-  id: 'lesson-1-token-swaps-amms',
+  id: 'token-swaps-amms',
   title: 'Token Swaps & AMMs',
   slug: 'token-swaps-and-amms',
   type: 'content',
@@ -76,7 +76,7 @@ Understanding these mechanics is essential for building trading interfaces that 
 };
 
 const lesson2: Lesson = {
-  id: 'lesson-2-lending-protocols',
+  id: 'lending-protocols',
   title: 'Lending Protocols',
   slug: 'lending-protocols',
   type: 'content',
@@ -144,7 +144,7 @@ Lending protocol integration requires careful monitoring of health factors and l
 };
 
 const lesson3: Lesson = {
-  id: 'lesson-3-oracles-price-feeds',
+  id: 'oracles-price-feeds',
   title: 'Oracles & Price Feeds',
   slug: 'oracles-and-price-feeds',
   type: 'content',
@@ -239,7 +239,7 @@ Switchboard uses a **push model** where oracles continuously update on-chain:
 
 
 const lesson4: Lesson = {
-  id: 'lesson-4-integrating-jupiter',
+  id: 'integrating-jupiter',
   title: 'Integrating Jupiter',
   slug: 'integrating-jupiter',
   type: 'content',
@@ -407,7 +407,7 @@ Jupiter's aggregation provides better prices than any single DEX, making it esse
 };
 
 const lesson5: Lesson = {
-  id: 'lesson-5-building-a-vault',
+  id: 'building-a-vault',
   title: 'Building a Vault',
   slug: 'building-a-vault',
   type: 'content',
@@ -559,7 +559,7 @@ Vaults abstract yield complexity from users while taking fees for management—a
 };
 
 const lesson6: Challenge = {
-  id: 'lesson-6-build-a-swap-ui',
+  id: 'build-a-swap-ui',
   title: 'Build a Swap UI',
   slug: 'build-a-swap-ui',
   type: 'challenge',

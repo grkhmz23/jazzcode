@@ -25,9 +25,16 @@ export class ContentLocalService implements CourseContentService {
     if (!course) {
       return null;
     }
+    const legacyNormalizedId = lessonId.replace(/^lesson-\d+-/, "");
 
     for (const courseModule of course.modules) {
-      const lesson = courseModule.lessons.find((item) => item.id === lessonId);
+      const lesson = courseModule.lessons.find(
+        (item) =>
+          item.id === lessonId ||
+          item.slug === lessonId ||
+          item.id === legacyNormalizedId ||
+          item.slug === legacyNormalizedId
+      );
       if (lesson) {
         return lesson;
       }

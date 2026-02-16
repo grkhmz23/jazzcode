@@ -21,45 +21,12 @@ import {
   PlayCircle,
   Code2,
   ArrowLeft,
-  Users,
   Loader2,
   LogIn,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import type { Course } from "@/types";
-
-const WHAT_YOU_LEARN: Record<string, string[]> = {
-  "solana-fundamentals": [
-    "Understand Solana's architecture and runtime model",
-    "Create and manage accounts on Solana",
-    "Build and send transactions",
-    "Deploy your first Solana program",
-    "Work with SPL tokens and Token-2022",
-    "Interact with programs using TypeScript clients",
-  ],
-  "anchor-development": [
-    "Set up and configure an Anchor development environment",
-    "Build programs with the Anchor framework DSL",
-    "Write comprehensive tests with Anchor's TypeScript library",
-    "Understand account constraints and validation",
-    "Deploy programs to devnet and mainnet",
-  ],
-  "defi-builder": [
-    "Understand AMM mechanics and constant product formula",
-    "Implement token swaps and liquidity pools",
-    "Build lending protocols on Solana",
-    "Work with Oracle integrations (Pyth, Switchboard)",
-    "Understand MEV and transaction ordering",
-  ],
-  "nft-metaplex": [
-    "Create NFTs using the Metaplex Core standard",
-    "Build and manage NFT collections",
-    "Implement soulbound credentials",
-    "Use the DAS API for indexing NFT data",
-    "Build marketplaces with Metaplex Auctioneer",
-  ],
-};
+import type { Course } from "@/types/content";
 
 export default function CourseDetailPage() {
   const t = useTranslations("courses");
@@ -167,7 +134,10 @@ export default function CourseDetailPage() {
   }
 
   const totalLessons = course.modules.reduce((s, m) => s + m.lessons.length, 0);
-  const whatYouLearn = WHAT_YOU_LEARN[course.slug] ?? [];
+  const whatYouLearn = course.modules
+    .flatMap((moduleItem) => moduleItem.lessons)
+    .slice(0, 6)
+    .map((lessonItem) => lessonItem.title);
 
   return (
     <div className="container py-8 md:py-12">
@@ -183,11 +153,7 @@ export default function CourseDetailPage() {
               <Badge variant="outline">{tc(course.difficulty)}</Badge>
               <span className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-3.5 w-3.5" />
-                {t("duration", { minutes: course.durationMinutes })}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Users className="h-3.5 w-3.5" />
-                {t("enrolled", { count: course.enrolledCount })}
+                {course.duration}
               </span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{course.title}</h1>
@@ -277,7 +243,7 @@ export default function CourseDetailPage() {
                                   <PlayCircle className="h-3.5 w-3.5 text-muted-foreground" />
                                 )}
                                 <span className="text-xs text-muted-foreground">
-                                  {lessonItem.durationMinutes} {tc("minutes")}
+                                  {lessonItem.duration}
                                 </span>
                                 <Badge variant="outline" className="text-[10px]">
                                   +{lessonItem.xpReward} {tc("xp")}
@@ -316,7 +282,7 @@ export default function CourseDetailPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t("instructor")}</span>
-                  <span className="font-medium">{course.instructorName}</span>
+                  <span className="font-medium">Superteam Academy</span>
                 </div>
               </div>
 

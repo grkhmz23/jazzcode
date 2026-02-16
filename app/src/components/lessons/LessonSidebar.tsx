@@ -36,7 +36,7 @@ function LessonItem({ lesson, courseSlug, isCurrent, isCompleted }: LessonItemPr
 
   return (
     <Link
-      href={`/courses/${courseSlug}/lessons/${lesson.slug}`}
+      href={`/courses/${courseSlug}/lessons/${lesson.id}`}
       className={cn(
         "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
         isCurrent
