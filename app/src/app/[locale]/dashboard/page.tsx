@@ -24,6 +24,7 @@ import {
   ArrowRight,
   Loader2,
   Star,
+  Wallet,
 } from "lucide-react";
 import type { AchievementWithStatus } from "@/types/achievements";
 
@@ -34,6 +35,15 @@ interface ActivityItem {
   lessonId: string;
   xpAwarded: number;
   completedAt: string;
+}
+
+// On-chain XP data interface
+interface OnChainXPData {
+  onChainAvailable: boolean;
+  balance?: number;
+  mintAddress?: string;
+  tokenAccount?: string | null;
+  message?: string;
 }
 
 function DashboardContent() {
@@ -50,6 +60,38 @@ function DashboardContent() {
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [achievements, setAchievements] = useState<AchievementWithStatus[]>([]);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
+
+  // On-chain XP state
+  const [onChainXP, setOnChainXP] = useState<OnChainXPData | null>(null);
+  const [isLoadingOnChain, setIsLoadingOnChain] = useState(true);
+
+  // Get wallet address from session
+  const walletAddress = session?.user?.walletAddress ?? null;
+
+  // Fetch on-chain XP
+  useEffect(() => {
+    async function fetchOnChainXP() {
+      if (!walletAddress) {
+        setIsLoadingOnChain(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/onchain/xp?wallet=${encodeURIComponent(walletAddress)}`
+        );
+        if (response.ok) {
+          const data = (await response.json()) as { data: OnChainXPData };
+          setOnChainXP(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch on-chain XP:", err);
+      } finally {
+        setIsLoadingOnChain(false);
+      }
+    }
+    void fetchOnChainXP();
+  }, [walletAddress]);
 
   // Fetch recent activity
   useEffect(() => {
@@ -75,7 +117,9 @@ function DashboardContent() {
       try {
         const response = await fetch("/api/achievements");
         if (response.ok) {
-          const data = (await response.json()) as { achievements: AchievementWithStatus[] };
+          const data = (await response.json()) as {
+            achievements: AchievementWithStatus[];
+          };
           setAchievements(data.achievements ?? []);
         }
       } catch (err) {
@@ -87,7 +131,12 @@ function DashboardContent() {
     void fetchAchievements();
   }, []);
 
-  const isLoading = isLoadingXP || isLoadingStreak || isLoadingProgress || isLoadingActivity || isLoadingAchievements;
+  const isLoading =
+    isLoadingXP ||
+    isLoadingStreak ||
+    isLoadingProgress ||
+    isLoadingActivity ||
+    isLoadingAchievements;
 
   if (isLoading) {
     return (
@@ -114,9 +163,33 @@ function DashboardContent() {
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <XPDisplay xp={xp} size="sm" showProgress={false} />
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-sm text-muted-foreground">{t("xpBalance")}</p>
               <p className="text-2xl font-bold">{xp.toLocaleString()}</p>
+              {/* On-chain XP display */}
+              {!isLoadingOnChain && (
+                <div className="mt-1">
+                  {walletAddress ? (
+                    onChainXP?.onChainAvailable ? (
+                      <p className="text-xs text-solana-green">
+                        On-chain: {(onChainXP.balance ?? 0).toLocaleString()} XP
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        On-chain XP after program deployment
+                      </p>
+                    )
+                  ) : (
+                    <Link
+                      href="/settings"
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                    >
+                      <Wallet className="h-3 w-3" />
+                      Link wallet for on-chain XP
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -133,7 +206,8 @@ function DashboardContent() {
               <div className="mt-1">
                 <Progress value={levelProgress.percent} className="h-1" />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {Math.round(levelProgress.current)} / {levelProgress.required} XP to Level {level + 1}
+                  {Math.round(levelProgress.current)} / {levelProgress.required}{" "}
+                  XP to Level {level + 1}
                 </p>
               </div>
             </div>
@@ -147,7 +221,9 @@ function DashboardContent() {
               <Flame className="h-6 w-6 text-orange-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t("currentStreak")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("currentStreak")}
+              </p>
               <p className="text-2xl font-bold">
                 {streak.currentStreak} {tc("days")}
               </p>
@@ -242,7 +318,10 @@ function DashboardContent() {
               <Card>
                 <CardContent className="divide-y p-0">
                   {activity.slice(0, 8).map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 px-4 py-3">
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 px-4 py-3"
+                    >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-solana-green/10">
                         <Zap className="h-4 w-4 text-solana-green" />
                       </div>
@@ -304,7 +383,9 @@ function DashboardContent() {
             </CardHeader>
             <CardContent>
               {achievements.filter((a) => a.unlocked).length === 0 ? (
-                <p className="text-sm text-muted-foreground">Complete lessons to unlock achievements!</p>
+                <p className="text-sm text-muted-foreground">
+                  Complete lessons to unlock achievements!
+                </p>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
                   {achievements
@@ -320,7 +401,8 @@ function DashboardContent() {
                 </div>
               )}
               <div className="mt-3 text-center text-xs text-muted-foreground">
-                {achievements.filter((a) => a.unlocked).length} / {achievements.length} unlocked
+                {achievements.filter((a) => a.unlocked).length} /{" "}
+                {achievements.length} unlocked
               </div>
             </CardContent>
           </Card>

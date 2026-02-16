@@ -7,6 +7,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Zap, Loader2, AlertCircle, Wallet } from "lucide-react";
 import bs58 from "bs58";
 import type { ClientSafeProvider } from "next-auth/react";
@@ -30,6 +31,8 @@ export default function SignInPage() {
 
   const handleOAuthSignIn = useCallback(
     (provider: string) => {
+      // Track OAuth sign-in attempt
+      trackEvent("sign_in", "auth", provider);
       void signIn(provider, { callbackUrl: "/dashboard" });
     },
     []
@@ -62,6 +65,9 @@ export default function SignInPage() {
       const messageBytes = new TextEncoder().encode(nonceData.message);
       const signature = await signMessage(messageBytes);
       const signatureB58 = bs58.encode(signature);
+
+      // Track wallet sign-in attempt
+      trackEvent("sign_in", "auth", "solana-wallet");
 
       // 3. Sign in via credentials provider
       const result = await signIn("solana-wallet", {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,7 +37,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CodeEditor } from "@/components/editor/CodeEditor";
+import dynamic from "next/dynamic";
+
+// Dynamic import for CodeEditor to reduce initial bundle size
+const CodeEditor = dynamic(
+  () => import("@/components/editor/CodeEditor").then((mod) => mod.CodeEditor),
+  { ssr: false }
+);
 
 interface ComponentDefinition {
   id: string;
@@ -47,14 +54,6 @@ interface ComponentDefinition {
   npmPackage: string;
   example: string;
 }
-
-const componentCategories = {
-  wallet: { label: "Wallet Connection", icon: Wallet, color: "text-blue-500" },
-  token: { label: "Token Operations", icon: Coins, color: "text-green-500" },
-  nft: { label: "NFT & Metaplex", icon: Package, color: "text-purple-500" },
-  defi: { label: "DeFi Integration", icon: Zap, color: "text-yellow-500" },
-  security: { label: "Security & Audit", icon: Shield, color: "text-red-500" },
-};
 
 const components: ComponentDefinition[] = [
   {
@@ -175,8 +174,35 @@ interface ComponentCardProps {
 
 function ComponentCard({ component, onPreview }: ComponentCardProps) {
   const [copied, setCopied] = useState(false);
-  const category = componentCategories[component.category];
-  const CategoryIcon = category.icon;
+  const t = useTranslations("components");
+
+  const categoryLabels: Record<string, string> = {
+    wallet: t("categoryWallet"),
+    token: t("categoryToken"),
+    nft: t("categoryNft"),
+    defi: t("categoryDefi"),
+    security: t("categorySecurity"),
+  };
+
+  const categoryIcons: Record<string, typeof Wallet> = {
+    wallet: Wallet,
+    token: Coins,
+    nft: Package,
+    defi: Zap,
+    security: Shield,
+  };
+
+  const categoryColors: Record<string, string> = {
+    wallet: "text-blue-500",
+    token: "text-green-500",
+    nft: "text-purple-500",
+    defi: "text-yellow-500",
+    security: "text-red-500",
+  };
+
+  const CategoryIcon = categoryIcons[component.category];
+  const categoryLabel = categoryLabels[component.category];
+  const categoryColor = categoryColors[component.category];
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(component.installCommand);
@@ -188,11 +214,11 @@ function ComponentCard({ component, onPreview }: ComponentCardProps) {
     <Card className="group flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-lg">
       <CardHeader className="pb-3">
         <div className="mb-2 flex items-center gap-2">
-          <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg bg-muted", category.color)}>
+          <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg bg-muted", categoryColor)}>
             <CategoryIcon className="h-4 w-4" />
           </div>
           <span className="text-xs font-medium text-muted-foreground">
-            {category.label}
+            {categoryLabel}
           </span>
         </div>
         <CardTitle className="text-lg">{component.name}</CardTitle>
@@ -218,18 +244,18 @@ function ComponentCard({ component, onPreview }: ComponentCardProps) {
                     {copied ? (
                       <>
                         <Check className="h-4 w-4 text-green-500" />
-                        Copied!
+                        {t("copied")}
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4" />
-                        Install
+                        {t("install")}
                       </>
                     )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Copy install command</p>
+                  <p>{t("copyCommand")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -244,11 +270,11 @@ function ComponentCard({ component, onPreview }: ComponentCardProps) {
                     className="gap-1"
                   >
                     <Code2 className="h-4 w-4" />
-                    Preview
+                    {t("preview")}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>View code example</p>
+                  <p>{t("viewExample")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -262,6 +288,7 @@ function ComponentCard({ component, onPreview }: ComponentCardProps) {
 export default function ComponentsPage() {
   const [previewComponent, setPreviewComponent] = useState<ComponentDefinition | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const t = useTranslations("components");
 
   const displayedComponents = showAll ? components : components.slice(0, 3);
 
@@ -273,14 +300,13 @@ export default function ComponentsPage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-sm font-medium text-amber-800">
               <Star className="h-4 w-4" />
-              Coming Soon
+              {t("comingSoon")}
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Component Hub
+              {t("title")}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Production-ready React components for Solana. Drop-in wallet connectors, 
-              token displays, NFT galleries, and more.
+              {t("subtitle")}
             </p>
             <div className="mt-6 flex items-center justify-center gap-4">
               <a
@@ -290,7 +316,7 @@ export default function ComponentsPage() {
                 className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
               >
                 <Star className="h-4 w-4" />
-                Star on GitHub
+                {t("starOnGitHub")}
               </a>
             </div>
           </div>
@@ -300,16 +326,15 @@ export default function ComponentsPage() {
       {/* Coming Soon Banner */}
       <div className="border-b bg-blue-50/50 px-4 py-3 text-center">
         <p className="text-sm text-blue-800">
-          The Component Hub is in active development.{" "}
+          {t("developmentNotice")}{" "}
           <a
             href="https://github.com/superteam-academy/jazzcode"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline hover:text-blue-900"
           >
-            Star us on GitHub
-          </a>{" "}
-          to get notified when it launches.
+            {t("getNotified")}
+          </a>
         </p>
       </div>
 
@@ -318,9 +343,9 @@ export default function ComponentsPage() {
         <div className="container">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Featured Components</h2>
+              <h2 className="text-2xl font-bold">{t("featuredComponents")}</h2>
               <p className="text-muted-foreground">
-                Drop-in components for your Solana dApp
+                {t("featuredSubtitle")}
               </p>
             </div>
             {!showAll && components.length > 3 && (
@@ -329,7 +354,7 @@ export default function ComponentsPage() {
                 onClick={() => setShowAll(true)}
                 className="gap-1"
               >
-                View All ({components.length})
+                {t("viewAll", { count: components.length })}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             )}
@@ -351,7 +376,7 @@ export default function ComponentsPage() {
                 variant="outline"
                 onClick={() => setShowAll(false)}
               >
-                Show Less
+                {t("showLess")}
               </Button>
             </div>
           )}
@@ -362,14 +387,14 @@ export default function ComponentsPage() {
       <section className="border-t bg-muted/30 py-12">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold">Submit a Component</h2>
+            <h2 className="text-2xl font-bold">{t("submitComponent")}</h2>
             <p className="mt-2 text-muted-foreground">
-              Built a great Solana component? Submit it to the hub and share it with the community.
+              {t("submitSubtitle")}
             </p>
             <a href="#submit-component">
               <Button className="mt-6 gap-2">
                 <ExternalLink className="h-4 w-4" />
-                Submit Component
+                {t("submitButton")}
               </Button>
             </a>
           </div>
@@ -391,7 +416,7 @@ export default function ComponentsPage() {
 
           <div className="space-y-4">
             <div>
-              <h4 className="mb-2 text-sm font-medium">Install</h4>
+              <h4 className="mb-2 text-sm font-medium">{t("installLabel")}</h4>
               <div className="flex items-center gap-2 rounded-md bg-muted p-3">
                 <code className="flex-1 text-sm">
                   {previewComponent?.installCommand}
@@ -413,7 +438,7 @@ export default function ComponentsPage() {
             </div>
 
             <div>
-              <h4 className="mb-2 text-sm font-medium">Example Usage</h4>
+              <h4 className="mb-2 text-sm font-medium">{t("exampleLabel")}</h4>
               <div className="h-64 overflow-hidden rounded-md border">
                 {previewComponent && (
                   <CodeEditor

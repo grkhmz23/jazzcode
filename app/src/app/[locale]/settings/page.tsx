@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTheme } from "next-themes";
 import { useRouter, usePathname } from "@/lib/i18n/navigation";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -212,6 +213,8 @@ function SettingsContent() {
 
   const switchLocale = useCallback(
     (locale: "en" | "pt-BR" | "es") => {
+      // Track language switch
+      trackEvent("language_switch", "i18n", locale);
       router.replace(pathname, { locale });
     },
     [pathname, router]

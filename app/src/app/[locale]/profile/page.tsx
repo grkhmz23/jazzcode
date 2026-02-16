@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AchievementGrid } from "@/components/achievements";
 import { StreakCalendar } from "@/components/dashboard";
+import { CredentialGrid } from "@/components/credentials";
 import { useXP } from "@/lib/hooks/use-xp";
 import { useStreak } from "@/lib/hooks/use-streak";
 import { useAllProgress } from "@/lib/hooks/use-progress";
@@ -26,12 +27,10 @@ import {
   Loader2,
   Calendar,
   Flame,
-
   Star,
+  Wallet,
 } from "lucide-react";
-import type { Credential } from "@/types";
 import type { AchievementWithStatus } from "@/types/achievements";
-
 
 // Skill radar data interface
 interface SkillData {
@@ -51,6 +50,15 @@ const COURSE_SKILL_MAP: Record<string, keyof SkillData> = {
   "defi-builder": "defi",
 };
 
+// On-chain XP data interface
+interface OnChainXPData {
+  onChainAvailable: boolean;
+  balance?: number;
+  mintAddress?: string;
+  tokenAccount?: string | null;
+  message?: string;
+}
+
 interface ProfileData {
   username: string | null;
   displayName: string | null;
@@ -58,7 +66,6 @@ interface ProfileData {
   avatarUrl: string | null;
   joinedAt: string;
   isPublic: boolean;
-  credentials: Credential[];
   achievements: AchievementWithStatus[];
   primaryWallet: string | null;
 }
@@ -76,6 +83,39 @@ function ProfileContent() {
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // On-chain XP state
+  const [onChainXP, setOnChainXP] = useState<OnChainXPData | null>(null);
+  const [isLoadingOnChain, setIsLoadingOnChain] = useState(true);
+
+  // Get wallet address from session or profile
+  const walletAddress =
+    profileData?.primaryWallet ?? session?.user?.walletAddress ?? null;
+
+  // Fetch on-chain XP
+  useEffect(() => {
+    async function fetchOnChainXP() {
+      if (!walletAddress) {
+        setIsLoadingOnChain(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/onchain/xp?wallet=${encodeURIComponent(walletAddress)}`
+        );
+        if (response.ok) {
+          const data = (await response.json()) as { data: OnChainXPData };
+          setOnChainXP(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch on-chain XP:", err);
+      } finally {
+        setIsLoadingOnChain(false);
+      }
+    }
+    void fetchOnChainXP();
+  }, [walletAddress]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -111,7 +151,12 @@ function ProfileContent() {
     }
   });
 
-  const isLoading = isLoadingXP || isLoadingStreak || isLoadingProgress || isLoadingProfile || isLoadingRank;
+  const isLoading =
+    isLoadingXP ||
+    isLoadingStreak ||
+    isLoadingProgress ||
+    isLoadingProfile ||
+    isLoadingRank;
 
   if (isLoading) {
     return (
@@ -121,21 +166,24 @@ function ProfileContent() {
     );
   }
 
-  const name = profileData?.displayName ?? profileData?.username ?? session?.user?.name ?? "Learner";
-  const achievements = profileData?.achievements ?? [];
-  const credentials = profileData?.credentials ?? [];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _completedCourses = progressList.filter((cp) => cp.completionPercent === 100);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _unlockedAchievements = achievements.filter((a: AchievementWithStatus) => a.unlocked);
+  const name =
+    profileData?.displayName ??
+    profileData?.username ??
+    session?.user?.name ??
+    "Learner";
 
   return (
     <div className="container py-8 md:py-12">
       {/* Profile Header */}
       <div className="mb-8 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={profileData?.avatarUrl ?? session?.user?.image ?? undefined} alt={name} />
-          <AvatarFallback className="text-2xl">{name.charAt(0).toUpperCase()}</AvatarFallback>
+          <AvatarImage
+            src={profileData?.avatarUrl ?? session?.user?.image ?? undefined}
+            alt={name}
+          />
+          <AvatarFallback className="text-2xl">
+            {name.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 text-center sm:text-left">
           <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -156,10 +204,16 @@ function ProfileContent() {
                   : "—",
               })}
             </span>
-            {profileData?.primaryWallet && (
-              <span className="font-mono text-xs">
-                {profileData.primaryWallet.slice(0, 4)}...{profileData.primaryWallet.slice(-4)}
-              </span>
+            {walletAddress && (
+              <a
+                href={`https://explorer.solana.com/address/${walletAddress}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-mono text-xs hover:text-primary"
+              >
+                {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                <ExternalLink className="h-3 w-3" />
+              </a>
             )}
           </div>
         </div>
@@ -177,6 +231,43 @@ function ProfileContent() {
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{xp.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">{tc("xp")}</p>
+            {/* On-chain XP display */}
+            {!isLoadingOnChain && (
+              <div className="mt-1">
+                {walletAddress ? (
+                  onChainXP?.onChainAvailable ? (
+                    <div className="space-y-1">
+                      <p className="text-xs text-solana-green">
+                        On-chain: {(onChainXP.balance ?? 0).toLocaleString()} XP
+                      </p>
+                      {onChainXP.tokenAccount && (
+                        <a
+                          href={`https://explorer.solana.com/address/${onChainXP.tokenAccount}?cluster=devnet`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          View token account
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      On-chain XP after program deployment
+                    </p>
+                  )
+                ) : (
+                  <Link
+                    href="/settings"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                  >
+                    <Wallet className="h-3 w-3" />
+                    Link wallet for on-chain XP
+                  </Link>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -213,7 +304,8 @@ function ProfileContent() {
               <span className="font-medium">Level {level}</span>
             </div>
             <span className="text-sm text-muted-foreground">
-              {Math.round(levelProgress.current)} / {levelProgress.required} XP to Level {level + 1}
+              {Math.round(levelProgress.current)} / {levelProgress.required} XP
+              to Level {level + 1}
             </span>
           </div>
           <Progress value={levelProgress.percent} className="mt-2 h-2" />
@@ -319,58 +411,23 @@ function ProfileContent() {
           <AchievementGrid />
         </TabsContent>
 
-        {/* Credentials */}
+        {/* Credentials - Updated with CredentialGrid */}
         <TabsContent value="credentials" className="mt-6">
-          {!profileData?.primaryWallet && (
-            <Card className="mb-4 border-amber-500/30 bg-amber-500/5">
-              <CardContent className="py-4 text-center">
-                <p className="text-sm text-amber-600">
+          {!walletAddress ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <Shield className="mb-4 h-12 w-12 text-muted-foreground/30" />
+                <p className="text-muted-foreground">
                   Link a wallet in{" "}
-                  <Link href="/settings" className="underline hover:text-amber-700">
+                  <Link href="/settings" className="text-primary hover:underline">
                     Settings
                   </Link>{" "}
-                  to view on-chain credentials
+                  to view your on-chain credentials
                 </p>
               </CardContent>
             </Card>
-          )}
-          {credentials.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <Shield className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
-                <p>{t("noCredentials")}</p>
-              </CardContent>
-            </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {credentials.map((cred) => (
-                <Card key={cred.mintAddress}>
-                  <CardContent className="p-4">
-                    {cred.imageUri && (
-                      <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-muted">
-                        <Shield className="h-12 w-12 text-muted-foreground/30" />
-                      </div>
-                    )}
-                    <h3 className="font-medium">{cred.trackName}</h3>
-                    <Badge variant="outline" className="mt-1">
-                      {t("credentialLevel", { level: cred.level })}
-                    </Badge>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {new Date(cred.acquiredAt).toLocaleDateString()}
-                    </p>
-                    <a
-                      href={cred.verificationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      {t("verifyOnChain")}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <CredentialGrid walletAddress={walletAddress} />
           )}
         </TabsContent>
       </Tabs>

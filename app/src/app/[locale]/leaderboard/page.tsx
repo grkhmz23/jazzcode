@@ -8,7 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLeaderboard } from "@/lib/hooks/use-leaderboard";
-import { Trophy, Medal, Crown, Zap, Flame } from "lucide-react";
+import {
+  Trophy,
+  Medal,
+  Crown,
+  Zap,
+  Flame,
+  Database,
+  Info,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import type { LeaderboardTimeframe } from "@/types";
 
 export default function LeaderboardPage() {
@@ -24,6 +34,9 @@ export default function LeaderboardPage() {
     error,
     timeframe,
     setTimeframe,
+    onChainAvailable,
+    showOnChain,
+    setShowOnChain,
   } = useLeaderboard(50);
 
   const rankIcon = (rank: number) => {
@@ -115,6 +128,52 @@ export default function LeaderboardPage() {
         </Card>
       )}
 
+      {/* On-Chain Toggle */}
+      <Card className="mb-6">
+        <CardContent className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <Database className="h-5 w-5 text-solana-green" />
+            <div>
+              <p className="font-medium">Show on-chain data</p>
+              <p className="text-xs text-muted-foreground">
+                Display XP balances from Solana devnet
+              </p>
+            </div>
+          </div>
+          <Button
+            variant={showOnChain ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowOnChain(!showOnChain)}
+            disabled={!onChainAvailable}
+            className="gap-2"
+          >
+            {showOnChain ? (
+              <>
+                <Eye className="h-4 w-4" />
+                On
+              </>
+            ) : (
+              <>
+                <EyeOff className="h-4 w-4" />
+                Off
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Info message when on-chain toggle is on but not available */}
+      {showOnChain && !onChainAvailable && (
+        <Card className="mb-6 border-dashed border-amber-500/30 bg-amber-500/5">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Info className="h-5 w-5 text-amber-600" />
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              On-chain leaderboard available after XP program deployment on devnet.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Leaderboard */}
       <Card>
         <CardHeader className="border-b">
@@ -188,6 +247,16 @@ export default function LeaderboardPage() {
                         {tc("xp")}
                       </span>
                     </div>
+                    {/* On-Chain XP Column */}
+                    {showOnChain && onChainAvailable && (
+                      <div className="flex items-center gap-1 border-l pl-3">
+                        <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {entry.onChainXP?.toLocaleString() ?? "—"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">on-chain</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

@@ -18,6 +18,9 @@ import {
   Check,
 } from "lucide-react";
 
+// ISR: Regenerate landing page every hour (3600 seconds)
+export const revalidate = 3600;
+
 export default function LandingPage({ params: { locale } }: { params: { locale: string } }) {
   unstable_setRequestLocale(locale);
   const t = useTranslations("landing");
@@ -153,14 +156,13 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <Badge variant="outline" className="mb-4">
-              Coming Soon
+              {t("componentHubBadge")}
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Component Hub
+              {t("componentHubTitle")}
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Production-ready React components for Solana. Drop-in wallet connectors, 
-              token displays, NFT galleries, and more.
+              {t("componentHubSubtitle")}
             </p>
           </div>
 
@@ -171,9 +173,9 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
                   <Code2 className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold">WalletConnectButton</h3>
+                <h3 className="font-semibold">{t("componentHubItem1Name")}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Beautiful, customizable wallet connection button with automatic wallet detection.
+                  {t("componentHubItem1Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
                   <code className="text-xs">npm install @jazzcode/wallet-connect-button</code>
@@ -187,9 +189,9 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
                   <Package className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold">TokenBalanceCard</h3>
+                <h3 className="font-semibold">{t("componentHubItem2Name")}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Display SPL token balances with real-time updates and price fetching.
+                  {t("componentHubItem2Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
                   <code className="text-xs">npm install @jazzcode/token-balance-card</code>
@@ -203,9 +205,9 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
                   <Star className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold">NFTGallery</h3>
+                <h3 className="font-semibold">{t("componentHubItem3Name")}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Responsive NFT gallery grid with Metaplex integration.
+                  {t("componentHubItem3Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
                   <code className="text-xs">npm install @jazzcode/nft-gallery</code>
@@ -217,7 +219,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
           <div className="mt-8 text-center">
             <Link href="/components">
               <Button variant="outline" className="gap-2">
-                View All Components
+                {t("componentHubCTA")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -231,21 +233,20 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <Badge variant="outline" className="mb-4">
-                Beta
+                {t("playgroundBadge")}
               </Badge>
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Interactive Playground
+                {t("playgroundTitle")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Experiment with Solana code in real-time. Test Web3.js snippets, 
-                explore Anchor IDLs, and prototype your next dApp.
+                {t("playgroundSubtitle")}
               </p>
               <ul className="mt-6 space-y-3">
                 {[
-                  "Live TypeScript execution with Solana mocks",
-                  "Pre-built templates for common operations",
-                  "Share your code with a URL",
-                  "No wallet connection required",
+                  t("playgroundFeature1"),
+                  t("playgroundFeature2"),
+                  t("playgroundFeature3"),
+                  t("playgroundFeature4"),
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-solana-green" />
@@ -257,7 +258,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                 <Link href="/playground">
                   <Button variant="solana" className="gap-2">
                     <Terminal className="h-4 w-4" />
-                    Open Playground
+                    {t("playgroundCTA")}
                   </Button>
                 </Link>
               </div>

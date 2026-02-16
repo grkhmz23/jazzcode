@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Play, RotateCcw, Lightbulb, Eye, CheckCircle2, ChevronRight, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -81,6 +82,9 @@ export function ChallengeRunner({
     setError(null);
     setResults([]);
 
+    // Track challenge run attempt
+    trackEvent("run_challenge", "editor");
+
     const currentCode = editorRef.current?.getValue() ?? code;
     const result = await runChallengeTests(currentCode, testCases);
 
@@ -89,6 +93,11 @@ export function ChallengeRunner({
     setError(result.error);
     setAllPassed(result.allPassed);
     setIsRunning(false);
+
+    // Track if all tests passed
+    if (result.allPassed) {
+      trackEvent("challenge_passed", "editor");
+    }
   }, [code, testCases]);
 
   const handleResetCode = useCallback(() => {

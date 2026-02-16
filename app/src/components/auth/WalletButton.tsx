@@ -3,14 +3,28 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Wallet, Copy, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function WalletButton() {
   const { publicKey, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [showActions, setShowActions] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasTracked, setHasTracked] = useState(false);
+
+  // Track wallet connection
+  useEffect(() => {
+    if (connected && publicKey && !hasTracked) {
+      trackEvent("wallet_connect", "auth");
+      setHasTracked(true);
+    }
+    // Reset tracking when disconnected
+    if (!connected) {
+      setHasTracked(false);
+    }
+  }, [connected, publicKey, hasTracked]);
 
   // Handle connect button click - opens wallet modal
   const handleConnect = () => {

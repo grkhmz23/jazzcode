@@ -36,17 +36,42 @@
     "advanced": "Advanced",
     "minutes": "min",
     "lessons": "lessons",
-    "free": "Free"
+    "free": "Free",
+    "copy": "Copy",
+    "share": "Share",
+    "download": "Download",
+    "continue": "Continue",
+    "start": "Start",
+    "submit": "Submit",
+    "reset": "Reset",
+    "run": "Run",
+    "clear": "Clear",
+    "success": "Success",
+    "pending": "Pending",
+    "active": "Active",
+    "inactive": "Inactive",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "verified": "Verified",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "ago": "ago",
+    "connectWallet": "Connect Wallet",
+    "linkWallet": "Link Wallet"
   },
   "nav": {
     "home": "Home",
     "courses": "Courses",
+    "components": "Components",
+    "playground": "Playground",
     "dashboard": "Dashboard",
     "leaderboard": "Leaderboard",
     "profile": "Profile",
     "settings": "Settings",
     "theme": "Toggle theme",
-    "language": "Language"
+    "language": "Language",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
   },
   "landing": {
     "heroTitle": "Master Solana Development",
@@ -71,7 +96,25 @@
     "ctaTitle": "Ready to Build on Solana?",
     "ctaSubtitle": "Join thousands of developers learning to build the future of decentralized applications.",
     "ctaButton": "Create Your Free Account",
-    "testimonialTitle": "What Builders Say"
+    "testimonialTitle": "What Builders Say",
+    "componentHubBadge": "Coming Soon",
+    "componentHubTitle": "Component Hub",
+    "componentHubSubtitle": "Production-ready React components for Solana. Drop-in wallet connectors, token displays, NFT galleries, and more.",
+    "componentHubCTA": "View All Components",
+    "componentHubItem1Name": "WalletConnectButton",
+    "componentHubItem1Desc": "Beautiful, customizable wallet connection button with automatic wallet detection.",
+    "componentHubItem2Name": "TokenBalanceCard",
+    "componentHubItem2Desc": "Display SPL token balances with real-time updates and price fetching.",
+    "componentHubItem3Name": "NFTGallery",
+    "componentHubItem3Desc": "Responsive NFT gallery grid with Metaplex integration.",
+    "playgroundBadge": "Beta",
+    "playgroundTitle": "Interactive Playground",
+    "playgroundSubtitle": "Experiment with Solana code in real-time. Test Web3.js snippets, explore Anchor IDLs, and prototype your next dApp.",
+    "playgroundCTA": "Open Playground",
+    "playgroundFeature1": "Live TypeScript execution with Solana mocks",
+    "playgroundFeature2": "Pre-built templates for common operations",
+    "playgroundFeature3": "Share your code with a URL",
+    "playgroundFeature4": "No wallet connection required"
   },
   "courses": {
     "title": "Course Catalog",
@@ -106,7 +149,8 @@
     "modules": "Modules",
     "aboutCourse": "About This Course",
     "courseContent": "Course Content",
-    "completeLesson": "Mark as Complete"
+    "completeLesson": "Mark as Complete",
+    "dayStreak": "Day Streak"
   },
   "lesson": {
     "content": "Content",
@@ -138,7 +182,8 @@
     "challengeComplete": "Challenge completed successfully!",
     "moduleComplete": "Module complete! Keep going!",
     "runToSeeResults": "Run your code to see test results",
-    "noOutput": "No output yet"
+    "noOutput": "No output yet",
+    "checkCode": "Check Code"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -165,7 +210,11 @@
     "streak": "Learning Streak",
     "recommendations": "Recommended for You",
     "noAchievements": "Complete lessons and challenges to unlock achievements!",
-    "locked": "Locked"
+    "locked": "Locked",
+    "yourRank": "Your Rank",
+    "onChainXP": "On-chain",
+    "viewTokenAccount": "View token account",
+    "linkWalletForXP": "Link wallet for on-chain XP"
   },
   "profile": {
     "title": "Profile",
@@ -185,7 +234,15 @@
     "publicDesc": "Your profile and achievements are visible to everyone",
     "privateDesc": "Only you can see your profile details",
     "memberSince": "Member since",
-    "viewOnExplorer": "View on Explorer"
+    "viewOnExplorer": "View on Explorer",
+    "linkWalletPrompt": "Link a wallet in {link} to view your on-chain credentials",
+    "settingsLink": "Settings",
+    "skillsFundamentals": "Solana Fundamentals",
+    "skillsRust": "Rust & Anchor",
+    "skillsFrontend": "Frontend",
+    "skillsDeFi": "DeFi",
+    "skillsSecurity": "Security",
+    "skillsTesting": "Testing"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -202,7 +259,12 @@
     "xp": "XP",
     "streak": "Streak",
     "noData": "No leaderboard data available yet.",
-    "connectWallet": "Connect your wallet to see your rank"
+    "connectWallet": "Connect your wallet to see your rank",
+    "showOnChain": "Show on-chain data",
+    "showOnChainDesc": "Display XP balances from Solana devnet",
+    "onChainUnavailable": "On-chain leaderboard available after XP program deployment on devnet.",
+    "on": "On",
+    "off": "Off"
   },
   "settings": {
     "title": "Settings",
@@ -255,7 +317,15 @@
     "xpEarned": "XP Earned",
     "shareText": "I just earned a certificate for completing {course} on Superteam Academy! 🎓",
     "notFound": "Certificate not found",
-    "verificationUrl": "Verification URL"
+    "verificationUrl": "Verification URL",
+    "ownershipVerified": "Ownership Verified",
+    "couldNotVerify": "Could not verify",
+    "onChainUnavailable": "On-chain verification unavailable",
+    "heliusNotConfigured": "Helius API key not configured",
+    "verifyOwnership": "Verify Ownership",
+    "verifying": "Verifying...",
+    "currentOwner": "Current owner",
+    "assetNotFound": "Asset not found or ownership mismatch"
   },
   "auth": {
     "signInTitle": "Sign In to Superteam Academy",
@@ -300,5 +370,83 @@
     "nextLesson": "Next Lesson",
     "challengeComplete": "Challenge Complete!",
     "xpEarned": "XP earned"
+  },
+  "components": {
+    "title": "Component Hub",
+    "subtitle": "Production-ready React components for Solana. Drop-in wallet connectors, token displays, NFT galleries, and more.",
+    "comingSoon": "Coming Soon",
+    "starOnGitHub": "Star on GitHub",
+    "developmentNotice": "The Component Hub is in active development.",
+    "getNotified": "Star us on GitHub to get notified when it launches.",
+    "featuredComponents": "Featured Components",
+    "featuredSubtitle": "Drop-in components for your Solana dApp",
+    "viewAll": "View All ({count})",
+    "showLess": "Show Less",
+    "submitComponent": "Submit a Component",
+    "submitSubtitle": "Built a great Solana component? Submit it to the hub and share it with the community.",
+    "submitButton": "Submit Component",
+    "install": "Install",
+    "preview": "Preview",
+    "copied": "Copied!",
+    "copyCommand": "Copy install command",
+    "viewExample": "View code example",
+    "installLabel": "Install",
+    "exampleLabel": "Example Usage",
+    "categoryWallet": "Wallet Connection",
+    "categoryToken": "Token Operations",
+    "categoryNft": "NFT & Metaplex",
+    "categoryDefi": "DeFi Integration",
+    "categorySecurity": "Security & Audit"
+  },
+  "playground": {
+    "title": "Solana Playground",
+    "subtitle": "Experiment with Solana code in real-time",
+    "templates": "Templates",
+    "yourDemos": "Your Demos",
+    "saveFeature": "Save feature coming soon",
+    "signInToSave": "Sign in to save demos",
+    "output": "Output",
+    "preview": "Preview",
+    "run": "Run",
+    "running": "Running...",
+    "share": "Share",
+    "clear": "Clear",
+    "editor": "Editor",
+    "consoleOutput": "Console output",
+    "sandboxNotice": "Playground runs in a sandboxed environment. Some APIs return simulated data.",
+    "shareSuccess": "Share URL copied to clipboard!",
+    "shareError": "Code too long to share via URL. Save feature coming soon.",
+    "noOutput": "Click Run to see output"
+  },
+  "credentials": {
+    "title": "On-Chain Credentials",
+    "noCredentials": "No credentials found. Complete courses to earn on-chain credentials.",
+    "notAvailable": "On-chain credentials will be visible once the credential program is deployed on devnet.",
+    "viewOnExplorer": "View on Explorer",
+    "viewMetadata": "View Metadata",
+    "verified": "Verified",
+    "compressed": "Compressed NFT (cNFT)",
+    "standard": "Standard NFT",
+    "name": "Name",
+    "track": "Track",
+    "level": "Level",
+    "mintAddress": "Mint Address",
+    "owner": "Owner",
+    "collection": "Collection",
+    "type": "Type",
+    "metadataUri": "Metadata URI",
+    "viewJson": "View JSON"
+  },
+  "errors": {
+    "404": "Page not found",
+    "404Desc": "The page you're looking for doesn't exist.",
+    "500": "Internal server error",
+    "500Desc": "Something went wrong on our end. Please try again later.",
+    "unauthorized": "Unauthorized",
+    "unauthorizedDesc": "You need to sign in to access this page.",
+    "rateLimited": "Rate limited",
+    "rateLimitedDesc": "Too many requests. Please wait a moment and try again.",
+    "networkError": "Network error",
+    "networkErrorDesc": "Please check your internet connection and try again."
   }
 }

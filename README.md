@@ -1,19 +1,66 @@
-# Superteam Academy
+# Superteam Academy — JazzCode
 
-Interactive Solana Developer Education Platform
+[![Build Status](https://img.shields.io/github/actions/workflow/status/solanabr/jazzcode/ci.yml)](https://github.com/solanabr/jazzcode/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+
+**Interactive Solana Developer Education Platform**
+
+> Learn Solana development through hands-on coding challenges, earn on-chain credentials, and join a global community of builders.
+
+See live demo at [jazzcode.vercel.app](https://jazzcode.vercel.app)
+
+---
+
+## Features
+
+- **4 Interactive Courses**: Solana Fundamentals, Anchor Development, Frontend Development, and DeFi
+- **Monaco Code Editor**: Full-featured IDE with syntax highlighting, IntelliSense, and sandboxed TypeScript execution
+- **Rust Structural Validation**: Specialized challenge runner for Anchor programs with AST-based checking
+- **Multi-Wallet Authentication**: GitHub OAuth + Solana wallet adapter (Phantom, Solflare, Backpack, and more)
+- **Gamification Engine**: XP system, levels, streaks, 18 unlockable achievements, and global leaderboard
+- **On-Chain Integration**: Read XP token balances and cNFT credentials via Helius DAS API on devnet
+- **Internationalization**: Full i18n support for English, Portuguese (BR), and Spanish
+- **Theming**: Dark/light mode with next-themes, fully responsive design
+- **Solana Playground**: Interactive code sandbox with runnable templates
+- **Component Hub**: Showcase of production-ready Solana UI components (preview)
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript 5.6 (strict) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Authentication | NextAuth.js v4 + Database sessions |
+| Database | PostgreSQL + Prisma ORM |
+| i18n | next-intl |
+| Editor | Monaco Editor (@monaco-editor/react) |
+| Solana | @solana/web3.js, @solana/wallet-adapter, @solana/spl-token |
+| Indexing | Helius DAS API |
+| Monitoring | Sentry (opt-in), Google Analytics 4 (opt-in) |
+| Testing | Vitest + React Testing Library + Playwright |
+| Logging | Pino (structured JSON logging) |
+
+---
 
 ## Prerequisites
 
-- Node.js 20+
-- pnpm 9+
-- PostgreSQL 15+ (or use Supabase/Neon)
+- Node.js 20+ (check with `node --version`)
+- pnpm 9+ (install with `npm install -g pnpm`)
+- PostgreSQL 15+ (local, Supabase, or Neon)
+
+---
 
 ## Quick Start
 
 ### 1. Clone and Install
 
 ```bash
-git clone <repo>
+git clone https://github.com/solanabr/jazzcode.git
 cd jazzcode
 pnpm install
 ```
@@ -35,11 +82,8 @@ DATABASE_URL=postgresql://user:password@localhost:5432/superteam_academy
 # Required: NextAuth secret (generate with: openssl rand -base64 32)
 NEXTAUTH_SECRET=your-super-secret-nextauth-key-min-32-chars
 
-# Optional: OAuth providers (for auth to work)
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
+# Required: Public URL
+NEXTAUTH_URL=http://localhost:3000
 ```
 
 ### 3. Database Setup
@@ -48,10 +92,10 @@ GITHUB_CLIENT_SECRET=
 # Generate Prisma client
 pnpm -C app db:generate
 
-# Run migrations
+# Push schema to database
 pnpm -C app db:push
 
-# (Optional) Seed database
+# (Optional) Seed with sample data
 pnpm -C app db:seed
 ```
 
@@ -61,155 +105,175 @@ pnpm -C app db:seed
 pnpm -C app dev
 ```
 
-Visit http://localhost:3000
+Visit [http://localhost:3000](http://localhost:3000)
 
-## Production Deployment
+---
 
-### Environment Variables (Required)
+## Environment Variables
+
+### Required
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string with pooler | `postgresql://...` |
-| `NEXTAUTH_SECRET` | Min 32 character secret | `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Public URL of your app | `https://app.example.com` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/db` |
+| `NEXTAUTH_SECRET` | Min 32-character random string | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | Public URL of your deployment | `https://app.example.com` |
 
-### Environment Variables (Optional)
+### Optional
 
 | Variable | Description | Default |
 |----------|-------------|---------|
+| `GITHUB_CLIENT_ID` | GitHub OAuth app ID | - |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth app secret | - |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | - |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | - |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 tracking ID | - |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry error reporting DSN | - |
+| `NEXT_PUBLIC_SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
+| `NEXT_PUBLIC_XP_MINT_ADDRESS` | XP token mint address | - |
+| `HELIUS_API_KEY` | Helius API key for DAS queries | - |
 | `RATE_LIMIT_ENABLED` | Enable rate limiting | `false` |
 | `RATE_LIMIT_UPSTASH_REDIS_REST_URL` | Upstash Redis URL | - |
 | `RATE_LIMIT_UPSTASH_REDIS_REST_TOKEN` | Upstash Redis token | - |
 | `LOG_LEVEL` | Logging level | `info` |
-| `ANALYTICS_ENABLED` | Enable analytics | `false` |
+| `CONTENT_SOURCE` | Content source (`local` or `sanity`) | `local` |
 
-### Build
+---
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | Run TypeScript type checking |
+| `pnpm test` | Run unit tests (Vitest) |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm test:e2e` | Run E2E tests (Playwright) |
+| `pnpm db:generate` | Generate Prisma client |
+| `pnpm db:push` | Push schema to database |
+| `pnpm db:studio` | Open Prisma Studio |
+| `pnpm db:seed` | Seed database with sample data |
+
+---
+
+## Project Structure
+
+```
+jazzcode/
+├── app/                          # Next.js 14 application
+│   ├── src/
+│   │   ├── app/                  # App Router
+│   │   │   ├── [locale]/         # Localized pages (i18n)
+│   │   │   ├── api/              # API routes
+│   │   │   ├── global-error.tsx  # Global error boundary
+│   │   │   └── layout.tsx        # Root layout
+│   │   ├── components/           # React components
+│   │   │   ├── ui/               # shadcn/ui components
+│   │   │   ├── layout/           # Layout components
+│   │   │   ├── lessons/          # Lesson-related components
+│   │   │   ├── editor/           # Code editor components
+│   │   │   ├── auth/             # Authentication components
+│   │   │   └── achievements/     # Gamification components
+│   │   ├── lib/                  # Utilities and services
+│   │   │   ├── services/         # Business logic (content, progress, on-chain)
+│   │   │   ├── data/             # Course data and achievements
+│   │   │   ├── db/               # Prisma client
+│   │   │   ├── auth/             # NextAuth configuration
+│   │   │   ├── i18n/             # Internationalization config
+│   │   │   └── logging/          # Pino logger setup
+│   │   ├── types/                # TypeScript type definitions
+│   │   └── styles/               # Global CSS and Tailwind
+│   ├── prisma/
+│   │   └── schema.prisma         # Database schema
+│   └── tests/                    # Test files
+├── ROADMAP.md                    # Product roadmap
+├── ARCHITECTURE.md               # System architecture
+├── CMS_GUIDE.md                  # Content management guide
+└── CUSTOMIZATION.md              # Customization guide
+```
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Fork this repository
+2. Create a new project on [Vercel](https://vercel.com)
+3. Connect your GitHub repository
+4. Set environment variables in Vercel dashboard
+5. Deploy
+
+**Important Vercel Settings:**
+- Build Command: `cd app && pnpm build`
+- Output Directory: `app/.next`
+- Install Command: `pnpm install`
+
+### Environment-Specific Notes
+
+**Production:**
+- Set `NODE_ENV=production`
+- Enable rate limiting: `RATE_LIMIT_ENABLED=true`
+- Configure Upstash Redis for rate limiting
+- Set up Sentry and Google Analytics
+
+**Development:**
+- Use `pnpm dev` for hot reloading
+- Use `pnpm db:studio` to inspect database
+
+---
+
+## Testing
 
 ```bash
-pnpm -C app build
+# Run all unit tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run with coverage
+pnpm test -- --coverage
+
+# Run E2E tests (requires dev server running)
+pnpm test:e2e
+
+# Run all quality checks (CI pipeline)
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
-### Database Migrations
+---
 
-For production, use proper migrations:
+## Contributing
 
-```bash
-pnpm -C app db:generate
-pnpm -C app db:push  # Or use migrations: pnpm -C app db:migrate
-```
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## Architecture
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Tech Stack
+Please ensure all tests pass and follow our code style guidelines.
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript (strict)
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Auth**: NextAuth.js v4 + Database sessions
-- **Database**: PostgreSQL + Prisma
-- **i18n**: next-intl
-- **Logging**: Pino (structured logging)
+---
 
-### Project Structure
+## Documentation
 
-```
-app/
-├── src/
-│   ├── app/              # Next.js App Router
-│   │   ├── api/          # API routes
-│   │   ├── [locale]/     # Localized pages
-│   │   └── ...
-│   ├── components/       # React components
-│   │   ├── ui/           # shadcn/ui components
-│   │   ├── layout/       # Layout components
-│   │   └── ...
-│   ├── lib/              # Utilities
-│   │   ├── api/          # API utilities (errors, validation)
-│   │   ├── auth/         # Auth configuration
-│   │   ├── db/           # Prisma client
-│   │   ├── env.ts        # Environment validation
-│   │   ├── i18n/         # i18n configuration
-│   │   ├── logging/      # Pino logger
-│   │   ├── rate-limit/   # Rate limiting
-│   │   └── services/     # Business logic services
-│   ├── types/            # TypeScript types
-│   └── styles/           # Global styles
-├── tests/                # Test files
-├── prisma/               # Database schema
-└── scripts/              # Utility scripts
-```
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — System design, data flows, and service architecture
+- **[CMS_GUIDE.md](CMS_GUIDE.md)** — Content management, adding courses, and CMS integration
+- **[CUSTOMIZATION.md](CUSTOMIZATION.md)** — Theming, i18n, and platform customization
+- **[ROADMAP.md](ROADMAP.md)** — Product roadmap and upcoming features
 
-### Key Features
-
-1. **Environment Validation**: Strict env var validation with zod
-2. **Security Headers**: CSP, HSTS, X-Frame-Options, etc.
-3. **Rate Limiting**: Configurable (disabled by default, uses in-memory or Upstash Redis)
-4. **Structured Logging**: Request correlation IDs with Pino
-5. **Database Health Checks**: `/api/health/db` endpoint
-6. **Type Safety**: Strict TypeScript throughout
-
-## API Routes
-
-### Health Check
-
-```bash
-GET /api/health/db
-```
-
-Returns database connectivity status.
-
-### On-chain Endpoints
-
-```bash
-GET /api/onchain/credentials?wallet=<address>
-GET /api/onchain/leaderboard?timeframe=alltime&limit=50
-GET /api/onchain/xp?wallet=<address>
-```
-
-All endpoints return `{ data, requestId }` or `{ error: { code, message, requestId } }`.
-
-## Development
-
-### Running Tests
-
-```bash
-# All tests
-pnpm -C app test
-
-# Watch mode
-pnpm -C app test:watch
-
-# With coverage
-pnpm -C app test -- --coverage
-```
-
-### Code Quality
-
-```bash
-# Lint
-pnpm -C app lint
-
-# Type check
-pnpm -C app typecheck
-
-# All checks (run in CI)
-pnpm -C app lint && pnpm -C app typecheck && pnpm -C app test && pnpm -C app build
-```
-
-### Adding shadcn Components
-
-```bash
-pnpm -C app shadcn add <component>
-```
-
-## Security Considerations
-
-1. **Secrets**: Never commit `.env.local` or any file with real secrets
-2. **Rate Limiting**: Enable `RATE_LIMIT_ENABLED=true` in production with Upstash Redis
-3. **CSP**: Content Security Policy is configured in `next.config.mjs`
-4. **Cookies**: Secure, httpOnly, sameSite cookies in production
-5. **CORS**: API routes only allow same-origin requests by default
+---
 
 ## License
 
-MIT
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+Built with ❤️ by [Superteam Brazil](https://superteam.com.br) for the global Solana community.

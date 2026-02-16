@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { AchievementToastContainer } from "@/components/achievements";
 import { LessonChallenge, LessonNavigation, LessonSidebar } from "@/components/lessons";
 import { useProgress } from "@/lib/hooks/use-progress";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import type { CompletionResult } from "@/types/progress";
 import type { Challenge, Module } from "@/types/content";
 import {
@@ -198,6 +199,9 @@ export default function LessonPage() {
         const data = (await response.json()) as CompletionResult;
         setCompletionResult(data);
 
+        // Track lesson completion with XP awarded
+        trackEvent("complete_lesson", "lessons", lessonData.lesson.id, data.xpAwarded);
+
         if (data.xpAwarded > 0) {
           setShowToast(true);
         }
@@ -221,6 +225,9 @@ export default function LessonPage() {
     (result: CompletionResult) => {
       setCompletionResult(result);
 
+      // Track challenge completion with XP awarded
+      trackEvent("complete_lesson", "lessons", lessonData?.lesson.id, result.xpAwarded);
+
       if (result.xpAwarded > 0) {
         setShowToast(true);
       }
@@ -232,7 +239,7 @@ export default function LessonPage() {
 
       refreshProgress();
     },
-    [refreshProgress]
+    [lessonData?.lesson.id, refreshProgress]
   );
 
   const dismissToast = useCallback(() => {

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SessionProvider } from "@/components/layout/session-provider";
 import { WalletProvider } from "@/components/layout/wallet-provider";
 import { AnalyticsProvider } from "@/lib/analytics/provider";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -46,6 +47,7 @@ export default async function LocaleLayout({ children, params: { locale } }: Loc
                     <main className="flex-1">{children}</main>
                     <Footer />
                   </div>
+                  <GoogleAnalytics />
                 </AnalyticsProvider>
               </NextIntlClientProvider>
             </WalletProvider>

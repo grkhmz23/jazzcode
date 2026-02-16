@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
 import { useProgress } from "@/lib/hooks/use-progress";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import {
   BookOpen,
   Clock,
@@ -123,6 +124,8 @@ export default function CourseDetailPage() {
       });
 
       if (response.ok) {
+        // Track enrollment event
+        trackEvent("enroll_course", "courses", params.slug);
         refreshProgress();
         // Navigate to first lesson
         if (course?.modules[0]?.lessons[0]) {

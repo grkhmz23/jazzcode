@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -146,6 +147,8 @@ function PlaygroundContent() {
   const router = useRouter();
   const { data: session } = useSession();
   const editorRef = useRef<CodeEditorHandle>(null);
+  const t = useTranslations("playground");
+  const tc = useTranslations("common");
 
   // UI State
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -224,14 +227,14 @@ function PlaygroundContent() {
     const compressed = compressCode(currentCode);
 
     if (!compressed || compressed.length > 4000) {
-      showToast("Code too long to share via URL. Save feature coming soon.", "error");
+      showToast(t("shareError"), "error");
       return;
     }
 
     const url = `${window.location.origin}/playground?code=${compressed}`;
     navigator.clipboard.writeText(url);
-    showToast("Share URL copied to clipboard!");
-  }, [code, showToast]);
+    showToast(t("shareSuccess"));
+  }, [code, showToast, t]);
 
   // Clear code
   const handleClear = useCallback(() => {
@@ -251,9 +254,7 @@ function PlaygroundContent() {
       {/* Info Banner */}
       <div className="flex items-center gap-2 border-b bg-blue-50/50 px-4 py-2 text-xs text-blue-700">
         <Info className="h-4 w-4" />
-        <span>
-          Playground runs in a sandboxed environment. Some APIs return simulated data.
-        </span>
+        <span>{t("sandboxNotice")}</span>
       </div>
 
       {/* Top Action Bar */}
@@ -266,7 +267,7 @@ function PlaygroundContent() {
             className="gap-1"
           >
             {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            Templates
+            {t("templates")}
           </Button>
           <div className="h-4 w-px bg-border" />
           <span className="text-sm text-muted-foreground">
@@ -285,11 +286,11 @@ function PlaygroundContent() {
                   className="gap-1"
                 >
                   <Share2 className="h-4 w-4" />
-                  Share
+                  {tc("share")}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Copy shareable URL</p>
+                <p>{t("share")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -304,11 +305,11 @@ function PlaygroundContent() {
                   className="gap-1"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Clear
+                  {tc("clear")}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Clear editor</p>
+                <p>{t("clear")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -322,12 +323,12 @@ function PlaygroundContent() {
             {isRunning ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Running...
+                {t("running")}
               </>
             ) : (
               <>
                 <Play className="h-4 w-4" />
-                Run
+                {tc("run")}
               </>
             )}
           </Button>
@@ -340,7 +341,7 @@ function PlaygroundContent() {
         {sidebarOpen && (
           <div className="flex w-64 flex-col border-r bg-muted/30">
             <div className="border-b p-3">
-              <h3 className="text-sm font-medium">Templates</h3>
+              <h3 className="text-sm font-medium">{t("templates")}</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               <div className="space-y-1">
@@ -363,15 +364,15 @@ function PlaygroundContent() {
             </div>
 
             <div className="border-t p-3">
-              <h3 className="mb-2 text-sm font-medium">Your Demos</h3>
+              <h3 className="mb-2 text-sm font-medium">{t("yourDemos")}</h3>
               {session ? (
                 <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
                   <Save className="mx-auto mb-2 h-5 w-5" />
-                  Save feature coming soon
+                  {t("saveFeature")}
                 </div>
               ) : (
                 <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
-                  Sign in to save demos
+                  {t("signInToSave")}
                 </div>
               )}
             </div>
@@ -398,11 +399,11 @@ function PlaygroundContent() {
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="output" className="gap-1">
                     <Terminal className="h-4 w-4" />
-                    Output
+                    {t("output")}
                   </TabsTrigger>
                   <TabsTrigger value="preview" className="gap-1">
                     <Eye className="h-4 w-4" />
-                    Preview
+                    {t("preview")}
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -433,7 +434,7 @@ function PlaygroundContent() {
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">
                       <Terminal className="mb-2 h-8 w-8 opacity-30" />
-                      <p>Click Run to see output</p>
+                      <p>{t("noOutput")}</p>
                     </div>
                   )}
                 </TabsContent>
@@ -441,8 +442,8 @@ function PlaygroundContent() {
                 <TabsContent value="preview" className="mt-0 h-full">
                   <div className="flex h-full flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">
                     <Eye className="mb-2 h-8 w-8 opacity-30" />
-                    <p>HTML preview rendering</p>
-                    <p className="text-xs">Coming in a future update</p>
+                    <p>{t("preview")}</p>
+                    <p className="text-xs">{t("saveFeature")}</p>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -483,12 +484,14 @@ function PlaygroundContent() {
 
 // Main page component with Suspense boundary
 export default function PlaygroundPage() {
+  const t = useTranslations("playground");
+  
   return (
     <Suspense fallback={
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="mt-2 text-sm text-muted-foreground">Loading playground...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("loading")}</p>
         </div>
       </div>
     }>
