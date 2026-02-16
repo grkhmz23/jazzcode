@@ -1,7 +1,0 @@
-{
-  "buildCommand": "cd app && pnpm build",
-  "outputDirectory": "app/.next",
-  "framework": "nextjs",
-  "installCommand": "corepack enable && corepack prepare pnpm@9.15.0 --activate && cd app && pnpm install",
-  "nodeVersion": "20.x"
-}
