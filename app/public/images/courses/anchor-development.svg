@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f0f23"/><stop offset="100%" stop-color="#1a0e2e"/></linearGradient>
+    <linearGradient id="anc" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FF6B6B"/><stop offset="100%" stop-color="#9945FF"/></linearGradient>
+  </defs>
+  <rect width="400" height="225" fill="url(#bg2)"/>
+  <text x="200" y="115" text-anchor="middle" fill="url(#anc)" font-family="system-ui" font-size="48" font-weight="bold">⚓</text>
+  <text x="200" y="185" text-anchor="middle" fill="#e0e0e0" font-family="system-ui" font-size="14" font-weight="600">Anchor Development</text>
+</svg>
