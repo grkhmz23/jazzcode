@@ -1,31 +1,31 @@
-import { OnChainReadError } from "@/types";
-import type { Credential, LeaderboardEntry, LeaderboardTimeframe } from "@/types";
 import type { OnChainReadService } from "../interfaces";
+import type { LeaderboardEntry, LeaderboardTimeframe, Credential } from "@/types";
+import { OnChainReadError } from "@/types";
 
+/**
+ * On-chain read service implementation
+ * Currently returns placeholder data as on-chain integration is not yet implemented
+ */
 export class OnChainReadServiceImpl implements OnChainReadService {
   async getXPBalance(wallet: string): Promise<number> {
     void wallet;
-    // Placeholder - would read from Solana program
-    throw new OnChainReadError("XP balance read not yet implemented");
+    throw new OnChainReadError("getXPBalance not implemented");
   }
 
-  async getLeaderboardFromDAS(timeframe: LeaderboardTimeframe): Promise<LeaderboardEntry[]> {
+  async getLeaderboardFromDAS(
+    timeframe: LeaderboardTimeframe
+  ): Promise<LeaderboardEntry[]> {
     void timeframe;
-    // Placeholder - would read from DAS API
-    throw new OnChainReadError("Leaderboard read from DAS not yet implemented");
+    throw new OnChainReadError("getLeaderboardFromDAS not implemented");
   }
 
   async getCredentialsFromDAS(wallet: string): Promise<Credential[]> {
     void wallet;
-    // Placeholder - would read from DAS API
-    throw new OnChainReadError("Credentials read from DAS not yet implemented");
+    throw new OnChainReadError("getCredentialsFromDAS not implemented");
   }
 
   async verifyCredentialOnChain(mintAddress: string): Promise<boolean> {
     void mintAddress;
-    // Placeholder - would verify on Solana
-    throw new OnChainReadError("Credential verification not yet implemented");
+    throw new OnChainReadError("verifyCredentialOnChain not implemented");
   }
 }
-
-export const onChainReadService = new OnChainReadServiceImpl();

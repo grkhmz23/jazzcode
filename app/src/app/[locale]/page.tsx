@@ -13,6 +13,9 @@ import {
   BookOpen,
   Trophy,
   Star,
+  Package,
+  Terminal,
+  Check,
 } from "lucide-react";
 
 export default function LandingPage({ params: { locale } }: { params: { locale: string } }) {
@@ -141,6 +144,155 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                 </Card>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Component Hub Section */}
+      <section className="border-t py-20 md:py-28">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <Badge variant="outline" className="mb-4">
+              Coming Soon
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Component Hub
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Production-ready React components for Solana. Drop-in wallet connectors, 
+              token displays, NFT galleries, and more.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Wallet Connect Card */}
+            <Card className="group transition-all hover:border-primary/50 hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                  <Code2 className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold">WalletConnectButton</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Beautiful, customizable wallet connection button with automatic wallet detection.
+                </p>
+                <div className="mt-4 rounded-md bg-muted p-2">
+                  <code className="text-xs">npm install @jazzcode/wallet-connect-button</code>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Token Balance Card */}
+            <Card className="group transition-all hover:border-primary/50 hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
+                  <Package className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold">TokenBalanceCard</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Display SPL token balances with real-time updates and price fetching.
+                </p>
+                <div className="mt-4 rounded-md bg-muted p-2">
+                  <code className="text-xs">npm install @jazzcode/token-balance-card</code>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* NFT Gallery Card */}
+            <Card className="group transition-all hover:border-primary/50 hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
+                  <Star className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold">NFTGallery</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Responsive NFT gallery grid with Metaplex integration.
+                </p>
+                <div className="mt-4 rounded-md bg-muted p-2">
+                  <code className="text-xs">npm install @jazzcode/nft-gallery</code>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link href="/components">
+              <Button variant="outline" className="gap-2">
+                View All Components
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Playground Section */}
+      <section className="border-t bg-muted/30 py-20 md:py-28">
+        <div className="container">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <Badge variant="outline" className="mb-4">
+                Beta
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Interactive Playground
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Experiment with Solana code in real-time. Test Web3.js snippets, 
+                explore Anchor IDLs, and prototype your next dApp.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  "Live TypeScript execution with Solana mocks",
+                  "Pre-built templates for common operations",
+                  "Share your code with a URL",
+                  "No wallet connection required",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-solana-green" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8">
+                <Link href="/playground">
+                  <Button variant="solana" className="gap-2">
+                    <Terminal className="h-4 w-4" />
+                    Open Playground
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Code Preview */}
+            <div className="relative">
+              <div className="rounded-lg border bg-card p-4 shadow-lg">
+                <div className="flex items-center gap-2 border-b pb-3">
+                  <div className="flex gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-red-500" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500" />
+                    <div className="h-3 w-3 rounded-full bg-green-500" />
+                  </div>
+                  <span className="ml-2 text-xs text-muted-foreground">playground.sol</span>
+                </div>
+                <pre className="mt-3 overflow-x-auto text-sm">
+                  <code className="language-typescript">
+                    {`const { Connection, PublicKey } = require('@solana/web3.js');
+
+async function main() {
+  const connection = new Connection('https://api.devnet.solana.com');
+  const pubkey = new PublicKey('11111111111111111111111111111111');
+  
+  const balance = await connection.getBalance(pubkey);
+  console.log(\`Balance: \${balance / 1e9} SOL\`);
+}
+
+main();`}
+                  </code>
+                </pre>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -right-4 -top-4 -z-10 h-full w-full rounded-lg bg-gradient-to-br from-solana-purple/20 to-solana-green/20" />
+            </div>
           </div>
         </div>
       </section>

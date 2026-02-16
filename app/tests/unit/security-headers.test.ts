@@ -24,14 +24,14 @@ const securityHeaders = [
 ];
 
 function getCspHeader(isDev: boolean): string {
-  const scriptSrc = isDev
-    ? "'self' 'unsafe-eval' 'unsafe-inline'"
-    : "'self' 'unsafe-inline'";
+  // Monaco editor requires worker-src blob: and script-src unsafe-eval
+  const scriptSrc = "'self' 'unsafe-eval' 'unsafe-inline' blob:";
   
   const csp = [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
+    "worker-src 'self' blob:",
     "img-src 'self' blob: data: https://cdn.sanity.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
     "font-src 'self'",
     "connect-src 'self' https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://api.mainnet-beta.solana.com wss://api.devnet.solana.com",
@@ -94,14 +94,14 @@ describe("Security Headers", () => {
       expect(csp).toContain("object-src 'none'");
     });
 
-    it("should allow unsafe-eval in development", () => {
+    it("should allow unsafe-eval for Monaco editor", () => {
       const csp = getCspHeader(true);
       expect(csp).toContain("'unsafe-eval'");
     });
 
-    it("should not allow unsafe-eval in production", () => {
-      const csp = getCspHeader(false);
-      expect(csp).not.toContain("'unsafe-eval'");
+    it("should allow worker-src blob: for Monaco web workers", () => {
+      const csp = getCspHeader(true);
+      expect(csp).toContain("worker-src 'self' blob:");
     });
 
     it("should include upgrade-insecure-requests in production", () => {

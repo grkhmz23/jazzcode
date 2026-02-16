@@ -8,24 +8,86 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { XPDisplay } from "@/components/gamification/xp-display";
-import { StreakCalendar } from "@/components/gamification/streak-calendar";
-import { useDashboardData } from "@/lib/hooks/use-dashboard-data";
+import { StreakCalendar, StreakStats } from "@/components/dashboard";
+import { useXP } from "@/lib/hooks/use-xp";
+import { useStreak } from "@/lib/hooks/use-streak";
+import { useAllProgress } from "@/lib/hooks/use-progress";
+import { useLeaderboard } from "@/lib/hooks/use-leaderboard";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AchievementBadge } from "@/components/achievements";
+import { useState, useEffect } from "react";
 import {
   BookOpen,
   Flame,
   Trophy,
   Zap,
   ArrowRight,
-
   Loader2,
+  Star,
 } from "lucide-react";
-import type { Achievement, XPEvent } from "@/types";
+import type { AchievementWithStatus } from "@/types/achievements";
 
-export default function DashboardPage() {
+// Activity item type
+interface ActivityItem {
+  id: string;
+  courseSlug: string;
+  lessonId: string;
+  xpAwarded: number;
+  completedAt: string;
+}
+
+function DashboardContent() {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const { data: session } = useSession();
-  const { xp, streak, achievements, courseProgress, recentXP, isLoading } = useDashboardData();
+
+  // Fetch real data from hooks
+  const { xp, level, levelProgress, isLoading: isLoadingXP } = useXP();
+  const { streak, isLoading: isLoadingStreak } = useStreak();
+  const { progressList, isLoading: isLoadingProgress } = useAllProgress();
+  const { userRank, isLoading: isLoadingRank } = useLeaderboard(50);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
+  const [achievements, setAchievements] = useState<AchievementWithStatus[]>([]);
+  const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
+
+  // Fetch recent activity
+  useEffect(() => {
+    async function fetchActivity() {
+      try {
+        const response = await fetch("/api/progress/activity?limit=10");
+        if (response.ok) {
+          const data = (await response.json()) as { activity: ActivityItem[] };
+          setActivity(data.activity ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch activity:", err);
+      } finally {
+        setIsLoadingActivity(false);
+      }
+    }
+    void fetchActivity();
+  }, []);
+
+  // Fetch achievements
+  useEffect(() => {
+    async function fetchAchievements() {
+      try {
+        const response = await fetch("/api/achievements");
+        if (response.ok) {
+          const data = (await response.json()) as { achievements: AchievementWithStatus[] };
+          setAchievements(data.achievements ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch achievements:", err);
+      } finally {
+        setIsLoadingAchievements(false);
+      }
+    }
+    void fetchAchievements();
+  }, []);
+
+  const isLoading = isLoadingXP || isLoadingStreak || isLoadingProgress || isLoadingActivity || isLoadingAchievements;
 
   if (isLoading) {
     return (
@@ -36,8 +98,6 @@ export default function DashboardPage() {
   }
 
   const userName = session?.user?.name;
-
-  const unlockedAchievements = achievements.filter((a: Achievement) => a.unlockedAt !== null);
 
   return (
     <div className="container py-8 md:py-12">
@@ -61,6 +121,25 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Level Card */}
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-solana-purple/10">
+              <Star className="h-6 w-6 text-solana-purple" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">{tc("level")}</p>
+              <p className="text-2xl font-bold">{level}</p>
+              <div className="mt-1">
+                <Progress value={levelProgress.percent} className="h-1" />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {Math.round(levelProgress.current)} / {levelProgress.required} XP to Level {level + 1}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Streak Card */}
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
@@ -79,29 +158,16 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Courses Card */}
-        <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <BookOpen className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">{t("currentCourses")}</p>
-              <p className="text-2xl font-bold">{courseProgress.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Achievements Card */}
+        {/* Rank Card */}
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10">
               <Trophy className="h-6 w-6 text-amber-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t("achievements")}</p>
+              <p className="text-sm text-muted-foreground">{t("yourRank")}</p>
               <p className="text-2xl font-bold">
-                {unlockedAchievements.length}/{achievements.length}
+                {isLoadingRank ? "—" : userRank ? `#${userRank}` : "—"}
               </p>
             </div>
           </CardContent>
@@ -121,7 +187,7 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            {courseProgress.length === 0 ? (
+            {progressList.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                   <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/30" />
@@ -135,22 +201,22 @@ export default function DashboardPage() {
               </Card>
             ) : (
               <div className="space-y-3">
-                {courseProgress.map((cp: { courseId: string; percentComplete: number }) => (
-                  <Link key={cp.courseId} href={`/courses/${cp.courseId}`}>
+                {progressList.map((cp) => (
+                  <Link key={cp.courseSlug} href={`/courses/${cp.courseSlug}`}>
                     <Card className="cursor-pointer transition-all hover:border-primary/50">
                       <CardContent className="flex items-center gap-4 p-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                           <BookOpen className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{cp.courseId}</p>
+                          <p className="font-medium truncate">{cp.courseSlug}</p>
                           <div className="mt-1 flex items-center gap-2">
                             <Progress
-                              value={cp.percentComplete}
+                              value={cp.completionPercent}
                               className="h-1.5 flex-1"
                             />
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {cp.percentComplete}%
+                              {cp.completionPercent}%
                             </span>
                           </div>
                         </div>
@@ -163,31 +229,33 @@ export default function DashboardPage() {
             )}
           </section>
 
-          {/* Recent XP Activity */}
+          {/* Recent Activity */}
           <section>
             <h2 className="mb-4 text-xl font-semibold">{t("recentActivity")}</h2>
-            {recentXP.length === 0 ? (
+            {activity.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  {t("noActivity")}
+                  Complete a lesson to start your journey
                 </CardContent>
               </Card>
             ) : (
               <Card>
                 <CardContent className="divide-y p-0">
-                  {recentXP.slice(0, 8).map((event: XPEvent) => (
-                    <div key={event.id} className="flex items-center gap-3 px-4 py-3">
+                  {activity.slice(0, 8).map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-solana-green/10">
                         <Zap className="h-4 w-4 text-solana-green" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">{event.reason}</p>
+                        <p className="text-sm truncate">
+                          Lesson completed in {item.courseSlug}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(event.createdAt).toLocaleDateString()}
+                          {new Date(item.completedAt).toLocaleDateString()}
                         </p>
                       </div>
                       <Badge variant="outline" className="shrink-0">
-                        +{event.amount} {tc("xp")}
+                        +{item.xpAwarded} {tc("xp")}
                       </Badge>
                     </div>
                   ))}
@@ -214,13 +282,17 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-base">{t("streakCalendar")}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <StreakCalendar streakData={streak} />
-              <div className="mt-3 flex items-center gap-2">
-                <div className="h-3 w-3 rounded-sm bg-solana-green" />
-                <span className="text-xs text-muted-foreground">{t("todayActive")}</span>
-                <div className="h-3 w-3 rounded-sm bg-muted" />
-                <span className="text-xs text-muted-foreground">—</span>
+            <CardContent className="space-y-4">
+              <StreakStats
+                currentStreak={streak.currentStreak}
+                longestStreak={streak.longestStreak}
+              />
+              <div className="border-t pt-4">
+                <StreakCalendar
+                  streakHistory={streak.streakHistory}
+                  currentStreak={streak.currentStreak}
+                  longestStreak={streak.longestStreak}
+                />
               </div>
             </CardContent>
           </Card>
@@ -231,31 +303,37 @@ export default function DashboardPage() {
               <CardTitle className="text-base">{t("achievements")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {achievements.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
+              {achievements.filter((a) => a.unlocked).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Complete lessons to unlock achievements!</p>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
-                  {achievements.slice(0, 12).map((ach: Achievement) => (
-                    <div
-                      key={ach.id}
-                      className={`flex h-12 w-12 items-center justify-center rounded-lg text-xl transition-all ${
-                        ach.unlockedAt
-                          ? "bg-amber-500/10 shadow-sm"
-                          : "bg-muted opacity-30 grayscale"
-                      }`}
-                      title={`${ach.name}: ${ach.description}${
-                        ach.unlockedAt ? "" : " (Locked)"
-                      }`}
-                    >
-                      {ach.icon}
-                    </div>
-                  ))}
+                  {achievements
+                    .filter((a) => a.unlocked)
+                    .slice(0, 12)
+                    .map((ach) => (
+                      <AchievementBadge
+                        key={ach.id}
+                        achievement={ach}
+                        size="sm"
+                      />
+                    ))}
                 </div>
               )}
+              <div className="mt-3 text-center text-xs text-muted-foreground">
+                {achievements.filter((a) => a.unlocked).length} / {achievements.length} unlocked
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <AuthGuard>
+      <DashboardContent />
+    </AuthGuard>
   );
 }

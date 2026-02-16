@@ -15,6 +15,7 @@ export interface SessionUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  walletAddress?: string | null;
 }
 
 /**
@@ -150,6 +151,16 @@ export const authOptions: AuthOptions = {
       if (session.user && user) {
         // Only expose minimal user data
         (session.user as SessionUser).id = user.id;
+        
+        // Fetch wallet address from database
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { walletAddress: true },
+        });
+        
+        if (dbUser) {
+          (session.user as SessionUser).walletAddress = dbUser.walletAddress;
+        }
         
         // Log session access in production for audit
         if (isProduction()) {

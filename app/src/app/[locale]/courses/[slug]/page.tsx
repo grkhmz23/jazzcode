@@ -5,8 +5,10 @@ import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { useSession } from "next-auth/react";
+import { useProgress } from "@/lib/hooks/use-progress";
 import {
   BookOpen,
   Clock,
@@ -20,9 +22,10 @@ import {
   ArrowLeft,
   Users,
   Loader2,
+  LogIn,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import type { Course } from "@/types";
 
 const WHAT_YOU_LEARN: Record<string, string[]> = {
@@ -61,9 +64,19 @@ export default function CourseDetailPage() {
   const t = useTranslations("courses");
   const tc = useTranslations("common");
   const params = useParams<{ slug: string }>();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
+
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [isEnrolling, setIsEnrolling] = useState(false);
+
+  // Fetch progress for this course
+  const { progress, refresh: refreshProgress } = useProgress(params.slug);
+  const isEnrolled = !!progress;
+  const completionPercent = progress?.completionPercent ?? 0;
 
   useEffect(() => {
     async function fetchCourse() {
@@ -94,6 +107,53 @@ export default function CourseDetailPage() {
       return next;
     });
   };
+
+  const handleEnroll = useCallback(async () => {
+    if (!isAuthenticated) {
+      router.push("/auth/signin");
+      return;
+    }
+
+    setIsEnrolling(true);
+    try {
+      const response = await fetch("/api/progress/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseSlug: params.slug }),
+      });
+
+      if (response.ok) {
+        refreshProgress();
+        // Navigate to first lesson
+        if (course?.modules[0]?.lessons[0]) {
+          router.push(`/courses/${params.slug}/lessons/${course.modules[0].lessons[0].id}`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to enroll:", err);
+    } finally {
+      setIsEnrolling(false);
+    }
+  }, [isAuthenticated, params.slug, course, router, refreshProgress]);
+
+  const handleContinue = useCallback(() => {
+    if (!course) return;
+
+    // Find first uncompleted lesson
+    for (const mod of course.modules) {
+      for (const lesson of mod.lessons) {
+        if (!progress?.completedLessons.includes(lesson.id)) {
+          router.push(`/courses/${params.slug}/lessons/${lesson.id}`);
+          return;
+        }
+      }
+    }
+
+    // All lessons completed - go to first lesson
+    if (course.modules[0]?.lessons[0]) {
+      router.push(`/courses/${params.slug}/lessons/${course.modules[0].lessons[0].id}`);
+    }
+  }, [course, progress, params.slug, router]);
 
   if (isLoading || !course) {
     return (
@@ -129,6 +189,19 @@ export default function CourseDetailPage() {
             </div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{course.title}</h1>
             <p className="mt-3 text-lg text-muted-foreground">{course.description}</p>
+
+            {/* Progress bar for enrolled users */}
+            {isEnrolled && (
+              <div className="mt-4 rounded-lg border bg-muted/50 p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium">{completionPercent}% complete</span>
+                  <span className="text-xs text-muted-foreground">
+                    {progress?.completedLessons.length ?? 0} / {totalLessons} lessons
+                  </span>
+                </div>
+                <Progress value={completionPercent} className="h-2" />
+              </div>
+            )}
           </div>
 
           {whatYouLearn.length > 0 && (
@@ -152,13 +225,13 @@ export default function CourseDetailPage() {
           <div>
             <h2 className="mb-4 text-xl font-semibold">{t("curriculum")}</h2>
             <div className="space-y-3">
-              {course.modules.map((module) => {
-                const isExpanded = expandedModules.has(module.id);
+              {course.modules.map((mod) => {
+                const isExpanded = expandedModules.has(mod.id);
                 return (
-                  <Card key={module.id} className="overflow-hidden">
+                  <Card key={mod.id} className="overflow-hidden">
                     <button
                       className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-accent/50"
-                      onClick={() => toggleModule(module.id)}
+                      onClick={() => toggleModule(mod.id)}
                     >
                       <div className="flex items-center gap-3">
                         {isExpanded ? (
@@ -167,40 +240,49 @@ export default function CourseDetailPage() {
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         )}
                         <div>
-                          <h3 className="font-medium">{module.title}</h3>
+                          <h3 className="font-medium">{mod.title}</h3>
                           <p className="text-xs text-muted-foreground">
-                            {module.lessons.length} {tc("lessons")}
+                            {mod.lessons.length} {tc("lessons")}
                           </p>
                         </div>
                       </div>
                     </button>
                     {isExpanded && (
                       <div className="border-t px-4 pb-4">
-                        {module.lessons.map((lesson) => (
-                          <Link
-                            key={lesson.id}
-                            href={`/courses/${course.slug}/lessons/${lesson.id}`}
-                            className="flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50"
-                          >
-                            <Circle className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex-1">
-                              <span className="text-sm">{lesson.title}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {lesson.type === "challenge" ? (
-                                <Code2 className="h-3.5 w-3.5 text-solana-purple" />
+                        {mod.lessons.map((lessonItem) => {
+                          const isCompleted = progress?.completedLessons.includes(lessonItem.id) ?? false;
+                          return (
+                            <Link
+                              key={lessonItem.id}
+                              href={`/courses/${course.slug}/lessons/${lessonItem.id}`}
+                              className="flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-accent/50"
+                            >
+                              {isCompleted ? (
+                                <CheckCircle2 className="h-4 w-4 text-solana-green" />
                               ) : (
-                                <PlayCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                                <Circle className="h-4 w-4 text-muted-foreground" />
                               )}
-                              <span className="text-xs text-muted-foreground">
-                                {lesson.durationMinutes} {tc("minutes")}
-                              </span>
-                              <Badge variant="outline" className="text-[10px]">
-                                +{lesson.xpReward} {tc("xp")}
-                              </Badge>
-                            </div>
-                          </Link>
-                        ))}
+                              <div className="flex-1">
+                                <span className={`text-sm ${isCompleted ? "text-muted-foreground line-through" : ""}`}>
+                                  {lessonItem.title}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {lessonItem.type === "challenge" ? (
+                                  <Code2 className="h-3.5 w-3.5 text-solana-purple" />
+                                ) : (
+                                  <PlayCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                  {lessonItem.durationMinutes} {tc("minutes")}
+                                </span>
+                                <Badge variant="outline" className="text-[10px]">
+                                  +{lessonItem.xpReward} {tc("xp")}
+                                </Badge>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </Card>
@@ -237,9 +319,41 @@ export default function CourseDetailPage() {
 
               <Separator />
 
-              <Button className="w-full" size="lg" variant="solana">
-                {t("enrollCTA")}
-              </Button>
+              {/* Enrollment CTA */}
+              {!isAuthenticated ? (
+                <Link href="/auth/signin">
+                  <Button className="w-full gap-2" size="lg" variant="outline">
+                    <LogIn className="h-4 w-4" />
+                    Sign in to track progress
+                  </Button>
+                </Link>
+              ) : isEnrolled ? (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  variant="solana"
+                  onClick={handleContinue}
+                >
+                  {completionPercent > 0 ? "Continue Learning" : "Start Course"}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  variant="solana"
+                  onClick={handleEnroll}
+                  disabled={isEnrolling}
+                >
+                  {isEnrolling ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enrolling...
+                    </>
+                  ) : (
+                    t("enrollCTA")
+                  )}
+                </Button>
+              )}
 
               <p className="text-center text-xs text-muted-foreground">{tc("free")}</p>
             </CardContent>

@@ -1,10 +1,11 @@
-import { LocalCourseContentService } from "./implementations/local-content";
 import { OnChainReadServiceImpl } from "./implementations/onchain-read";
-import type { CourseContentService, OnChainReadService } from "./interfaces";
+import type { OnChainReadService } from "./interfaces";
+import { getContentService } from "./content-factory";
 
 // Service registry for dependency injection
-export const courseContentService: CourseContentService = new LocalCourseContentService();
+export const courseContentService = getContentService();
 export const onChainService: OnChainReadService = new OnChainReadServiceImpl();
+export { getContentService };
 
 // Placeholder services that would be implemented with actual backends
 export const progressService = {

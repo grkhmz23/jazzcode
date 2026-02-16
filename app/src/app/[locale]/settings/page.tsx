@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import {
   User,
   Wallet,
@@ -38,7 +39,7 @@ interface SettingsData {
   isPublic: boolean;
 }
 
-export default function SettingsPage() {
+function SettingsContent() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
   useSession();
@@ -114,29 +115,30 @@ export default function SettingsPage() {
     setError(null);
 
     try {
-      // 1. Get nonce
-      const nonceResponse = await fetch("/api/auth/nonce", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: publicKey.toBase58() }),
-      });
+      // Get user ID from session - we need this for the message format
+      const sessionResponse = await fetch("/api/auth/session");
+      const sessionData = (await sessionResponse.json()) as { user?: { id?: string } };
+      
+      if (!sessionData.user?.id) {
+        throw new Error("Not authenticated");
+      }
 
-      if (!nonceResponse.ok) throw new Error("Failed to get nonce");
-      const nonceData = (await nonceResponse.json()) as { nonce: string; message: string };
+      // Construct the message for linking
+      const message = `Link wallet to Superteam Academy: ${sessionData.user.id}`;
 
-      // 2. Sign message
-      const messageBytes = new TextEncoder().encode(nonceData.message);
+      // Sign the message
+      const messageBytes = new TextEncoder().encode(message);
       const signature = await signMessage(messageBytes);
       const signatureB58 = bs58.encode(signature);
 
-      // 3. Link wallet
+      // Link wallet via the new endpoint
       const linkResponse = await fetch("/api/auth/link-wallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          wallet: publicKey.toBase58(),
+          walletAddress: publicKey.toBase58(),
           signature: signatureB58,
-          nonce: nonceData.nonce,
+          message: message,
         }),
       });
 
@@ -160,6 +162,36 @@ export default function SettingsPage() {
       setIsLinkingWallet(false);
     }
   }, [connected, publicKey, signMessage, t]);
+
+  const handleUnlinkWallet = useCallback(async () => {
+    setIsLinkingWallet(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/link-wallet", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error ?? "Failed to unlink wallet");
+      }
+
+      // Refresh settings
+      const refreshResponse = await fetch("/api/profile");
+      if (refreshResponse.ok) {
+        const data = (await refreshResponse.json()) as SettingsData;
+        setSettings(data);
+      }
+
+      setSaveMessage(t("saved"));
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to unlink wallet");
+    } finally {
+      setIsLinkingWallet(false);
+    }
+  }, [t]);
 
   const handleExportData = useCallback(async () => {
     try {
@@ -304,10 +336,24 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Solana Wallet</p>
-                    <p className="text-xs text-muted-foreground">{t("walletLinkDesc")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {settings?.linkedWallets && settings.linkedWallets.length > 0
+                        ? `${settings.linkedWallets[0].address.slice(0, 6)}...${settings.linkedWallets[0].address.slice(-4)}`
+                        : t("walletLinkDesc")}
+                    </p>
                   </div>
                 </div>
-                {connected && (
+                {settings?.linkedWallets && settings.linkedWallets.length > 0 ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUnlinkWallet}
+                    disabled={isLinkingWallet}
+                  >
+                    {isLinkingWallet ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                    {t("unlink")}
+                  </Button>
+                ) : connected ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -317,20 +363,10 @@ export default function SettingsPage() {
                     {isLinkingWallet ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
                     {t("linkWallet")}
                   </Button>
+                ) : (
+                  <Badge variant="secondary">{t("notLinked")}</Badge>
                 )}
               </div>
-              {settings?.linkedWallets && settings.linkedWallets.length > 0 && (
-                <div className="mt-3 space-y-2 pl-12">
-                  {settings.linkedWallets.map((w) => (
-                    <div key={w.address} className="flex items-center gap-2 text-sm">
-                      <code className="rounded bg-muted px-2 py-0.5 text-xs">
-                        {w.address.slice(0, 6)}...{w.address.slice(-4)}
-                      </code>
-                      {w.isPrimary && <Badge variant="outline" className="text-[10px]">{t("primary")}</Badge>}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -434,5 +470,13 @@ export default function SettingsPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <AuthGuard>
+      <SettingsContent />
+    </AuthGuard>
   );
 }

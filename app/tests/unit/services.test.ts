@@ -3,10 +3,10 @@ import type {
   LearningProgressService,
   LeaderboardService,
   CredentialsService,
-  CourseContentService,
   ChallengeRunnerService,
   OnChainReadService,
 } from "@/lib/services/interfaces";
+import type { CourseContentService } from "@/lib/services/content";
 
 describe("Service Interfaces", () => {
   it("LearningProgressService has all required methods", () => {

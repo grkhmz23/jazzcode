@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
 import { validateQuery, Schemas } from "@/lib/api/validation";
-import { onChainReadService } from "@/lib/services/implementations/onchain-read";
+import { onChainService } from "@/lib/services/registry";
 import { deriveLevel } from "@/types";
 import { logger } from "@/lib/logging/logger";
 import { OnChainReadError } from "@/types";
@@ -20,7 +20,7 @@ export const GET = createApiHandler(
     logger.info("Fetching XP balance", { wallet });
 
     try {
-      const xp = await onChainReadService.getXPBalance(wallet);
+      const xp = await onChainService.getXPBalance(wallet);
       const level = deriveLevel(xp);
 
       return createApiResponse({ wallet, xp, level });

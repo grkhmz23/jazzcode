@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { courses } from "../src/lib/data/courses";
 
 const prisma = new PrismaClient();
 
@@ -24,30 +25,51 @@ async function main() {
 
   console.log(`Created demo user: ${demoUser.id}`);
 
-  // Create course progress
-  await prisma.courseProgress.upsert({
-    where: {
-      userId_courseId: {
-        userId: demoUser.id,
-        courseId: "sol-fundamentals",
-      },
-    },
-    update: {},
-    create: {
-      userId: demoUser.id,
-      courseId: "sol-fundamentals",
-      completedLessons: [0, 1, 2],
+  // Seed course progress for each course
+  const courseProgressData = [
+    {
+      courseId: "course-solana-fundamentals",
+      completedLessons: [0, 1],
       totalLessons: 8,
       currentModuleIndex: 0,
-      currentLessonIndex: 3,
+      currentLessonIndex: 2,
     },
-  });
+    {
+      courseId: "course-anchor-development",
+      completedLessons: [0],
+      totalLessons: 6,
+      currentModuleIndex: 0,
+      currentLessonIndex: 1,
+    },
+  ];
+
+  for (const progress of courseProgressData) {
+    await prisma.courseProgress.upsert({
+      where: {
+        userId_courseId: {
+          userId: demoUser.id,
+          courseId: progress.courseId,
+        },
+      },
+      update: {},
+      create: {
+        userId: demoUser.id,
+        courseId: progress.courseId,
+        completedLessons: progress.completedLessons,
+        totalLessons: progress.totalLessons,
+        currentModuleIndex: progress.currentModuleIndex,
+        currentLessonIndex: progress.currentLessonIndex,
+      },
+    });
+  }
+
+  console.log(`Seeded ${courseProgressData.length} course progress records`);
 
   // Create XP events
   const xpReasons = [
-    { amount: 10, reason: "Completed: What is Solana?", courseId: "sol-fundamentals", lessonId: "les-1" },
-    { amount: 15, reason: "Completed: Accounts Model", courseId: "sol-fundamentals", lessonId: "les-2" },
-    { amount: 50, reason: "Challenge passed: Create Keypair", courseId: "sol-fundamentals", lessonId: "les-3" },
+    { amount: 20, reason: "Completed: What is Solana?", courseId: "course-solana-fundamentals", lessonId: "lesson-1-what-is-solana" },
+    { amount: 20, reason: "Completed: The Accounts Model", courseId: "course-solana-fundamentals", lessonId: "lesson-2-accounts-model" },
+    { amount: 50, reason: "Challenge passed: Your First Transaction", courseId: "course-solana-fundamentals", lessonId: "lesson-4-first-transaction" },
     { amount: 25, reason: "Daily login bonus", courseId: null, lessonId: null },
     { amount: 10, reason: "Streak bonus (7 days)", courseId: null, lessonId: null },
   ];
@@ -63,6 +85,8 @@ async function main() {
       },
     });
   }
+
+  console.log(`Seeded ${xpReasons.length} XP events`);
 
   // Create streak
   await prisma.streakRecord.upsert({
@@ -99,7 +123,14 @@ async function main() {
     });
   }
 
-  console.log("Seed completed.");
+  // Log available courses
+  console.log("\nAvailable courses in content service:");
+  for (const course of courses) {
+    const totalLessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
+    console.log(`  - ${course.title} (${course.slug}): ${course.modules.length} modules, ${totalLessons} lessons`);
+  }
+
+  console.log("\nSeed completed.");
 }
 
 main()

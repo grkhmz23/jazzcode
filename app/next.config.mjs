@@ -50,19 +50,22 @@ const securityHeaders = [
 const getCspHeader = () => {
   const isDev = process.env.NODE_ENV === "development";
   
-  // In development, allow unsafe-eval for better DX (HMR, source maps)
-  // In production, this is more restrictive
-  const scriptSrc = isDev
-    ? "'self' 'unsafe-eval' 'unsafe-inline'"
-    : "'self' 'unsafe-inline'";
+  // Monaco editor requires worker-src blob: and script-src unsafe-eval
+  // Web Workers need blob: for dynamic worker creation
+  // unsafe-eval is required for Monaco's syntax highlighting workers
+  const scriptSrc = "'self' 'unsafe-eval' 'unsafe-inline' blob:";
   
   const csp = [
     // Default fallback
     "default-src 'self'",
     // Scripts - Next.js requires unsafe-inline for hydration
+    // Monaco editor requires 'unsafe-eval' and blob: for web workers
     `script-src ${scriptSrc}`,
     // Styles - Next.js requires unsafe-inline for styled-jsx
+    // Monaco injects styles dynamically
     "style-src 'self' 'unsafe-inline'",
+    // Workers - Monaco creates web workers from blob URLs
+    "worker-src 'self' blob:",
     // Images - allow data URIs and configured remote hosts
     "img-src 'self' blob: data: https://cdn.sanity.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
     // Fonts

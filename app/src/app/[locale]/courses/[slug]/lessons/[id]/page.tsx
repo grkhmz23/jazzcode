@@ -1,67 +1,150 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useTranslations } from "next-intl";
+
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CodeEditor } from "@/components/editor/code-editor";
-import { runChallenge, type RunnerResult } from "@/lib/challenge-runner/worker-runner";
+import { AchievementToastContainer } from "@/components/achievements";
+import { LessonChallenge, LessonNavigation, LessonSidebar } from "@/components/lessons";
+import { useProgress } from "@/lib/hooks/use-progress";
+import type { CompletionResult } from "@/types/progress";
+import type { Challenge, Module } from "@/types/content";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Play,
-  RotateCcw,
   CheckCircle2,
-  XCircle,
-  Lightbulb,
-  Eye,
-  EyeOff,
   Loader2,
-  Zap,
+  Star,
   Trophy,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { Lesson } from "@/types";
 
 interface LessonApiResponse {
-  lesson: Lesson;
+  lesson: {
+    id: string;
+    title: string;
+    slug: string;
+    type: "content" | "challenge";
+    content: string;
+    xpReward: number;
+    challenge?: Challenge;
+  };
   courseSlug: string;
   courseTitle: string;
-  moduleName: string;
+  modules: Module[];
   prevLessonId: string | null;
   nextLessonId: string | null;
 }
 
+// XP Notification Component
+function XPTOast({
+  result,
+  onDismiss,
+}: {
+  result: CompletionResult;
+  onDismiss: () => void;
+}) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 5000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
+      <div className="rounded-lg border border-solana-green/30 bg-solana-green/10 p-4 shadow-lg">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-solana-green/20">
+            <Star className="h-5 w-5 text-solana-green" />
+          </div>
+          <div>
+            <p className="font-medium text-solana-green">
+              +{result.xpAwarded} XP Earned!
+            </p>
+            {result.isFirstOfDay && (
+              <p className="text-sm text-solana-green/80">
+                +25 XP First completion today!
+              </p>
+            )}
+            {result.leveledUp && (
+              <div className="mt-2 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+                <Trophy className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-medium text-amber-500">
+                  Level Up! You&apos;re now Level {result.newLevel}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Course Complete Banner
+function CourseCompleteBanner({
+  totalXP,
+  onBackToCourse,
+}: {
+  totalXP: number;
+  onBackToCourse: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-6 text-center">
+      <div className="mb-4 flex justify-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
+          <Trophy className="h-8 w-8 text-green-600" />
+        </div>
+      </div>
+      <h2 className="mb-2 text-2xl font-bold text-green-700">
+        Course Complete! 🎉
+      </h2>
+      <p className="mb-4 text-green-600">
+        Congratulations! You&apos;ve completed all lessons in this course.
+      </p>
+      <div className="mb-4 flex justify-center gap-4">
+        <div className="rounded-lg bg-green-500/10 px-4 py-2">
+          <p className="text-sm text-green-600">Total XP Earned</p>
+          <p className="text-xl font-bold text-green-700">{totalXP}</p>
+        </div>
+      </div>
+      <Button onClick={onBackToCourse} variant="solana">
+        Back to Course
+      </Button>
+    </div>
+  );
+}
+
 export default function LessonPage() {
-  const t = useTranslations("lesson");
-  const tc = useTranslations("common");
   const params = useParams<{ slug: string; id: string }>();
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
 
   const [lessonData, setLessonData] = useState<LessonApiResponse | null>(null);
   const [isLoadingLesson, setIsLoadingLesson] = useState(true);
-  const [code, setCode] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [result, setResult] = useState<RunnerResult | null>(null);
-  const [showHints, setShowHints] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
-  const [currentHint, setCurrentHint] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("tests");
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [showCourseComplete, setShowCourseComplete] = useState(false);
 
+  // Fetch progress for this course
+  const { progress, refresh: refreshProgress } = useProgress(params.slug);
+
+  // Check if lesson is already completed
+  const isLessonCompleted = progress?.completedLessons.includes(params.id) ?? false;
+
+  // Fetch lesson data
   useEffect(() => {
     async function fetchLesson() {
       try {
-        const res = await fetch(`/api/courses/${params.slug}/lessons/${params.id}`);
+        const res = await fetch(
+          `/api/courses/${params.slug}/lessons/${params.id}`
+        );
         if (res.ok) {
           const data = (await res.json()) as LessonApiResponse;
           setLessonData(data);
-          if (data.lesson.challenge) {
-            setCode(data.lesson.challenge.starterCode);
-          }
         }
       } catch (err) {
         console.error("Failed to fetch lesson:", err);
@@ -72,54 +155,99 @@ export default function LessonPage() {
     void fetchLesson();
   }, [params.slug, params.id]);
 
-  const handleRun = useCallback(async () => {
-    if (!lessonData?.lesson.challenge) return;
-    setIsRunning(true);
-    setResult(null);
-    setActiveTab("tests");
-
-    try {
-      const challenge = lessonData.lesson.challenge;
-      const visibleTests = challenge.testCases.filter((tc) => !tc.hidden);
-      const runResult = await runChallenge(code, visibleTests, challenge.timeoutMs);
-      setResult(runResult);
-
-      if (runResult.success && !isCompleted) {
-        setIsCompleted(true);
-        // Trigger progress update via API
-        try {
-          await fetch("/api/lessons/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              courseId: lessonData.courseSlug,
-              lessonId: lessonData.lesson.id,
-              xpEarned: lessonData.lesson.xpReward,
-            }),
-          });
-        } catch {
-          // Progress update is best-effort; don't block the UI
-        }
-      }
-    } catch {
-      setResult({
-        success: false,
-        testResults: [],
-        output: "",
-        error: "Failed to execute code",
-        executionTimeMs: 0,
-      });
-    } finally {
-      setIsRunning(false);
+  // Auto-enroll on first visit
+  useEffect(() => {
+    if (isAuthenticated && !progress && !isEnrolling && !isLoadingLesson) {
+      setIsEnrolling(true);
+      fetch("/api/progress/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseSlug: params.slug }),
+      })
+        .then(() => {
+          refreshProgress();
+        })
+        .catch(console.error)
+        .finally(() => setIsEnrolling(false));
     }
-  }, [code, isCompleted, lessonData]);
+  }, [
+    isAuthenticated,
+    progress,
+    isEnrolling,
+    isLoadingLesson,
+    params.slug,
+    refreshProgress,
+  ]);
 
-  const handleReset = useCallback(() => {
-    if (!lessonData?.lesson.challenge) return;
-    setCode(lessonData.lesson.challenge.starterCode);
-    setResult(null);
-    setIsCompleted(false);
-  }, [lessonData]);
+  // Handle lesson completion (for content lessons)
+  const completeLesson = useCallback(async () => {
+    if (!lessonData) return;
+
+    setIsCompleting(true);
+    try {
+      const response = await fetch("/api/progress/complete-lesson", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseSlug: lessonData.courseSlug,
+          lessonId: lessonData.lesson.id,
+        }),
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as CompletionResult;
+        setCompletionResult(data);
+
+        if (data.xpAwarded > 0) {
+          setShowToast(true);
+        }
+
+        // Check if course is complete
+        if (data.isCourseComplete) {
+          setShowCourseComplete(true);
+        }
+
+        refreshProgress();
+      }
+    } catch (err) {
+      console.error("Failed to complete lesson:", err);
+    } finally {
+      setIsCompleting(false);
+    }
+  }, [lessonData, refreshProgress]);
+
+  // Handle challenge completion
+  const handleChallengeComplete = useCallback(
+    (result: CompletionResult) => {
+      setCompletionResult(result);
+
+      if (result.xpAwarded > 0) {
+        setShowToast(true);
+      }
+
+      // Check if course is complete
+      if (result.isCourseComplete) {
+        setShowCourseComplete(true);
+      }
+
+      refreshProgress();
+    },
+    [refreshProgress]
+  );
+
+  const dismissToast = useCallback(() => {
+    setShowToast(false);
+  }, []);
+
+  const dismissAchievementToast = useCallback((id: string) => {
+    setCompletionResult((prev) => {
+      if (!prev?.newAchievements) return prev;
+      return {
+        ...prev,
+        newAchievements: prev.newAchievements.filter((a) => a !== id),
+      };
+    });
+  }, []);
 
   if (isLoadingLesson || !lessonData) {
     return (
@@ -129,263 +257,142 @@ export default function LessonPage() {
     );
   }
 
-  const { lesson, courseSlug, prevLessonId, nextLessonId } = lessonData;
-  const challenge = lesson.challenge;
-  const isChallenge = lesson.type === "challenge" && challenge;
+  const { lesson, courseSlug, courseTitle, modules } = lessonData;
+  const isChallenge = lesson.type === "challenge" && lesson.challenge;
 
-  const visibleTests = challenge?.testCases.filter((tc) => !tc.hidden) ?? [];
-  const passedCount = result?.testResults.filter((r) => r.passed).length ?? 0;
-  const totalTests = visibleTests.length;
-
-  // Content-only lesson layout
-  if (!isChallenge) {
-    return (
-      <div className="container max-w-3xl py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href={`/courses/${courseSlug}`}
-            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("backToCourse")}
-          </Link>
-          <div className="flex items-center gap-2">
-            {prevLessonId && (
-              <Link href={`/courses/${courseSlug}/lessons/${prevLessonId}`}>
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="mr-1 h-4 w-4" />
-                  {t("previousLesson")}
-                </Button>
-              </Link>
-            )}
-            {nextLessonId && (
-              <Link href={`/courses/${courseSlug}/lessons/${nextLessonId}`}>
-                <Button variant="ghost" size="sm">
-                  {t("nextLesson")}
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-        <Badge variant="outline" className="mb-4 text-xs">
-          <Zap className="mr-1 h-3 w-3 text-solana-green" />
-          +{lesson.xpReward} {tc("xp")}
-        </Badge>
-        <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.content}</ReactMarkdown>
-        </div>
-        <div className="mt-8 flex justify-end">
-          {nextLessonId && (
-            <Link href={`/courses/${courseSlug}/lessons/${nextLessonId}`}>
-              <Button variant="solana" className="gap-2">
-                {t("nextLesson")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Challenge layout: split content/editor
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between border-b px-4 py-2">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/courses/${courseSlug}`}
-            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("backToCourse")}
-          </Link>
-          <span className="text-sm font-medium">{lesson.title}</span>
-          <Badge variant="outline" className="text-xs">
-            <Zap className="mr-1 h-3 w-3 text-solana-green" />
-            +{lesson.xpReward} {tc("xp")}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          {prevLessonId && (
-            <Link href={`/courses/${courseSlug}/lessons/${prevLessonId}`}>
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {t("previousLesson")}
-              </Button>
-            </Link>
-          )}
-          {nextLessonId && (
-            <Link href={`/courses/${courseSlug}/lessons/${nextLessonId}`}>
-              <Button variant="ghost" size="sm">
-                {t("nextLesson")}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
+      {/* XP Toast */}
+      {showToast && completionResult && (
+        <XPTOast result={completionResult} onDismiss={dismissToast} />
+      )}
 
-      {/* Split layout */}
+      {/* Achievement Toasts */}
+      {completionResult?.newAchievements &&
+        completionResult.newAchievements.length > 0 && (
+          <AchievementToastContainer
+            achievementIds={completionResult.newAchievements}
+            onDismiss={dismissAchievementToast}
+          />
+        )}
+
+      {/* Top Navigation */}
+      <LessonNavigation
+        courseSlug={courseSlug}
+        currentLessonId={lesson.id}
+        modules={modules}
+        completedLessons={progress?.completedLessons ?? []}
+      />
+
+      {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Content */}
-        <div className="w-1/2 overflow-y-auto border-r p-6">
-          <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.content}</ReactMarkdown>
-          </div>
+        {/* Sidebar */}
+        <LessonSidebar
+          courseSlug={courseSlug}
+          modules={modules}
+          currentLessonId={lesson.id}
+          completedLessons={progress?.completedLessons ?? []}
+          courseTitle={courseTitle}
+        />
 
-          {/* Hints */}
-          <div className="mt-6 space-y-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowHints(!showHints)}
-              className="gap-2"
-            >
-              <Lightbulb className="h-4 w-4" />
-              {showHints ? t("hideHints") : t("showHints")}
-            </Button>
-            {showHints && challenge.hints.length > 0 && (
-              <div className="space-y-2">
-                {challenge.hints.slice(0, currentHint + 1).map((hint, i) => (
-                  <div key={i} className="rounded-md border bg-muted/50 p-3 text-sm">
-                    <span className="font-medium text-amber-500">{t("hint", { number: i + 1 })}: </span>
-                    {hint}
+        {/* Content */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Course Complete Banner */}
+          {showCourseComplete && (
+            <div className="border-b p-4">
+              <CourseCompleteBanner
+                totalXP={completionResult?.totalXP ?? 0}
+                onBackToCourse={() =>
+                  (window.location.href = `/courses/${courseSlug}`)
+                }
+              />
+            </div>
+          )}
+
+          {/* Lesson Content */}
+          <div className="flex flex-1 overflow-hidden">
+            {isChallenge ? (
+              // Challenge Layout: Split pane
+              <div className="flex w-full flex-col md:flex-row">
+                {/* Left: Content */}
+                <div className="h-1/2 overflow-y-auto border-b p-6 md:h-full md:w-2/5 md:border-b-0 md:border-r">
+                  <Badge variant="outline" className="mb-4">
+                    {lesson.xpReward} XP
+                  </Badge>
+                  <h1 className="mb-4 text-2xl font-bold">{lesson.title}</h1>
+                  <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {lesson.content}
+                    </ReactMarkdown>
                   </div>
-                ))}
-                {currentHint < challenge.hints.length - 1 && (
-                  <Button variant="ghost" size="sm" onClick={() => setCurrentHint((p) => p + 1)}>
-                    {t("showHints")} ({currentHint + 2}/{challenge.hints.length})
-                  </Button>
-                )}
+                </div>
+
+                {/* Right: Challenge Runner */}
+                <div className="h-1/2 overflow-hidden md:h-full md:w-3/5">
+                  <LessonChallenge
+                    challenge={lesson.challenge!}
+                    courseSlug={courseSlug}
+                    lessonId={lesson.id}
+                    isCompleted={isLessonCompleted}
+                    onComplete={handleChallengeComplete}
+                  />
+                </div>
               </div>
-            )}
+            ) : (
+              // Content Layout: Full width
+              <div className="flex w-full flex-col">
+                <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                  <div className="mx-auto max-w-3xl">
+                    <Badge variant="outline" className="mb-4">
+                      {lesson.xpReward} XP
+                    </Badge>
+                    <h1 className="mb-6 text-3xl font-bold">{lesson.title}</h1>
+                    <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-code:text-solana-green prose-pre:bg-muted">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {lesson.content}
+                      </ReactMarkdown>
+                    </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSolution(!showSolution)}
-              className="gap-2"
-            >
-              {showSolution ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {showSolution ? t("hideSolution") : t("showSolution")}
-            </Button>
-            {showSolution && (
-              <div className="rounded-md border bg-muted p-4">
-                <pre className="overflow-x-auto text-sm">
-                  <code>{challenge.solutionCode}</code>
-                </pre>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Editor + Tests */}
-        <div className="flex w-1/2 flex-col">
-          <div className="min-h-0 flex-1">
-            <CodeEditor value={code} onChange={setCode} language={challenge.language} />
-          </div>
-
-          {/* Action bar */}
-          <div className="flex items-center justify-between border-y px-4 py-2">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handleReset}>
-                <RotateCcw className="mr-1 h-4 w-4" />
-                {t("reset")}
-              </Button>
-            </div>
-            <div className="flex items-center gap-3">
-              {result && (
-                <span className="text-sm text-muted-foreground">
-                  {t("testsPassed", { passed: passedCount, total: totalTests })}
-                </span>
-              )}
-              <Button
-                onClick={handleRun}
-                disabled={isRunning}
-                variant={isCompleted ? "outline" : "solana"}
-                className="gap-2"
-              >
-                {isRunning ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t("running")}
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    {t("runCode")}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Test Results / Output */}
-          <div className="h-64 overflow-y-auto border-t">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="m-2">
-                <TabsTrigger value="tests">{t("tests")}</TabsTrigger>
-                <TabsTrigger value="output">{t("output")}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="tests" className="px-4 pb-4">
-                {isCompleted && (
-                  <div className="mb-3 flex items-center gap-2 rounded-lg border border-solana-green/30 bg-solana-green/10 p-3">
-                    <Trophy className="h-5 w-5 text-solana-green" />
-                    <div>
-                      <p className="font-medium text-solana-green">{t("congratulations")}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {t("xpEarned", { xp: lesson.xpReward })}
-                      </p>
+                    {/* Mark Complete Section */}
+                    <div className="mt-12 flex items-center justify-between border-t pt-8">
+                      {isAuthenticated ? (
+                        isLessonCompleted ? (
+                          <div className="flex items-center gap-2 text-solana-green">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="font-medium">Completed</span>
+                          </div>
+                        ) : (
+                          <Button
+                            onClick={completeLesson}
+                            disabled={isCompleting}
+                            variant="solana"
+                            className="gap-2"
+                          >
+                            {isCompleting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Marking Complete...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4" />
+                                Mark Complete
+                              </>
+                            )}
+                          </Button>
+                        )
+                      ) : (
+                        <Link href="/auth/signin">
+                          <Button variant="outline" className="gap-2">
+                            Sign in to track progress
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
-                )}
-                {result ? (
-                  <div className="space-y-2">
-                    {result.testResults.map((tr) => (
-                      <div
-                        key={tr.testId}
-                        className={`flex items-start gap-2 rounded-md border p-3 ${
-                          tr.passed ? "border-emerald-500/30 bg-emerald-500/5" : "border-red-500/30 bg-red-500/5"
-                        }`}
-                      >
-                        {tr.passed ? (
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                        ) : (
-                          <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-                        )}
-                        <div className="flex-1 text-sm">
-                          <span className="font-medium">{tr.testName}</span>
-                          {!tr.passed && (
-                            <div className="mt-1 space-y-1 text-xs text-muted-foreground">
-                              <div>
-                                Expected: <code className="text-foreground">{tr.expected}</code>
-                              </div>
-                              <div>
-                                Actual: <code className="text-red-400">{tr.actual || "(empty)"}</code>
-                              </div>
-                              {tr.error && <div className="text-red-400">{tr.error}</div>}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground">
-                    <Play className="mb-2 h-8 w-8 opacity-30" />
-                    <p>{t("runToSeeResults")}</p>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="output" className="px-4 pb-4">
-                <pre className="rounded-md bg-muted p-3 font-mono text-sm">
-                  {result?.output || result?.error || t("noOutput")}
-                </pre>
-              </TabsContent>
-            </Tabs>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

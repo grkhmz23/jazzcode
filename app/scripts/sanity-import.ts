@@ -8,8 +8,7 @@
  * Usage:
  *   pnpm --filter @superteam/app sanity:import
  *
- * This script reads from lib/data/courses.ts and creates Sanity documents
- * matching the schemas defined in lib/cms/sanity-schemas.ts.
+ * This script reads from lib/data/courses/index.ts and creates Sanity documents.
  */
 
 import { createClient } from "next-sanity";
@@ -36,30 +35,26 @@ const client = createClient({
   useCdn: false,
 });
 
+// Type matching the new Course structure from src/types/content.ts
 interface LocalLesson {
   id: string;
   title: string;
-  description: string;
+  slug: string;
   type: "content" | "challenge";
   order: number;
   xpReward: number;
-  durationMinutes: number;
   content: string;
-  challenge?: {
-    language: string;
-    instructions: string;
-    starterCode: string;
-    solutionCode: string;
-    testCases: Array<{ id: string; name: string; input: string; expectedOutput: string; hidden: boolean }>;
-    hints: string[];
-    timeoutMs: number;
-  };
+  moduleId: string;
+  starterCode?: string;
+  language?: string;
+  testCases?: Array<{ name: string; input: string; expectedOutput: string }>;
+  hints?: string[];
+  solution?: string;
 }
 
 interface LocalModule {
   id: string;
   title: string;
-  description: string;
   order: number;
   lessons: LocalLesson[];
 }
@@ -69,20 +64,25 @@ interface LocalCourse {
   slug: string;
   title: string;
   description: string;
-  difficulty: string;
-  durationMinutes: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  duration: string;
   totalXP: number;
-  trackId: string;
-  tags: string[];
-  instructorName: string;
-  enrolledCount: number;
-  publishedAt: string;
+  thumbnailUrl: string;
+  instructor: {
+    name: string;
+    avatarUrl: string;
+    bio: string;
+  };
   modules: LocalModule[];
+  tags: string[];
+  language: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 async function importCourses(): Promise<void> {
   // Dynamic import of the course data
-  const { COURSES } = await import("../src/lib/data/courses") as { COURSES: LocalCourse[] };
+  const { courses: COURSES } = await import("../src/lib/data/courses") as { courses: LocalCourse[] };
 
   console.log(`Importing ${COURSES.length} courses into Sanity (${projectId}/${dataset})...`);
 
@@ -96,34 +96,29 @@ async function importCourses(): Promise<void> {
           _id: `lesson-${lesson.id}`,
           _type: "lesson" as const,
           title: lesson.title,
-          description: lesson.description,
-          lessonType: lesson.type,
-          order: lesson.order,
-          xpReward: lesson.xpReward,
-          durationMinutes: lesson.durationMinutes,
+          slug: lesson.slug,
           content: lesson.content,
-          ...(lesson.challenge
-            ? {
-                challenge: {
-                  language: lesson.challenge.language,
-                  instructions: lesson.challenge.instructions,
-                  starterCode: lesson.challenge.starterCode,
-                  solutionCode: lesson.challenge.solutionCode,
-                  testCases: lesson.challenge.testCases.map((tc) => ({
-                    _key: tc.id,
-                    testId: tc.id,
-                    name: tc.name,
-                    input: tc.input,
-                    expectedOutput: tc.expectedOutput,
-                    hidden: tc.hidden,
-                  })),
-                  hints: lesson.challenge.hints,
-                  timeoutMs: lesson.challenge.timeoutMs,
-                },
-              }
-            : {}),
+          type: lesson.type,
+          xpReward: lesson.xpReward,
+          order: lesson.order,
+          moduleId: lesson.moduleId,
         };
         transaction.createOrReplace(lessonDoc);
+
+        // If it's a challenge, create challenge document
+        if (lesson.type === "challenge" && lesson.starterCode) {
+          const challengeDoc = {
+            _id: `challenge-${lesson.id}`,
+            _type: "challenge" as const,
+            lesson: { _type: "reference" as const, _ref: `lesson-${lesson.id}` },
+            starterCode: lesson.starterCode,
+            language: lesson.language,
+            testCases: lesson.testCases ?? [],
+            hints: lesson.hints ?? [],
+            solution: lesson.solution,
+          };
+          transaction.createOrReplace(challengeDoc);
+        }
       }
 
       // Create module document
@@ -131,12 +126,10 @@ async function importCourses(): Promise<void> {
         _id: `module-${mod.id}`,
         _type: "module" as const,
         title: mod.title,
-        description: mod.description,
         order: mod.order,
         lessons: mod.lessons.map((l) => ({
           _type: "reference" as const,
           _ref: `lesson-${l.id}`,
-          _key: l.id,
         })),
       };
       transaction.createOrReplace(moduleDoc);
@@ -147,29 +140,25 @@ async function importCourses(): Promise<void> {
       _id: `course-${course.id}`,
       _type: "course" as const,
       title: course.title,
-      slug: { _type: "slug" as const, current: course.slug },
+      slug: course.slug,
       description: course.description,
       difficulty: course.difficulty,
-      durationMinutes: course.durationMinutes,
+      duration: course.duration,
       totalXP: course.totalXP,
-      trackId: course.trackId,
-      tags: course.tags,
-      instructorName: course.instructorName,
-      enrolledCount: course.enrolledCount,
-      publishedAt: course.publishedAt,
+      thumbnailUrl: course.thumbnailUrl,
+      instructor: course.instructor,
       modules: course.modules.map((m) => ({
         _type: "reference" as const,
         _ref: `module-${m.id}`,
-        _key: m.id,
       })),
+      tags: course.tags,
+      language: course.language,
     };
     transaction.createOrReplace(courseDoc);
-
-    console.log(`  + ${course.title} (${course.modules.length} modules)`);
   }
 
   await transaction.commit();
-  console.log("Import complete.");
+  console.log(`Successfully imported ${COURSES.length} courses.`);
 }
 
 importCourses().catch((err) => {

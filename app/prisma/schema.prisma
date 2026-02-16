@@ -33,6 +33,9 @@ model User {
   preferredLocale String @default("en")
   theme           String @default("dark")
 
+  // Linked wallet for on-chain credentials
+  walletAddress String? @unique
+
   // Relations
   accounts       Account[]
   sessions       Session[]
@@ -42,6 +45,13 @@ model User {
   achievements   UserAchievement[]
   streakData     StreakRecord?
   nonces         WalletNonce[]
+
+  // Phase 5.2 progress service relations
+  enrollments       Enrollment[]
+  lessonCompletions LessonCompletion[]
+  userXP            UserXP?
+  userStreak        UserStreak?
+  userAchievements  UserAchievementNew[]
 }
 
 // NextAuth required models
@@ -184,4 +194,67 @@ model LeaderboardCache {
   expiresAt DateTime
 
   @@unique([timeframe])
+}
+
+// ============================================================================
+// Phase 5.2: Learning Progress Service
+// ============================================================================
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  courseSlug  String
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseSlug])
+  @@index([userId])
+  @@index([courseSlug])
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  courseSlug  String
+  lessonId    String
+  xpAwarded   Int
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseSlug, lessonId])
+  @@index([userId])
+  @@index([courseSlug])
+}
+
+model UserXP {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  totalXP          Int      @default(0)
+  weeklyXP         Int      @default(0)
+  monthlyXP        Int      @default(0)
+  lastWeeklyReset  DateTime @default(now())
+  lastMonthlyReset DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStreak {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime?
+  streakHistory    Json     @default("[]")
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserAchievementNew {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
 }

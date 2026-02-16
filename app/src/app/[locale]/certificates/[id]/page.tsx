@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,7 @@ import {
 import type { Certificate } from "@/types";
 
 export default function CertificatePage({ params }: { params: { id: string } }) {
+  const { data: session } = useSession();
   const t = useTranslations("certificate");
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [verification, setVerification] = useState<{ valid: boolean; owner: string | null } | null>(null);
@@ -149,6 +152,20 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                       <span className="text-sm text-muted-foreground">Pending on-chain verification</span>
                     </>
                   )}
+                </div>
+              )}
+
+              {/* Wallet Linking Notice */}
+              {session?.user && !session.user.walletAddress && (
+                <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    Link a wallet to mint your certificate on-chain.
+                  </p>
+                  <Link href="/settings">
+                    <Button variant="link" className="h-auto p-0 text-sm text-amber-800 dark:text-amber-200">
+                      Go to Settings →
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

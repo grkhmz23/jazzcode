@@ -1,12 +1,9 @@
 import type {
   Achievement,
   ChallengeRunResult,
-  Course,
-  CourseFilter,
   Credential,
   LeaderboardEntry,
   LeaderboardTimeframe,
-  Lesson,
   Progress,
   StreakData,
   XPEvent,
@@ -32,13 +29,6 @@ export interface CredentialsService {
   getCredentials(userId: string): Promise<Credential[]>;
   getCredentialByMint(mintAddress: string): Promise<Credential | null>;
   verifyCredential(mintAddress: string): Promise<boolean>;
-}
-
-export interface CourseContentService {
-  getCourses(filter?: CourseFilter): Promise<Course[]>;
-  getCourseBySlug(slug: string): Promise<Course | null>;
-  getLessonById(courseSlug: string, lessonId: string): Promise<Lesson | null>;
-  searchCourses(query: string): Promise<Course[]>;
 }
 
 export interface ChallengeRunnerService {
