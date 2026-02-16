@@ -5,11 +5,10 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+
 import {
   ExternalLink,
   Share2,
-  Download,
   Loader2,
   Award,
   CheckCircle2,
@@ -21,7 +20,6 @@ import type { Certificate } from "@/types";
 
 export default function CertificatePage({ params }: { params: { id: string } }) {
   const t = useTranslations("certificate");
-  const tc = useTranslations("common");
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [verification, setVerification] = useState<{ valid: boolean; owner: string | null } | null>(null);
   const [isLoading, setIsLoading] = useState(true);

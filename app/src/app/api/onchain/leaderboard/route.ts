@@ -1,33 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
+import { validateQuery } from "@/lib/api/validation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { leaderboardService } from "@/lib/services/registry";
 import { prisma } from "@/lib/db/client";
-import type { LeaderboardTimeframe } from "@/types";
+import { logger } from "@/lib/logging/logger";
+import type { LeaderboardEntry } from "@/types";
 
-const VALID_TIMEFRAMES = new Set<LeaderboardTimeframe>(["weekly", "monthly", "alltime"]);
+export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const timeframeParam = searchParams.get("timeframe") ?? "alltime";
-    const limitParam = searchParams.get("limit") ?? "50";
+const QuerySchema = z.object({
+  timeframe: z.enum(["weekly", "monthly", "alltime"]).optional().default("alltime"),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+});
 
-    const timeframe: LeaderboardTimeframe = VALID_TIMEFRAMES.has(timeframeParam as LeaderboardTimeframe)
-      ? (timeframeParam as LeaderboardTimeframe)
-      : "alltime";
-    const limit = Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200);
+export const GET = createApiHandler(
+  async (request) => {
+    const { timeframe, limit } = validateQuery(QuerySchema, new URL(request.url).searchParams);
+
+    logger.info("Fetching leaderboard", { timeframe, limit });
 
     const entries = await leaderboardService.getLeaderboard(timeframe, limit);
 
     // Enrich with usernames from DB where possible
-    const walletAddresses = entries.map((e) => e.wallet);
+    const walletAddresses = entries.map((e: LeaderboardEntry) => e.wallet);
     const walletsWithUsers = await prisma.userWallet.findMany({
       where: { address: { in: walletAddresses } },
       include: { user: { select: { username: true, displayName: true, avatarUrl: true } } },
     });
 
-    const walletUserMap = new Map(
+    interface UserInfo {
+      username: string | null;
+      avatarUrl: string | null;
+    }
+
+    const walletUserMap = new Map<string, UserInfo>(
       walletsWithUsers.map((w) => [
         w.address,
         {
@@ -37,7 +45,7 @@ export async function GET(request: NextRequest) {
       ])
     );
 
-    const enriched = entries.map((entry) => {
+    const enriched = entries.map((entry: LeaderboardEntry) => {
       const userInfo = walletUserMap.get(entry.wallet);
       return {
         ...entry,
@@ -57,7 +65,7 @@ export async function GET(request: NextRequest) {
       });
 
       for (const w of userWallets) {
-        const rank = enriched.findIndex((e) => e.wallet === w.address);
+        const rank = enriched.findIndex((e: LeaderboardEntry) => e.wallet === w.address);
         if (rank !== -1) {
           userRank = rank + 1;
           break;
@@ -65,9 +73,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ entries: enriched, userRank });
-  } catch (error) {
-    console.error("Leaderboard API error:", error);
-    return NextResponse.json({ entries: [], userRank: null });
-  }
-}
+    return createApiResponse({ entries: enriched, userRank });
+  },
+  { rateLimit: true }
+);

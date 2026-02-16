@@ -41,7 +41,7 @@ interface SettingsData {
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
-  const { data: session } = useSession();
+  useSession();
   const { publicKey, signMessage, connected } = useWallet();
   const { theme: currentTheme, setTheme } = useTheme();
   const router = useRouter();

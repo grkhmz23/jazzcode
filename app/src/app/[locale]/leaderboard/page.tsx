@@ -6,15 +6,15 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
 import { Trophy, Medal, Crown, Zap, Loader2 } from "lucide-react";
-import { deriveLevel } from "@/types";
+
 import type { LeaderboardEntry, LeaderboardTimeframe } from "@/types";
 
 export default function LeaderboardPage() {
   const t = useTranslations("leaderboard");
   const tc = useTranslations("common");
-  const { data: session } = useSession();
+  useSession();
 
   const [timeframe, setTimeframe] = useState<LeaderboardTimeframe>("alltime");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);

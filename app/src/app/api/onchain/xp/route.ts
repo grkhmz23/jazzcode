@@ -1,22 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
+import { validateQuery, Schemas } from "@/lib/api/validation";
 import { onChainReadService } from "@/lib/services/implementations/onchain-read";
 import { deriveLevel } from "@/types";
+import { logger } from "@/lib/logging/logger";
+import { OnChainReadError } from "@/types";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const wallet = searchParams.get("wallet");
 
-    if (!wallet || wallet.length < 32 || wallet.length > 44) {
-      return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
+export const runtime = "nodejs";
+
+const QuerySchema = z.object({
+  wallet: Schemas.walletAddress,
+});
+
+export const GET = createApiHandler(
+  async (request) => {
+    const { wallet } = validateQuery(QuerySchema, new URL(request.url).searchParams);
+
+    logger.info("Fetching XP balance", { wallet });
+
+    try {
+      const xp = await onChainReadService.getXPBalance(wallet);
+      const level = deriveLevel(xp);
+
+      return createApiResponse({ wallet, xp, level });
+    } catch (error) {
+      // Handle expected on-chain read errors gracefully
+      if (error instanceof OnChainReadError) {
+        logger.warn("On-chain read not implemented", { wallet, message: error.message });
+        // Return 0 XP as fallback (service not yet implemented)
+        return createApiResponse({ wallet, xp: 0, level: 0 });
+      }
+      throw error;
     }
-
-    const xp = await onChainReadService.getXPBalance(wallet);
-    const level = deriveLevel(xp);
-
-    return NextResponse.json({ wallet, xp, level });
-  } catch (error) {
-    console.error("XP read error:", error);
-    return NextResponse.json({ wallet: null, xp: 0, level: 0, error: "Failed to read XP balance" });
-  }
-}
+  },
+  { rateLimit: true }
+);

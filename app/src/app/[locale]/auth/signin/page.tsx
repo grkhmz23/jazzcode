@@ -13,7 +13,6 @@ import bs58 from "bs58";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
-  const tc = useTranslations("common");
   const { publicKey, signMessage, connected, connecting } = useWallet();
   const { setVisible: setWalletModalVisible } = useWalletModal();
 

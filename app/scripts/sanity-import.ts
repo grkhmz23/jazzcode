@@ -82,7 +82,7 @@ interface LocalCourse {
 
 async function importCourses(): Promise<void> {
   // Dynamic import of the course data
-  const { COURSES } = await import("../src/lib/data/courses.js") as { COURSES: LocalCourse[] };
+  const { COURSES } = await import("../src/lib/data/courses") as { COURSES: LocalCourse[] };
 
   console.log(`Importing ${COURSES.length} courses into Sanity (${projectId}/${dataset})...`);
 

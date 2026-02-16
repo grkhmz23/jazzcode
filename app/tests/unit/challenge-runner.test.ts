@@ -11,6 +11,7 @@ describe("ChallengeRunner types and contracts", () => {
       name: "Test 1",
       input: "[1, 2]",
       expectedOutput: "3",
+      hidden: false,
     };
 
     expect(testCase.id).toBe("t1");
@@ -55,7 +56,7 @@ describe("ChallengeRunner sandboxing requirements", () => {
   it("timeout produces correct error structure", () => {
     const timeoutMs = 5000;
     const testCases: RunnerTestCase[] = [
-      { id: "t1", name: "Test", input: "[1]", expectedOutput: "1" },
+      { id: "t1", name: "Test", input: "[1]", expectedOutput: "1", hidden: false },
     ];
 
     // Simulate timeout result structure

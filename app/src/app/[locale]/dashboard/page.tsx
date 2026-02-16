@@ -16,16 +16,16 @@ import {
   Trophy,
   Zap,
   ArrowRight,
-  Clock,
-  Star,
+
   Loader2,
 } from "lucide-react";
+import type { Achievement, XPEvent } from "@/types";
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const { data: session } = useSession();
-  const { data, isLoading } = useDashboardData();
+  const { xp, streak, achievements, courseProgress, recentXP, isLoading } = useDashboardData();
 
   if (isLoading) {
     return (
@@ -36,18 +36,8 @@ export default function DashboardPage() {
   }
 
   const userName = session?.user?.name;
-  const xp = data?.xp ?? 0;
-  const streak = data?.streak ?? {
-    currentStreak: 0,
-    longestStreak: 0,
-    lastActivityDate: new Date().toISOString(),
-    streakCalendar: {},
-  };
-  const achievements = data?.achievements ?? [];
-  const courseProgress = data?.courseProgress ?? [];
-  const recentXP = data?.recentXP ?? [];
 
-  const unlockedAchievements = achievements.filter((a) => a.unlockedAt !== null);
+  const unlockedAchievements = achievements.filter((a: Achievement) => a.unlockedAt !== null);
 
   return (
     <div className="container py-8 md:py-12">
@@ -145,7 +135,7 @@ export default function DashboardPage() {
               </Card>
             ) : (
               <div className="space-y-3">
-                {courseProgress.map((cp) => (
+                {courseProgress.map((cp: { courseId: string; percentComplete: number }) => (
                   <Link key={cp.courseId} href={`/courses/${cp.courseId}`}>
                     <Card className="cursor-pointer transition-all hover:border-primary/50">
                       <CardContent className="flex items-center gap-4 p-4">
@@ -158,7 +148,6 @@ export default function DashboardPage() {
                             <Progress
                               value={cp.percentComplete}
                               className="h-1.5 flex-1"
-                              indicatorClassName="bg-gradient-solana"
                             />
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {cp.percentComplete}%
@@ -186,7 +175,7 @@ export default function DashboardPage() {
             ) : (
               <Card>
                 <CardContent className="divide-y p-0">
-                  {recentXP.slice(0, 8).map((event) => (
+                  {recentXP.slice(0, 8).map((event: XPEvent) => (
                     <div key={event.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-solana-green/10">
                         <Zap className="h-4 w-4 text-solana-green" />
@@ -246,7 +235,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
-                  {achievements.slice(0, 12).map((ach) => (
+                  {achievements.slice(0, 12).map((ach: Achievement) => (
                     <div
                       key={ach.id}
                       className={`flex h-12 w-12 items-center justify-center rounded-lg text-xl transition-all ${

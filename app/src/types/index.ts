@@ -1,4 +1,4 @@
-import type { PublicKey } from "@solana/web3.js";
+
 
 // ============================================================================
 // Course & Content Types
@@ -7,6 +7,11 @@ import type { PublicKey } from "@solana/web3.js";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type LessonType = "content" | "challenge";
 export type Language = "en" | "pt-BR" | "es";
+
+export interface CourseFilter {
+  difficulty?: Difficulty;
+  search?: string;
+}
 
 export interface Course {
   id: string;
@@ -44,6 +49,14 @@ export interface Lesson {
   durationMinutes: number;
   content: string;
   challenge?: ChallengeDefinition;
+}
+
+export interface LessonContext {
+  lesson: Lesson;
+  course: Course;
+  moduleId: string;
+  prevLessonId: string | null;
+  nextLessonId: string | null;
 }
 
 export interface ChallengeDefinition {

@@ -1,15 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/client";
+import { z } from "zod";
 import crypto from "crypto";
+import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
+import { validate } from "@/lib/api/validation";
+import { Schemas } from "@/lib/api/validation";
+import { prisma } from "@/lib/db/client";
+import { logger } from "@/lib/logging/logger";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json() as { wallet?: string };
-    const { wallet } = body;
 
-    if (!wallet || typeof wallet !== "string" || wallet.length < 32 || wallet.length > 44) {
-      return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
-    }
+export const runtime = "nodejs";
+
+const BodySchema = z.object({
+  wallet: Schemas.walletAddress,
+});
+
+export const POST = createApiHandler(
+  async (request) => {
+    const body = await request.json();
+    const { wallet } = validate(BodySchema, body);
+
+    logger.info("Generating nonce", { wallet });
 
     const nonce = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min expiry
@@ -18,17 +27,20 @@ export async function POST(request: NextRequest) {
       data: { address: wallet, nonce, expiresAt },
     });
 
-    // Clean up expired nonces
-    await prisma.walletNonce.deleteMany({
+    // Clean up expired nonces (fire and forget)
+    prisma.walletNonce.deleteMany({
       where: { expiresAt: { lt: new Date() } },
+    }).catch((err: Error) => {
+      logger.warn("Failed to clean up expired nonces", { error: err.message });
     });
 
-    return NextResponse.json({
+    return createApiResponse({
       nonce,
-      message: `Sign this message to verify your wallet ownership.\n\nNonce: ${nonce}\nApp: Superteam Academy`,
+      message: `Sign this message to verify your wallet ownership.
+
+Nonce: ${nonce}
+App: Superteam Academy`,
     });
-  } catch (error) {
-    console.error("Nonce generation error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+  },
+  { rateLimit: true }
+);

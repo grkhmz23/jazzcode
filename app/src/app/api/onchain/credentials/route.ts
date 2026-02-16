@@ -1,19 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createApiHandler, createApiResponse } from "@/lib/api/middleware";
+import { validateQuery, Schemas } from "@/lib/api/validation";
 import { credentialsService } from "@/lib/services/registry";
+import { logger } from "@/lib/logging/logger";
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const wallet = searchParams.get("wallet");
 
-    if (!wallet || wallet.length < 32 || wallet.length > 44) {
-      return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
-    }
+export const runtime = "nodejs";
+
+const QuerySchema = z.object({
+  wallet: Schemas.walletAddress,
+});
+
+export const GET = createApiHandler(
+  async (request) => {
+    const { wallet } = validateQuery(QuerySchema, new URL(request.url).searchParams);
+
+    logger.info("Fetching credentials", { wallet });
 
     const credentials = await credentialsService.getCredentials(wallet);
-    return NextResponse.json({ wallet, credentials });
-  } catch (error) {
-    console.error("Credentials read error:", error);
-    return NextResponse.json({ wallet: null, credentials: [], error: "Failed to read credentials" });
-  }
-}
+    
+    return createApiResponse({ wallet, credentials });
+  },
+  { rateLimit: true }
+);
