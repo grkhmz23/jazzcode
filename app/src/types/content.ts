@@ -1,5 +1,9 @@
 export type CourseDifficulty = 'beginner' | 'intermediate' | 'advanced';
-export type LessonType = 'content' | 'challenge';
+export type LessonType =
+  | 'content'
+  | 'challenge'
+  | 'multi-file-challenge'
+  | 'devnet-challenge';
 export type ChallengeLanguage = 'typescript' | 'rust';
 
 export interface TestCase {

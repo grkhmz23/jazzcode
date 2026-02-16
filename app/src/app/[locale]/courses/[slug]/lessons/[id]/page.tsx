@@ -40,6 +40,10 @@ function toChallenge(lesson: Lesson): Challenge | undefined {
   };
 }
 
+function toClientLessonType(type: Lesson["type"]): "content" | "challenge" {
+  return type === "challenge" ? "challenge" : "content";
+}
+
 function buildLessonPayload(
   slug: string,
   courseTitle: string,
@@ -54,7 +58,7 @@ function buildLessonPayload(
       id: lesson.id,
       title: lesson.title,
       slug: lesson.slug,
-      type: lesson.type,
+      type: toClientLessonType(lesson.type),
       content: lesson.content,
       xpReward: lesson.xpReward,
       challenge: toChallenge(lesson),
