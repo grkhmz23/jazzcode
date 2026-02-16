@@ -17,7 +17,27 @@ function toChallenge(lesson: Lesson): Challenge | undefined {
     return undefined;
   }
 
-  return lesson as Challenge;
+  const challengeLesson = lesson as Partial<Challenge>;
+
+  if (
+    typeof challengeLesson.starterCode !== "string" ||
+    (challengeLesson.language !== "typescript" &&
+      challengeLesson.language !== "rust") ||
+    !Array.isArray(challengeLesson.testCases) ||
+    !Array.isArray(challengeLesson.hints) ||
+    typeof challengeLesson.solution !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    ...lesson,
+    starterCode: challengeLesson.starterCode,
+    language: challengeLesson.language,
+    testCases: challengeLesson.testCases,
+    hints: challengeLesson.hints,
+    solution: challengeLesson.solution,
+  };
 }
 
 function buildLessonPayload(

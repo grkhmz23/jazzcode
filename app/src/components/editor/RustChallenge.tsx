@@ -145,6 +145,7 @@ export function RustChallenge({
   const handleShowSolution = useCallback(() => {
     setSolutionDialogOpen(false);
     setHasViewedSolution(true);
+    setCode(solution);
     if (editorRef.current) {
       editorRef.current.setValue(solution);
     }

@@ -63,7 +63,7 @@ const getCspHeader = () => {
     "default-src 'self'",
     // Scripts - Next.js requires unsafe-inline for hydration
     // Monaco editor requires 'unsafe-eval' and blob: for web workers
-    `script-src ${scriptSrc} https://www.googletagmanager.com https://www.google-analytics.com`,
+    `script-src ${scriptSrc} https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com`,
     // Styles - Next.js requires unsafe-inline for styled-jsx
     // Monaco injects styles dynamically
     "style-src 'self' 'unsafe-inline'",
@@ -74,7 +74,7 @@ const getCspHeader = () => {
     // Fonts
     "font-src 'self'",
     // Connect (API calls, WebSockets, Google Analytics)
-    "connect-src 'self' https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://api.mainnet-beta.solana.com wss://api.devnet.solana.com https://www.google-analytics.com",
+    "connect-src 'self' https://cdn.jsdelivr.net https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://api.mainnet-beta.solana.com wss://api.devnet.solana.com https://www.google-analytics.com",
     // Media
     "media-src 'self'",
     // Object (Flash, etc)

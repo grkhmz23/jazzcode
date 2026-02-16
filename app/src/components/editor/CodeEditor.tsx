@@ -73,6 +73,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     const { theme: appTheme } = useTheme();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [editorReady, setEditorReady] = useState(false);
+    const [editorFailed, setEditorFailed] = useState(false);
+    const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [fallbackValue, setFallbackValue] = useState(value ?? defaultValue);
+    const currentValueRef = useRef(value ?? defaultValue);
 
     // Debounce timer ref
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -83,27 +88,52 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // Handle hydration - only render on client
     useEffect(() => {
       setMounted(true);
+      fallbackTimeoutRef.current = setTimeout(() => {
+        if (!editorRef.current) {
+          setEditorFailed(true);
+        }
+      }, 10000);
+
+      return () => {
+        if (fallbackTimeoutRef.current) {
+          clearTimeout(fallbackTimeoutRef.current);
+        }
+      };
     }, []);
 
     // Expose imperative handle
     useImperativeHandle(
       ref,
       () => ({
-        getValue: () => editorRef.current?.getValue() ?? "",
+        getValue: () => editorRef.current?.getValue() ?? currentValueRef.current,
         setValue: (newValue: string) => {
-          editorRef.current?.setValue(newValue);
+          if (editorRef.current) {
+            editorRef.current.setValue(newValue);
+          } else {
+            setFallbackValue(newValue);
+          }
+          currentValueRef.current = newValue;
+          onChange?.(newValue);
         },
         focus: () => {
-          editorRef.current?.focus();
+          if (editorRef.current) {
+            editorRef.current.focus();
+          }
         },
       }),
-      []
+      [onChange]
     );
 
     // Handle editor mount
     const handleEditorDidMount = useCallback(
       (editor: editor.IStandaloneCodeEditor) => {
         editorRef.current = editor;
+        setEditorReady(true);
+        setEditorFailed(false);
+        if (fallbackTimeoutRef.current) {
+          clearTimeout(fallbackTimeoutRef.current);
+          fallbackTimeoutRef.current = null;
+        }
       },
       []
     );
@@ -111,6 +141,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // Debounced onChange handler
     const handleChange = useCallback(
       (newValue: string | undefined) => {
+        currentValueRef.current = newValue ?? "";
         if (debounceTimerRef.current) {
           clearTimeout(debounceTimerRef.current);
         }
@@ -120,6 +151,13 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       },
       [onChange]
     );
+
+    // Keep fallback/editor state synced when parent controls value/defaultValue.
+    useEffect(() => {
+      const nextValue = value ?? defaultValue;
+      currentValueRef.current = nextValue;
+      setFallbackValue(nextValue);
+    }, [value, defaultValue]);
 
     // Cleanup debounce timer on unmount
     useEffect(() => {
@@ -169,6 +207,29 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // Don't render during SSR
     if (!mounted) {
       return <EditorLoading height={height} />;
+    }
+
+    if (editorFailed && !editorReady) {
+      return (
+        <div className="relative h-full w-full overflow-hidden rounded-md border">
+          <div className="border-b bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            Monaco failed to load after 10s. Using fallback editor.
+          </div>
+          <textarea
+            className="h-[calc(100%-2.25rem)] w-full resize-none bg-background p-3 font-mono text-sm outline-none"
+            value={fallbackValue}
+            onChange={(event) => {
+              const next = event.target.value;
+              setFallbackValue(next);
+              currentValueRef.current = next;
+              onChange?.(next);
+            }}
+            readOnly={readOnly}
+            spellCheck={false}
+            aria-label="Fallback code editor"
+          />
+        </div>
+      );
     }
 
     return (

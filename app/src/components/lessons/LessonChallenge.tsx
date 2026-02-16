@@ -90,7 +90,7 @@ export function LessonChallenge({
       )}
 
       {/* Render appropriate challenge component based on language */}
-      {challenge.language === "rust" ? (
+      {challenge.language === "rust" && (
         <RustChallenge
           starterCode={starterCode}
           testCases={challenge.testCases}
@@ -98,10 +98,11 @@ export function LessonChallenge({
           solution={challenge.solution}
           onComplete={handleComplete}
         />
-      ) : (
+      )}
+      {challenge.language === "typescript" && (
         <ChallengeRunner
           starterCode={starterCode}
-          language={challenge.language}
+          language="typescript"
           testCases={challenge.testCases}
           hints={challenge.hints}
           solution={challenge.solution}
