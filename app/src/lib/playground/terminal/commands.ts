@@ -37,6 +37,11 @@ export interface TerminalState {
   simulatedBalances: Record<string, number>;
   tokenMints: Record<string, TokenMintState>;
   pendingTransfer: PendingTransfer | null;
+  gitAuth: GitAuthState;
+}
+
+export interface GitAuthState {
+  token: string | null;
 }
 
 export interface TerminalIo {
@@ -46,6 +51,8 @@ export interface TerminalIo {
   readFile: (path: string) => string | null;
   listPaths: () => string[];
   setActiveFile: (path: string) => void;
+  deleteFile?: (path: string) => void;
+  requestGitToken?: () => Promise<string | null>;
   wallet: {
     mode: "burner" | "external";
     burnerAddress: string | null;
@@ -119,4 +126,10 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
     flags: ["--decimals", "--owner", "--mint"],
   },
   { name: "confirm", description: "Confirm pending transfer action.", usage: "confirm", flags: [] },
+  {
+    name: "git",
+    description: "Git version control commands.",
+    usage: "git <init|status|add|commit|log|branch|checkout|remote|clone|pull|push>",
+    flags: ["-m", "-b", "--oneline"],
+  },
 ];

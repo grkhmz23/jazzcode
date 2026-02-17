@@ -1,0 +1,328 @@
+"use client";
+
+import { useCallback, useRef, useState } from "react";
+import { Download, FolderUp, Github, Upload, FileDown, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { parseZipFile, mergeImportedFiles, sanitizeZipPath, ConflictResolution, ZipImportEntry } from "@/lib/playground/import-zip";
+import { WorkspaceFile } from "@/lib/playground/types";
+import { inferLanguageFromPath } from "@/lib/playground/workspace";
+
+interface PlaygroundTopBarProps {
+  workspaceName: string;
+  workspaceFiles: Record<string, WorkspaceFile>;
+  activeFile: string | null;
+  onImportFiles: (files: Record<string, WorkspaceFile>) => void;
+  onExportZip: () => void;
+  onExportCurrentFile: () => void;
+  onOpenGithubImport: () => void;
+  onResetWorkspace: () => void;
+  gitBranch?: string | null;
+}
+
+export function PlaygroundTopBar({
+  workspaceName,
+  workspaceFiles,
+  activeFile,
+  onImportFiles,
+  onExportZip,
+  onExportCurrentFile,
+  onOpenGithubImport,
+  onResetWorkspace,
+  gitBranch,
+}: PlaygroundTopBarProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
+  const [importDropdownOpen, setImportDropdownOpen] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+  const [pendingEntries, setPendingEntries] = useState<ZipImportEntry[]>([]);
+  const [conflictPaths, setConflictPaths] = useState<string[]>([]);
+
+  const processFiles = useCallback(
+    (entries: ZipImportEntry[]) => {
+      const conflicts = entries.filter((e) => Boolean(workspaceFiles[e.path]));
+      if (conflicts.length > 0) {
+        setPendingEntries(entries);
+        setConflictPaths(conflicts.map((c) => c.path));
+        setConflictDialogOpen(true);
+      } else {
+        const now = Date.now();
+        const files: Record<string, WorkspaceFile> = {};
+        for (const entry of entries) {
+          files[entry.path] = {
+            path: entry.path,
+            language: inferLanguageFromPath(entry.path),
+            content: entry.content,
+            updatedAt: now,
+          };
+        }
+        onImportFiles(files);
+      }
+    },
+    [workspaceFiles, onImportFiles]
+  );
+
+  const handleResolveConflict = useCallback(
+    (resolution: ConflictResolution) => {
+      const merged = mergeImportedFiles(workspaceFiles, pendingEntries, resolution);
+      // Only send the new/changed files
+      const diff: Record<string, WorkspaceFile> = {};
+      for (const [path, file] of Object.entries(merged)) {
+        if (!workspaceFiles[path] || workspaceFiles[path].content !== file.content) {
+          diff[path] = file;
+        }
+      }
+      onImportFiles(diff);
+      setConflictDialogOpen(false);
+      setPendingEntries([]);
+      setConflictPaths([]);
+    },
+    [workspaceFiles, pendingEntries, onImportFiles]
+  );
+
+  const handleFileUpload = useCallback(
+    async (fileList: FileList) => {
+      const entries: ZipImportEntry[] = [];
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        if (file.name.endsWith(".zip")) {
+          const buffer = await file.arrayBuffer();
+          const result = parseZipFile(buffer);
+          entries.push(...result.entries);
+        } else {
+          const sanitized = sanitizeZipPath(file.name);
+          if (sanitized) {
+            const content = await file.text();
+            entries.push({ path: sanitized, content, sizeBytes: file.size });
+          }
+        }
+      }
+      if (entries.length > 0) {
+        processFiles(entries);
+      }
+    },
+    [processFiles]
+  );
+
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  }, []);
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
+      if (e.dataTransfer.files.length > 0) {
+        void handleFileUpload(e.dataTransfer.files);
+      }
+    },
+    [handleFileUpload]
+  );
+
+  return (
+    <>
+      <div
+        className={`flex h-10 items-center gap-1 border-b px-2 text-xs ${
+          dragActive
+            ? "border-[#007acc] bg-[#007acc]/10"
+            : "border-[#2f2f2f] bg-[#252526]"
+        }`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+      >
+        <span className="mr-2 truncate font-medium text-[#cccccc]">{workspaceName}</span>
+
+        {/* Import dropdown */}
+        <div className="relative">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 gap-1 px-2 text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+            onClick={() => {
+              setImportDropdownOpen((p) => !p);
+              setExportDropdownOpen(false);
+            }}
+          >
+            <Upload className="h-3 w-3" />
+            Import
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+          {importDropdownOpen && (
+            <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded border border-[#454545] bg-[#252526] py-1 shadow-lg">
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  fileInputRef.current?.click();
+                  setImportDropdownOpen(false);
+                }}
+              >
+                <FolderUp className="h-3 w-3" />
+                Upload file(s)
+              </button>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  zipInputRef.current?.click();
+                  setImportDropdownOpen(false);
+                }}
+              >
+                <FolderUp className="h-3 w-3" />
+                Import ZIP
+              </button>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  onOpenGithubImport();
+                  setImportDropdownOpen(false);
+                }}
+              >
+                <Github className="h-3 w-3" />
+                GitHub Import
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Export dropdown */}
+        <div className="relative">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 gap-1 px-2 text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+            onClick={() => {
+              setExportDropdownOpen((p) => !p);
+              setImportDropdownOpen(false);
+            }}
+          >
+            <Download className="h-3 w-3" />
+            Export
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+          {exportDropdownOpen && (
+            <div className="absolute left-0 top-full z-50 mt-1 w-44 rounded border border-[#454545] bg-[#252526] py-1 shadow-lg">
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  onExportZip();
+                  setExportDropdownOpen(false);
+                }}
+              >
+                <Download className="h-3 w-3" />
+                Export as ZIP
+              </button>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  onExportCurrentFile();
+                  setExportDropdownOpen(false);
+                }}
+                disabled={!activeFile}
+              >
+                <FileDown className="h-3 w-3" />
+                Export current file
+              </button>
+            </div>
+          )}
+        </div>
+
+        {gitBranch && (
+          <span className="ml-2 rounded bg-[#2a2d2e] px-2 py-0.5 text-[11px] text-[#9d9d9d]">
+            {gitBranch}
+          </span>
+        )}
+
+        <div className="flex-1" />
+
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+          onClick={onResetWorkspace}
+        >
+          Reset
+        </Button>
+
+        {/* Hidden file inputs */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              void handleFileUpload(e.target.files);
+            }
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={zipInputRef}
+          type="file"
+          accept=".zip"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              void handleFileUpload(e.target.files);
+            }
+            e.target.value = "";
+          }}
+        />
+      </div>
+
+      {/* Conflict resolution dialog */}
+      <Dialog open={conflictDialogOpen} onOpenChange={(open) => { if (!open) { setConflictDialogOpen(false); setPendingEntries([]); setConflictPaths([]); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Conflicts</DialogTitle>
+            <DialogDescription>
+              {conflictPaths.length} file(s) already exist in your workspace:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-40 overflow-auto rounded border border-[#323232] bg-[#1e1e1e] p-2 font-mono text-xs text-[#d4d4d4]">
+            {conflictPaths.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => handleResolveConflict("skip")}>
+              Skip all
+            </Button>
+            <Button type="button" variant="outline" onClick={() => handleResolveConflict("keep_both")}>
+              Keep both
+            </Button>
+            <Button type="button" onClick={() => handleResolveConflict("overwrite")}>
+              Overwrite all
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

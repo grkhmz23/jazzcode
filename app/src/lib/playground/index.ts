@@ -16,3 +16,5 @@ export * from "@/lib/playground/progress/events";
 export * from "@/lib/playground/snapshot";
 export * from "@/lib/playground/github-import";
 export * from "@/lib/playground/export-zip";
+export * from "@/lib/playground/import-zip";
+export * from "@/lib/playground/runtime";

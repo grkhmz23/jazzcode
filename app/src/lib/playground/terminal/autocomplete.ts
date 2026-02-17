@@ -90,6 +90,23 @@ export function getAutocompleteSuggestions({ input, filePaths }: AutocompleteCon
     };
   }
 
+  if (parsed.command === "git") {
+    const subcommands = ["init", "status", "add", "commit", "log", "branch", "checkout", "remote", "clone", "pull", "push"];
+    if (parsed.positional.length <= 1 && !trimmed.endsWith(" ")) {
+      const token = parsed.positional[0] ?? "";
+      return {
+        suggestions: subcommands.filter((item) => startsWithToken(item, token)),
+        replacement: token,
+      };
+    }
+    // git add: complete file paths
+    if (parsed.positional[0] === "add") {
+      const fragment = trimmed.endsWith(" ") ? "" : (parsed.positional[1] ?? "");
+      const suggestions = completePath(fragment, filePaths);
+      return { suggestions, replacement: fragment };
+    }
+  }
+
   return {
     suggestions: [],
     replacement: "",

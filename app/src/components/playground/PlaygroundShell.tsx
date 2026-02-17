@@ -7,6 +7,8 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditorPane } from "@/components/playground/EditorPane";
 import { FileExplorer } from "@/components/playground/FileExplorer";
+import { PlaygroundTopBar } from "@/components/playground/PlaygroundTopBar";
+import { QuickOpenPalette } from "@/components/playground/QuickOpenPalette";
 import { StatusBar } from "@/components/playground/StatusBar";
 import { TaskPanel } from "@/components/playground/TaskPanel";
 import { TerminalPane } from "@/components/playground/TerminalPane";
@@ -29,6 +31,7 @@ import {
   createInitialTerminalState,
   createWorkspaceFromTemplate,
   deserializeSnapshot,
+  downloadSingleFile,
   downloadWorkspaceZip,
   evaluateAchievements,
   evaluateQuest,
@@ -57,6 +60,7 @@ import {
   updateFileContent,
   workspaceReducer,
 } from "@/lib/playground";
+import { useKeyboardShortcuts } from "@/lib/playground/hooks/use-keyboard-shortcuts";
 import { TaskResult } from "@/lib/playground/tasks/types";
 import { Workspace } from "@/lib/playground/types";
 
@@ -100,6 +104,9 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [importRepo, setImportRepo] = useState("");
   const [importBranch, setImportBranch] = useState("");
   const [importBusy, setImportBusy] = useState(false);
+  const [gitTokenDialogOpen, setGitTokenDialogOpen] = useState(false);
+  const [gitTokenInput, setGitTokenInput] = useState("");
+  const gitTokenResolveRef = useRef<((token: string | null) => void) | null>(null);
   const [walletMode, setWalletMode] = useState<"burner" | "external">("burner");
   const [burnerWallet, setBurnerWallet] = useState<{ publicKey: string; secretKey: number[] } | null>(null);
   const [balanceLabel, setBalanceLabel] = useState("Balance: --");
@@ -114,11 +121,13 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [persistedAchievements, setPersistedAchievements] = useState<string[]>([]);
   const [bestTimeMs, setBestTimeMs] = useState<number | null>(null);
   const [, setCheckpointSnapshots] = useState<Record<string, string>>({});
+  const [quickOpenOpen, setQuickOpenOpen] = useState(false);
 
   const emittedQuestRef = useRef(false);
   const checkpointRef = useRef<string[]>([]);
   const workspaceRef = useRef(workspace);
   const terminalRef = useRef(terminalState);
+  const terminalInputRef = useRef<HTMLInputElement>(null);
 
   const { connection } = useConnection();
   const { publicKey, connected, disconnect, sendTransaction } = useWallet();
@@ -370,6 +379,23 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
           };
         }
       },
+      deleteFile: (path: string) => {
+        if (pendingWorkspace.files[path] && Object.keys(pendingWorkspace.files).length > 1) {
+          const nextFiles = { ...pendingWorkspace.files };
+          delete nextFiles[path];
+          pendingWorkspace = {
+            ...pendingWorkspace,
+            files: nextFiles,
+            openFiles: pendingWorkspace.openFiles.filter((p) => p !== path),
+            updatedAt: Date.now(),
+          };
+        }
+      },
+      requestGitToken: () =>
+        new Promise<string | null>((resolve) => {
+          gitTokenResolveRef.current = resolve;
+          setGitTokenDialogOpen(true);
+        }),
       wallet: {
         mode: walletMode,
         burnerAddress: burnerWallet?.publicKey ?? null,
@@ -573,17 +599,58 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
     setConfirmAction(null);
   };
 
+  const handleExportCurrentFile = () => {
+    const path = workspace.activeFile;
+    const file = workspace.files[path];
+    if (file) {
+      downloadSingleFile(path, file.content);
+    }
+  };
+
+  const shortcutHandlers = useMemo(
+    () => ({
+      save: () => void saveWorkspaceToIndexedDb(workspaceRef.current),
+      quickOpen: () => setQuickOpenOpen((p) => !p),
+      focusTerminal: () => terminalInputRef.current?.focus(),
+    }),
+    []
+  );
+  useKeyboardShortcuts(shortcutHandlers);
+
   const gridColumns = `${leftCollapsed ? 0 : 260}px 1fr ${rightCollapsed ? 0 : 340}px`;
   const terminalHeight = bottomCollapsed ? 0 : 220;
 
   return (
     <div className="h-[calc(100vh-10rem)] min-h-[680px] w-full rounded-lg border border-[#2f2f2f] bg-[#1e1e1e] text-[#d4d4d4]">
+      <QuickOpenPalette
+        open={quickOpenOpen}
+        filePaths={Object.keys(workspace.files)}
+        onSelect={(path) => {
+          dispatch({ type: "open_file", path });
+          dispatch({ type: "set_active_file", path });
+        }}
+        onClose={() => setQuickOpenOpen(false)}
+      />
       <div
         className="hidden h-full lg:grid"
-        style={{ gridTemplateColumns: gridColumns, gridTemplateRows: `1fr ${terminalHeight}px 36px` }}
+        style={{ gridTemplateColumns: gridColumns, gridTemplateRows: `40px 1fr ${terminalHeight}px 36px` }}
       >
+        <div style={{ gridColumn: "1 / 4", gridRow: "1" }}>
+          <PlaygroundTopBar
+            workspaceName={activeTemplate.title}
+            workspaceFiles={workspace.files}
+            activeFile={workspace.activeFile}
+            onImportFiles={(files) => dispatch({ type: "import_files", files })}
+            onExportZip={handleExportZip}
+            onExportCurrentFile={handleExportCurrentFile}
+            onOpenGithubImport={() => setImportModalOpen(true)}
+            onResetWorkspace={() => setConfirmAction("reset")}
+            gitBranch={terminalState.commandSuccesses.includes("git:init") ? "main" : null}
+          />
+        </div>
+
         {!leftCollapsed ? (
-          <div className="overflow-hidden" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
+          <div className="overflow-hidden" style={{ gridColumn: "1", gridRow: "2 / 4" }}>
             <FileExplorer
               workspace={workspace}
               tree={tree}
@@ -595,7 +662,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
           </div>
         ) : null}
 
-        <div className="relative" style={{ gridColumn: "2", gridRow: "1 / 2" }}>
+        <div className="relative" style={{ gridColumn: "2", gridRow: "2 / 3" }}>
           <EditorPane
             workspace={workspace}
             onChangeContent={(path, content) => dispatch({ type: "update_content", path, content })}
@@ -605,7 +672,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
         </div>
 
         {!rightCollapsed ? (
-          <div style={{ gridColumn: "3", gridRow: "1 / 3" }}>
+          <div style={{ gridColumn: "3", gridRow: "2 / 4" }}>
             <TaskPanel
               quest={solanaFundamentalsQuest}
               results={taskResults}
@@ -644,18 +711,19 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
         ) : null}
 
         {!bottomCollapsed ? (
-          <div style={{ gridColumn: "1 / 3", gridRow: "2" }}>
+          <div style={{ gridColumn: "1 / 3", gridRow: "3" }}>
             <TerminalPane
               entries={terminalEntries}
               commandHistory={terminalState.commandHistory}
               onRunCommand={(command) => void runCommand(command)}
               onAutocomplete={(input) => getAutocompleteSuggestions({ input, filePaths: Object.keys(workspace.files) })}
               onApplySuggestion={applySuggestion}
+              inputRef={terminalInputRef}
             />
           </div>
         ) : null}
 
-        <div style={{ gridColumn: "1 / 4", gridRow: "3" }}>
+        <div style={{ gridColumn: "1 / 4", gridRow: "4" }}>
           <StatusBar
             leftCollapsed={leftCollapsed}
             rightCollapsed={rightCollapsed}
@@ -800,6 +868,60 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
             </Button>
             <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
               {importBusy ? "Importing..." : "Import"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={gitTokenDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            gitTokenResolveRef.current?.(null);
+            gitTokenResolveRef.current = null;
+            setGitTokenDialogOpen(false);
+            setGitTokenInput("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>GitHub Token Required</DialogTitle>
+            <DialogDescription>
+              Enter a personal access token for git push or private repo access. The token is stored in session memory only.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            type="password"
+            value={gitTokenInput}
+            onChange={(e) => setGitTokenInput(e.target.value)}
+            placeholder="ghp_xxxxxxxxxxxx"
+            aria-label="GitHub personal access token"
+          />
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                gitTokenResolveRef.current?.(null);
+                gitTokenResolveRef.current = null;
+                setGitTokenDialogOpen(false);
+                setGitTokenInput("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                gitTokenResolveRef.current?.(gitTokenInput || null);
+                gitTokenResolveRef.current = null;
+                setGitTokenDialogOpen(false);
+                setGitTokenInput("");
+              }}
+              disabled={!gitTokenInput.trim()}
+            >
+              Submit
             </Button>
           </DialogFooter>
         </DialogContent>

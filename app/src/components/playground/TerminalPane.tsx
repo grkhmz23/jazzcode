@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, KeyboardEvent, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, Ref, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AutocompleteResult, TerminalEntry } from "@/lib/playground";
@@ -11,6 +11,7 @@ interface TerminalPaneProps {
   onRunCommand: (command: string) => void;
   onAutocomplete: (input: string) => AutocompleteResult;
   onApplySuggestion: (input: string, replacement: string, suggestion: string) => string;
+  inputRef?: Ref<HTMLInputElement>;
 }
 
 export function TerminalPane({
@@ -19,6 +20,7 @@ export function TerminalPane({
   onRunCommand,
   onAutocomplete,
   onApplySuggestion,
+  inputRef,
 }: TerminalPaneProps) {
   const [command, setCommand] = useState("");
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -127,6 +129,7 @@ export function TerminalPane({
           $
         </span>
         <Input
+          ref={inputRef}
           value={command}
           onChange={(event) => {
             setCommand(event.target.value);

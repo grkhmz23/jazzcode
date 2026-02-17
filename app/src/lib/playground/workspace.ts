@@ -16,7 +16,8 @@ export type WorkspaceAction =
   | { type: "update_content"; path: string; content: string }
   | { type: "open_file"; path: string }
   | { type: "close_file"; path: string }
-  | { type: "set_active_file"; path: string };
+  | { type: "set_active_file"; path: string }
+  | { type: "import_files"; files: Record<string, WorkspaceFile> };
 
 function now(): number {
   return Date.now();
@@ -331,6 +332,19 @@ export function workspaceReducer(state: Workspace, action: WorkspaceAction): Wor
       return closeFile(state, action.path);
     case "set_active_file":
       return setActiveFile(state, action.path);
+    case "import_files": {
+      const mergedFiles = { ...state.files, ...action.files };
+      const newPaths = Object.keys(action.files);
+      const firstNew = newPaths.sort()[0];
+      const next: Workspace = {
+        ...state,
+        files: mergedFiles,
+        openFiles: firstNew ? [...state.openFiles, firstNew] : state.openFiles,
+        activeFile: firstNew ?? state.activeFile,
+        updatedAt: Date.now(),
+      };
+      return ensureWorkspaceConsistency(next);
+    }
     default:
       return state;
   }

@@ -17,6 +17,7 @@ import {
   TokenMintState,
 } from "@/lib/playground/terminal/commands";
 import { createTerminalError } from "@/lib/playground/terminal/errors";
+import { handleGitCommand } from "@/lib/playground/terminal/git-commands";
 import { normalizePath } from "@/lib/playground/workspace";
 
 const MAX_TERMINAL_ERRORS = 30;
@@ -116,6 +117,7 @@ export function createInitialTerminalState(): TerminalState {
     simulatedBalances: {},
     tokenMints: {},
     pendingTransfer: null,
+    gitAuth: { token: null },
   };
 }
 
@@ -1145,6 +1147,16 @@ export async function executeTerminalCommand(rawCommand: string, state: Terminal
 
   if (parsed.command === "confirm") {
     return handleConfirm(nextStateWithHistory, io);
+  }
+
+  if (parsed.command === "git") {
+    return handleGitCommand(
+      parsed,
+      nextStateWithHistory,
+      io,
+      nextStateWithHistory.gitAuth,
+      async () => io.requestGitToken?.() ?? null
+    );
   }
 
   const error = createTerminalError("UNKNOWN_COMMAND", `Unknown command: ${parsed.command}`);

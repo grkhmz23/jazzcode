@@ -10,7 +10,10 @@ export type TerminalErrorCode =
   | "DIRECTORY_NOT_FOUND"
   | "NETWORK_MISMATCH"
   | "PROJECT_EXISTS"
-  | "TOKEN_NOT_FOUND";
+  | "TOKEN_NOT_FOUND"
+  | "GIT_NOT_INITIALIZED"
+  | "GIT_AUTH_REQUIRED"
+  | "GIT_CLONE_FAILED";
 
 export interface TerminalError {
   code: TerminalErrorCode;
@@ -66,6 +69,18 @@ const ERROR_MAP: Record<TerminalErrorCode, Omit<TerminalError, "code">> = {
   TOKEN_NOT_FOUND: {
     message: "Token mint was not found in local SPL ledger.",
     hint: "Create one with `spl-token create-token` first.",
+  },
+  GIT_NOT_INITIALIZED: {
+    message: "Not a git repository.",
+    hint: "Run `git init` to initialize a repository.",
+  },
+  GIT_AUTH_REQUIRED: {
+    message: "Authentication required for this git operation.",
+    hint: "Provide a GitHub personal access token when prompted.",
+  },
+  GIT_CLONE_FAILED: {
+    message: "Failed to clone repository.",
+    hint: "Check the URL and network connection, then try again.",
   },
 };
 
