@@ -1,414 +1,506 @@
-import type { Course, Module, Lesson, Challenge } from '@/types/content';
+import type { Challenge, Course, Lesson, Module } from "@/types/content";
+import {
+  lesson4Hints,
+  lesson4SolutionCode,
+  lesson4StarterCode,
+  lesson4TestCases,
+} from "@/lib/courses/solana-security/challenges/lesson-4-exploit-signer-owner";
+import {
+  lesson5Hints,
+  lesson5SolutionCode,
+  lesson5StarterCode,
+  lesson5TestCases,
+} from "@/lib/courses/solana-security/challenges/lesson-5-exploit-pda";
+import {
+  lesson6Hints,
+  lesson6SolutionCode,
+  lesson6StarterCode,
+  lesson6TestCases,
+} from "@/lib/courses/solana-security/challenges/lesson-6-patch-validate";
+import {
+  lesson8Hints,
+  lesson8SolutionCode,
+  lesson8StarterCode,
+  lesson8TestCases,
+} from "@/lib/courses/solana-security/challenges/lesson-8-audit-report";
 
 const lesson1: Lesson = {
-  id: 'missing-signer-checks',
-  slug: 'missing-signer-checks',
-  title: 'Missing Signer Checks',
-  type: 'content',
-  xpReward: 150,
-  duration: '45 min',
-  content: `# Missing Signer Checks
+  id: "security-v2-threat-model",
+  slug: "security-v2-threat-model",
+  title: "Solana threat model for auditors: accounts, owners, signers, writable, PDAs",
+  type: "content",
+  xpReward: 45,
+  duration: "55 min",
+  content: `# Solana threat model for auditors: accounts, owners, signers, writable, PDAs
 
-A missing signer check is one of the most common and most severe classes of Solana vulnerabilities. In Solana, any account can be passed into an instruction if the transaction message includes it. That means program code cannot assume an account is controlled by a user unless it explicitly checks signature requirements. If a handler updates privileged state, moves funds, changes authorities, or writes governance settings without confirming that an authorized signer signed the transaction, an attacker can submit the same instruction with forged account context and gain control.
+Security work on Solana starts with one non-negotiable fact: instruction callers choose the account list. Programs do not receive trusted implicit context. They receive exactly the account metas and instruction data encoded in a transaction message. This design is powerful for composability and performance, but it means almost every critical exploit is an account validation exploit in disguise. If you internalize this early, your audits become more mechanical and less guess-based.
 
-In raw Rust programs, signer validation is usually done by checking the account metadata and failing if \
-\`!account_info.is_signer\`. In Anchor, using \
-\`Signer<'info>\` in the accounts struct enforces this automatically. Problems arise when developers use \
-\`UncheckedAccount<'info>\`, \
-\`AccountInfo<'info>\`, or even \
-\`Account<'info, T>\` for an authority account but forget to add \
-\`has_one\` or explicit equality checks. The program compiles, tests may pass in happy paths, and then production traffic reveals that an arbitrary wallet can call the instruction.
+A good mental model is to treat each instruction as a contract boundary with five mandatory validations: identity, authority, ownership, mutability, and derivation. Identity asks whether the supplied account is the account the instruction expects. Authority asks whether the actor that is allowed to mutate state actually signed. Ownership asks whether account data should be interpreted under the current program or a different one. Mutability asks whether writable access is both requested and justified. Derivation asks whether PDA paths are deterministic and verified against canonical seeds plus bump. Missing any of those layers creates openings that attackers repeatedly use.
 
-A classic exploit pattern is an admin rotation endpoint:
+Signer checks are not optional on privileged paths. If the instruction changes authority, moves funds, or updates risk parameters, the authority account must be a signer and must be the expected authority from state. One common bug is checking only that “some signer exists.” That is still broken. Audits should explicitly map each privileged transition to a concrete signer relationship and verify that relation is enforced before state mutation.
 
-\`\`\`rust
-pub fn set_admin(ctx: Context<SetAdmin>, new_admin: Pubkey) -> Result<()> {
-    // Vulnerable if authority isn't verified as signer and current admin
-    ctx.accounts.config.admin = new_admin;
-    Ok(())
-}
-\`\`\`
+Owner checks are equally critical. Programs often parse account bytes into local structs. Without owner checks, an attacker can pass arbitrary bytes that deserialize into a shape that looks valid but is controlled by another program or by no program assumptions at all. This is account substitution. It is the root cause of many catastrophic incidents and should be surfaced early in review notes.
 
-If \
-\`authority\` is not constrained, anyone can rewrite \
-\`config.admin\`. A similar issue appears in vault withdrawals, treasury spending, and upgrade authorities. Another subtle variant is checking that a signer exists, but not checking it is the expected signer. That is still broken: any signer can approve.
+PDA checks are where many teams lose determinism. Seed recipes need to be explicit, stable, and versioned. If the runtime accepts user-provided bump values without recomputation, or if seed ordering differs between handlers, spoofed addresses can pass inconsistent checks. Auditors should insist on exact re-derivation and equality checks in all sensitive paths.
 
-Prevention patterns:
+Writable flags matter for two reasons: correctness and attack surface. Over-broad writable sets increase risk by allowing unnecessary state transitions in CPI-heavy flows. Under-declared mutability causes runtime failure, which is safer but still a reliability bug.
 
-- Use strict account types: \
-\`Signer<'info>\`, \
-\`Program<'info, ...>\`, \
-\`Account<'info, ...>\`.
-- Bind authority to state with \
-\`has_one = authority\`.
-- Add explicit key checks: \
-\`require_keys_eq!(authority.key(), config.admin, ErrorCode::Unauthorized)\`.
-- Write negative tests where an attacker signer attempts privileged actions.
-- Audit every instruction for “who is allowed to do this?” and enforce it at account validation and instruction logic layers.
+Finally, threat modeling should include arithmetic constraints. Even if auth is correct, unchecked u64 math can corrupt balances through underflow or overflow and invalidate all higher-level assumptions.
 
-Signer checks are cheap, explicit, and non-optional in secure Solana programs.`
+## Checklist
+- Map each instruction to a clear privilege model.
+- Verify authority account is required signer for privileged actions.
+- Verify authority key equality against stored state authority.
+- Verify every parsed account has explicit owner validation.
+- Verify each PDA is re-derived from canonical seeds and bump.
+- Verify writable accounts are minimal and justified.
+- Verify arithmetic uses checked operations for u64 transitions.
+- Verify negative-path tests exist for unauthorized and malformed accounts.
+
+## Red flags
+- Privileged state updates without signer checks.
+- Parsing unchecked account data from unknown owners.
+- PDA acceptance based on partial seed checks.
+- Handlers that trust client-provided bump blindly.
+- Arithmetic updates using plain + and - on balances.
+
+## How to verify (simulator)
+- Run vulnerable mode on signer-missing scenario and inspect trace.
+- Re-run fixed mode and confirm ERR_NOT_SIGNER.
+- Execute owner-missing scenario and compare vulnerable vs fixed outcomes.
+- Execute pda-spoof scenario and confirm fixed mode emits ERR_BAD_PDA.
+- Compare trace hashes to verify deterministic event ordering.
+`,
+  blocks: [
+    {
+      type: "quiz",
+      id: "security-v2-l1-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "security-v2-l1-q1",
+          prompt: "Why are account owner checks mandatory before deserializing state?",
+          options: [
+            "Because callers can pass arbitrary accounts and forged byte layouts",
+            "Because owner checks improve rendering speed",
+            "Because owner checks replace signer checks",
+          ],
+          answerIndex: 0,
+          explanation:
+            "Without owner checks, account substitution allows attacker-controlled bytes to be parsed as trusted state.",
+        },
+        {
+          id: "security-v2-l1-q2",
+          prompt: "What should be verified for a privileged withdraw path?",
+          options: [
+            "Expected authority key, signer requirement, owner check, and PDA derivation",
+            "Only that the vault account is writable",
+            "Only that an amount field exists",
+          ],
+          answerIndex: 0,
+          explanation:
+            "Privileged transitions need full identity and authority validation.",
+        },
+      ],
+    },
+  ],
 };
 
 const lesson2: Lesson = {
-  id: 'account-validation',
-  slug: 'account-validation',
-  title: 'Account Validation',
-  type: 'content',
-  xpReward: 150,
-  duration: '45 min',
-  content: `# Account Validation
+  id: "security-v2-evidence-chain",
+  slug: "security-v2-evidence-chain",
+  title: "Evidence chain: reproduce, trace, impact, fix, verify",
+  type: "content",
+  xpReward: 45,
+  duration: "55 min",
+  content: `# Evidence chain: reproduce, trace, impact, fix, verify
 
-Account validation on Solana is fundamentally about proving identity and intent of each account passed into an instruction. Because callers control account lists, the program must reject malformed, substituted, or adversarial accounts. Failing to validate account ownership, seeds, discriminators, or expected relationships leads to type confusion, account substitution, and privilege escalation.
+Strong security reports are built on evidence chains, not opinions. In the Solana context, that means moving from a claim such as “missing signer check exists” to a deterministic chain: reproduce exploit conditions, capture a stable execution trace, quantify impact, apply a patch, and verify that the same steps now fail with expected error codes while invariants hold. This chain is what turns audit work into an engineering artifact.
 
-Owner checks are the first gate. For example, if a handler expects an SPL Token account, the \
-\`owner\` of that account data must be the Token Program ID. If code deserializes arbitrary bytes as a token account without verifying program ownership, attackers can provide a fake account with crafted bytes. In Anchor, typed \
-\`Account<'info, T>\` helps, but for external account types or unchecked accounts, explicit checks are mandatory.
+Reproduction should be deterministic and minimal. Every scenario should declare initial accounts, authority/signer flags, vault ownership assumptions, and instruction inputs. If reproductions depend on external RPC timing or changing liquidity conditions, confidence drops and triage slows down. In this course lab, scenarios are fixture-driven and offline so every replay produces the same state transitions.
 
-Type confusion often appears when programs deserialize account data into a struct without verifying the 8-byte Anchor discriminator (or equivalent schema marker). An attacker can pass a different account type with overlapping fields, tricking logic paths. Similarly, account substitution happens when an instruction expects “the user vault PDA” but accepts any writable account and writes sensitive state into attacker-controlled storage.
+Trace capture is the core of audit evidence. Instead of recording only final balances, log each relevant event in stable order: InstructionStart, AccountRead, CheckPassed/CheckFailed, BalanceChange, InstructionEnd. These events let reviewers verify exactly which assumptions passed and where validation was skipped. They also help map exploitability to code-level checks. For example, if signer checks are absent in vulnerable mode, the trace should explicitly show that signer validation was skipped or never evaluated.
 
-PDA validation best practices:
+Impact analysis should be quantitative. For signer and owner bugs, compute drained lamports or unauthorized state changes. For PDA bugs, show mismatch between expected derived address and accepted address. For arithmetic bugs, show underflow or overflow conditions and resulting corruption. Impact details inform severity and prioritization.
 
-- Recompute PDAs inside the program with \
-\`Pubkey::find_program_address\` or Anchor \
-\`seeds\` constraints.
-- Compare both key and bump.
-- Never trust user-supplied bump values without verification.
-- Avoid using dynamic seeds that can be influenced unexpectedly.
+Patch validation should not just say “fixed.” It should prove exploit steps now fail for the right reason. If signer exploit now fails, error code should be ERR_NOT_SIGNER. If PDA spoof now fails, error code should be ERR_BAD_PDA. This specificity catches regressions where one bug is accidentally masked by unrelated behavior.
 
-Example secure Anchor constraint:
+Verification closes the chain with invariant checks. Examples: vault balance remains a valid u64 string, authority remains unchanged, and no unauthorized lamport delta occurs in fixed mode. These invariants convert patch confidence into measurable guarantees.
 
-\`\`\`rust
-#[account(
-  mut,
-  seeds = [b"vault", user.key().as_ref()],
-  bump = vault.bump,
-  has_one = user
-)]
-pub vault: Account<'info, VaultState>;
-\`\`\`
+When teams do this consistently, reports become executable documentation. New engineers can replay scenarios and understand why controls exist. Incident response becomes faster because prior failure signatures and remediation patterns are already captured.
 
-Also verify relational constraints: if a position references a market, ensure the position’s stored market key equals the passed market account key. If a receipt references an authority, ensure keys match. Every cross-account invariant should be asserted.
+## Checklist
+- Define each scenario with explicit initial state and instruction inputs.
+- Capture deterministic, ordered trace events for each run.
+- Hash traces with canonical JSON for reproducibility.
+- Quantify impact using before/after deltas.
+- Map each finding to explicit evidence references.
+- Re-run identical scenarios in fixed mode.
+- Verify fixed-mode failures use expected error codes.
+- Record post-fix invariant results with stable IDs.
 
-Testing for validation flaws should include adversarial cases: substitute one account with another valid account of same type, pass a random PDA with matching shape, pass accounts owned by wrong programs, and mutate account ordering. Security reviews should trace each account from instruction entry to state mutation and confirm every trust assumption is enforced.
+## Red flags
+- Reports with no reproduction steps.
+- Non-deterministic traces that change between runs.
+- Impact described qualitatively without deltas.
+- Patch claims without fixed-mode replay evidence.
+- Invariant lists omitted from verification section.
 
-Strong account validation is the backbone of Solana security. Without it, otherwise correct business logic can be fully compromised.`
+## How to verify (simulator)
+- Run signer-missing in vulnerable mode, save trace hash.
+- Run same scenario in fixed mode, confirm ERR_NOT_SIGNER.
+- Run owner-missing and confirm ERR_BAD_OWNER in fixed mode.
+- Run pda-spoof and compare expected/accepted PDA fields.
+- Generate audit report JSON and markdown summary from checkpoint builder.
+`,
+  blocks: [
+    {
+      type: "explorer",
+      id: "security-v2-l2-account-explorer",
+      title: "Trace Account Snapshot",
+      explorer: "AccountExplorer",
+      props: {
+        samples: [
+          {
+            label: "Vault account (vulnerable run)",
+            address: "PDA_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            lamports: 300,
+            owner: "VaultProgram111111111111111111111111111111111",
+            executable: false,
+            dataLen: 96,
+          },
+          {
+            label: "Recipient account (post exploit)",
+            address: "Recipient111111111111111111111111111111111111",
+            lamports: 710,
+            owner: "SystemProgram1111111111111111111111111111111111",
+            executable: false,
+            dataLen: 0,
+          },
+        ],
+      },
+    },
+    {
+      type: "quiz",
+      id: "security-v2-l2-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "security-v2-l2-q1",
+          prompt: "What is the purpose of trace hashing in an audit workflow?",
+          options: [
+            "To prove deterministic replay and evidence integrity",
+            "To replace structured test assertions",
+            "To randomize scenario ordering",
+          ],
+          answerIndex: 0,
+          explanation:
+            "Canonical trace hashes make replay evidence comparable and tamper-evident.",
+        },
+        {
+          id: "security-v2-l2-q2",
+          prompt: "Which sequence represents a valid evidence chain?",
+          options: [
+            "Reproduce -> trace -> impact -> fix -> verify",
+            "Fix -> reproduce -> trace -> release",
+            "Trace -> release -> verify",
+          ],
+          answerIndex: 0,
+          explanation: "This order ensures claims are demonstrated and patch effectiveness is validated.",
+        },
+      ],
+    },
+  ],
 };
 
 const lesson3: Lesson = {
-  id: 'integer-overflow',
-  slug: 'integer-overflow',
-  title: 'Integer Overflow and Underflow',
-  type: 'content',
-  xpReward: 150,
-  duration: '45 min',
-  content: `# Integer Overflow and Underflow
+  id: "security-v2-bug-classes",
+  slug: "security-v2-bug-classes",
+  title: "Common Solana bug classes and mitigations",
+  type: "content",
+  xpReward: 45,
+  duration: "55 min",
+  content: `# Common Solana bug classes and mitigations
 
-Arithmetic vulnerabilities in financial programs are catastrophic because balances, shares, debt indexes, and fee calculations are integer-based. In Rust, behavior depends on build configuration: debug builds panic on overflow, while release builds can wrap unless checked operations are used. Solana programs are compiled in release mode for deployment, so relying on debug behavior is unsafe.
+Auditors on Solana repeatedly encounter the same core bug families. The implementation details differ across protocols, but exploit mechanics are surprisingly consistent: identity confusion, authority confusion, derivation drift, arithmetic corruption, and unsafe cross-program assumptions. A robust review process categorizes findings by class, applies known verification patterns, and tests negative paths intentionally.
 
-In token protocols, common vulnerable formulas include:
+**Missing signer checks** are high-severity because they directly break authorization. The fix is conceptually simple: require signer and key relation. Yet teams miss it when refactoring account structs or switching between typed and unchecked account wrappers. Auditors should scan all state-mutating handlers and ask: who can call this and what proves authorization?
 
-- \
-\`new_balance = old_balance + amount\`
-- \
-\`shares = deposit * total_shares / total_assets\`
-- \
-\`fee = amount * fee_bps / 10_000\`
+**Missing owner checks** create account substitution risk. Programs may deserialize account bytes and trust semantic fields without proving the account is owned by the expected program. In mixed CPI systems, this is especially dangerous because account shapes can look valid while semantics differ. Mitigation is explicit owner validation before parsing and strict account type usage.
 
-Each line can overflow if operands are large enough. An attacker can craft edge values to wrap balances, bypass limits, mint excess shares, or force liquidation math into invalid states.
+**PDA seed/bump mismatch** appears when seed ordering, domain tags, or bump handling drifts between instructions. One handler derives ["vault", authority], another derives [authority, "vault"], a third trusts client-provided bump. Attackers search those inconsistencies to route privileged logic through spoofed addresses. Mitigation is canonical seed schema, exact re-derivation on every sensitive path, and tests that intentionally pass malformed PDA candidates.
 
-Use safe math patterns:
+**CPI authority confusion** happens when one program delegates authority assumptions to another without strict scope. If signer seeds or delegated permissions are broader than intended, downstream calls can perform unintended state transitions. Mitigation includes explicit CPI allowlists, minimal writable/signer metas, and scope-limited delegated authorities.
 
-\`\`\`rust
-let new_balance = old_balance
-    .checked_add(amount)
-    .ok_or(ErrorCode::MathOverflow)?;
+**Integer overflow/underflow** remains a practical class in accounting-heavy systems. Rust release mode behavior makes unchecked arithmetic unacceptable for balances and fee logic. Mitigation is checked operations, u128 intermediates for multiply/divide paths, and boundary-focused tests.
 
-let fee = amount
-    .checked_mul(fee_bps)
-    .ok_or(ErrorCode::MathOverflow)?
-    .checked_div(10_000)
-    .ok_or(ErrorCode::DivisionByZero)?;
-\`\`\`
+Mitigation quality depends on verification quality. Unit tests should include adversarial account substitutions, malformed seeds, missing signers, and boundary arithmetic. If tests only cover happy paths, high-severity bugs will survive code review.
 
-Underflow is equally dangerous when subtracting collateral, debt, or reserves. Always use \
-\`checked_sub\` and fail if the result would be negative. For division, handle zero denominators explicitly.
+The audit deliverable should translate classes into implementation guidance. Engineers need clear, actionable remediations and concrete reproduction conditions, not generic warnings. The best reports include checklists that can be wired into CI and release gates.
 
-In Anchor codebases, developers often assume token amounts are small enough for \
-\`u64\`, but aggregate values (TVL, cumulative interest indices, protocol totals) may require \
-\`u128\` intermediates to avoid overflow during multiplication before division. A robust pattern is to cast inputs to \
-\`u128\`, compute, then downcast with range checks:
+## Checklist
+- Enumerate all privileged instructions and expected signers.
+- Verify owner checks before parsing external account layouts.
+- Pin and document PDA seed schemas and bump usage.
+- Validate CPI target program IDs against allowlist.
+- Minimize writable and signer account metas in CPI.
+- Enforce checked math for all u64 state transitions.
+- Add negative tests for each bug class.
+- Require deterministic traces for security-critical tests.
 
-\`\`\`rust
-let result_u128 = (amount as u128)
-    .checked_mul(rate as u128)
-    .ok_or(ErrorCode::MathOverflow)?
-    .checked_div(1_000_000u128)
-    .ok_or(ErrorCode::DivisionByZero)?;
-let result = u64::try_from(result_u128).map_err(|_| ErrorCode::MathOverflow)?;
-\`\`\`
+## Red flags
+- Any privileged mutation path without explicit signer requirement.
+- Any unchecked account deserialization path.
+- Any instruction that accepts bump without re-derivation.
+- Any CPI call to dynamic or user-selected program ID.
+- Any unchecked arithmetic on balances or supply values.
 
-Testing must include boundary values: \
-\`u64::MAX\`, near-zero values, one-unit dust values, and large batched operations. Fuzzing is especially effective for discovering arithmetic corner cases that unit tests miss.
-
-Finally, define explicit error codes for overflow/underflow and fail fast. Silent wraps are never acceptable in on-chain finance. Correct arithmetic design is both a safety requirement and an audit baseline.`
+## How to verify (simulator)
+- Use lesson 4 scenario to confirm unauthorized withdraw in vulnerable mode.
+- Use lesson 5 scenario to confirm spoofed PDA acceptance in vulnerable mode.
+- Use lesson 6 patch suite to verify fixed-mode errors by code.
+- Run checkpoint report and ensure all scenarios are marked reproduced.
+- Inspect invariant result array for all fixed-mode scenarios.
+`,
+  blocks: [
+    {
+      type: "quiz",
+      id: "security-v2-l3-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "security-v2-l3-q1",
+          prompt: "What is the strongest mitigation for PDA spoof risks?",
+          options: [
+            "Canonical seed schema with exact re-derivation + bump verification",
+            "Accepting any PDA-like prefix",
+            "Trusting client-provided bump values",
+          ],
+          answerIndex: 0,
+          explanation: "Deterministic re-derivation closes spoofable PDA substitution paths.",
+        },
+        {
+          id: "security-v2-l3-q2",
+          prompt: "Why are negative-path tests required for audit confidence?",
+          options: [
+            "Because most exploitable bugs only appear under malformed or adversarial input",
+            "Because happy-path tests cover all security cases",
+            "Because traces are optional without them",
+          ],
+          answerIndex: 0,
+          explanation:
+            "Security failures are usually adversarial edge cases, so tests must target those edges directly.",
+        },
+      ],
+    },
+  ],
 };
 
 const lesson4: Challenge = {
-  id: 'security-audit-challenge',
-  slug: 'security-audit-challenge',
-  title: 'Security Audit Challenge',
-  type: 'challenge',
-  xpReward: 300,
-  duration: '60 min',
-  language: 'typescript',
-  content: `# Security Audit Challenge
+  id: "security-v2-exploit-signer-owner",
+  slug: "security-v2-exploit-signer-owner",
+  title: "Break it: exploit missing signer + owner checks",
+  type: "challenge",
+  xpReward: 60,
+  duration: "40 min",
+  language: "typescript",
+  content: `# Break it: exploit missing signer + owner checks
 
-You are auditing a simplified Solana program snippet that intentionally contains three vulnerabilities. Implement a function that returns the list of vulnerabilities you identify.
+Implement a deterministic exploit-proof formatter for signer/owner vulnerabilities.
 
-Required findings:
+Expected output fields:
+- scenario
+- before/after vault balance
+- before/after recipient lamports
+- trace hash
+- explanation with drained lamports
 
-1. Missing signer check
-2. Missing owner check
-3. Integer overflow risk
-
-Return these findings as a comma-separated string in this exact canonical order:
-
-\`missing-signer-check,missing-owner-check,integer-overflow\`
-
-You can compute the result however you want, but tests will validate the expected vulnerabilities are detected.`,
-  starterCode: `type Finding =
-  | "missing-signer-check"
-  | "missing-owner-check"
-  | "integer-overflow";
-
-const vulnerableProgramSnippet = [
-  'pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {',
-  '  // No signer check for authority',
-  '  if ctx.accounts.vault.owner != ctx.accounts.token_program.key() {',
-  '    // Owner check is wrong target and incomplete',
-  '  }',
-  '  ctx.accounts.vault.total_withdrawn = ctx.accounts.vault.total_withdrawn + amount;',
-  '  Ok(())',
-  '}',
-].join('\\n');
-
-export function identifyVulnerabilities(_source: string): string {
-  // TODO: Return comma-separated findings in canonical order.
-  // required: missing-signer-check,missing-owner-check,integer-overflow
-  return "";
-}
-
-identifyVulnerabilities(vulnerableProgramSnippet);`,
-  testCases: [
-    {
-      name: 'Includes missing signer check',
-      input: '{}',
-      expectedOutput: 'missing-signer-check,missing-owner-check,integer-overflow'
-    },
-    {
-      name: 'Includes missing owner check',
-      input: '{"focus":"owner"}',
-      expectedOutput: 'missing-signer-check,missing-owner-check,integer-overflow'
-    },
-    {
-      name: 'Includes integer overflow',
-      input: '{"focus":"math"}',
-      expectedOutput: 'missing-signer-check,missing-owner-check,integer-overflow'
-    }
-  ],
-  hints: [
-    'The answer must include exactly three findings in canonical order.',
-    'Look for authorization (signer), account ownership validation, and unsafe arithmetic.',
-    'Return a single comma-separated string, not an array.'
-  ],
-  solution: `type Finding =
-  | "missing-signer-check"
-  | "missing-owner-check"
-  | "integer-overflow";
-
-const vulnerableProgramSnippet = \
-\`
-pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-    // No signer check for authority
-    if ctx.accounts.vault.owner != ctx.accounts.token_program.key() {
-        // Owner check is wrong target and incomplete
-    }
-
-    // Potential overflow in accounting math
-    ctx.accounts.vault.total_withdrawn = ctx.accounts.vault.total_withdrawn + amount;
-    Ok(())
-}
-\`;
-
-export function identifyVulnerabilities(_source: string): string {
-  const findings: Finding[] = [
-    "missing-signer-check",
-    "missing-owner-check",
-    "integer-overflow",
-  ];
-
-  return findings.join(",");
-}
-
-identifyVulnerabilities(vulnerableProgramSnippet);`
+Use canonical key ordering so tests can assert exact JSON output.`,
+  starterCode: lesson4StarterCode,
+  testCases: lesson4TestCases,
+  hints: lesson4Hints,
+  solution: lesson4SolutionCode,
 };
 
-const lesson5: Lesson = {
-  id: 'reentrancy-and-cpi',
-  slug: 'reentrancy-and-cpi',
-  title: 'Reentrancy and CPI Safety',
-  type: 'content',
-  xpReward: 175,
-  duration: '45 min',
-  content: `# Reentrancy and CPI Safety
+const lesson5: Challenge = {
+  id: "security-v2-exploit-pda-spoof",
+  slug: "security-v2-exploit-pda-spoof",
+  title: "Break it: exploit PDA spoof mismatch",
+  type: "challenge",
+  xpReward: 60,
+  duration: "40 min",
+  language: "typescript",
+  content: `# Break it: exploit PDA spoof mismatch
 
-Solana does not have EVM-style synchronous fallback functions, but cross-program invocations (CPIs) can still create reentrancy-like logic hazards. A program that performs external calls before finalizing internal state can be manipulated through unexpected control flow, repeated invocation patterns, or stale assumptions about account state after CPI execution.
+Implement a deterministic PDA spoof proof output.
 
-A common anti-pattern is “check, CPI, mutate” where sensitive checks happen first, then an external token transfer or plugin call is made, and only afterward state is updated. If the external call can influence subsequent state assumptions or trigger additional invocations in the same transaction path, the program may execute with inconsistent invariants.
+You must show:
+- expected PDA
+- accepted PDA
+- mismatch boolean
+- trace hash
 
-Safer ordering is “check, mutate, CPI where possible,” or “check, lock, CPI, unlock.” For example, in a vault withdrawal instruction:
-
-1. Validate authority, amounts, and vault state.
-2. Mark an in-progress flag or decrement internal accounting first.
-3. Execute CPI transfer.
-4. Finalize and clear lock.
-
-If CPI fails, the entire transaction reverts, preserving atomicity. But if your logic emits side effects in different accounts and not all are protected, CPI behavior can still be abused.
-
-Recommended controls:
-
-- Introduce explicit reentrancy guard fields on critical accounts (e.g., \
-\`is_withdrawing\`).
-- Validate all writable accounts before and after CPI if external programs can mutate them.
-- Minimize writable account sets passed to CPI.
-- Avoid passing privileged signer seeds to untrusted CPI targets.
-- Use strict CPI allowlists: only invoke known program IDs.
-
-Example of a lock pattern:
-
-\`\`\`rust
-require!(!vault.is_locked, ErrorCode::VaultLocked);
-vault.is_locked = true;
-
-// perform CPI transfer
-
-vault.is_locked = false;
-\`\`\`
-
-Auditors should trace each CPI call graph and ask: can this path re-enter an instruction that assumes pre-CPI state? can any downstream program mutate accounts we later trust? does a partial logic path leave stale flags?
-
-While Solana’s runtime model differs from EVM, CPI-induced state hazards are real. Design with explicit state transitions, lock discipline, and strict account scoping to prevent cross-program control-flow abuse.`
+This lesson validates evidence generation for derivation mismatches.`,
+  starterCode: lesson5StarterCode,
+  testCases: lesson5TestCases,
+  hints: lesson5Hints,
+  solution: lesson5SolutionCode,
 };
 
-const lesson6: Lesson = {
-  id: 'oracle-manipulation',
-  slug: 'oracle-manipulation',
-  title: 'Oracle Manipulation',
-  type: 'content',
-  xpReward: 175,
-  duration: '45 min',
-  content: `# Oracle Manipulation
+const lesson6: Challenge = {
+  id: "security-v2-patch-validate",
+  slug: "security-v2-patch-validate",
+  title: "Fix it: validations + invariant suite",
+  type: "challenge",
+  xpReward: 65,
+  duration: "45 min",
+  language: "typescript",
+  content: `# Fix it: validations + invariant suite
 
-Oracle manipulation is one of the highest-impact attack classes in DeFi. If protocol logic trusts a single instantaneous price, attackers can move that price briefly, trigger profitable liquidations or undercollateralized borrows, and exit before markets normalize. Flash liquidity and capital-efficient routing make this practical even in deep markets.
+Implement patch validation output that confirms:
+- signer check
+- owner check
+- PDA check
+- safe u64 arithmetic
+- exploit blocked state with error code
 
-On Solana, protocols commonly consume Pyth data. Pyth provides both price and confidence interval, and includes publish timestamps. A secure integration should never read only the \
-\`price\` field. It should validate freshness, confidence width, and market status.
-
-Core controls:
-
-- **Freshness bound**: reject prices older than a threshold (e.g., 30-60 seconds).
-- **Confidence filter**: reject high-uncertainty prices where confidence/price exceeds policy.
-- **Deviation checks**: compare to previous accepted price and cap per-update movement.
-- **Multi-oracle checks**: compare Pyth with another source; halt on large divergence.
-
-Flash-loan-assisted manipulation usually targets spot-sensitive logic. A robust defense is using TWAP (time-weighted average price) over a window instead of instant spot values. TWAP smooths transient spikes but must be tuned to avoid excessive lag in volatile markets.
-
-Example policy idea:
-
-\`\`\`text
-if stale -> reject
-if confidence > 1% of price -> reject
-if abs(price - median(last_n_prices)) > 5% -> circuit breaker
-\`\`\`
-
-Liquidation and borrow engines should also include safety haircuts. Even with clean oracle input, collateral value should be discounted to absorb latency and adverse moves. For high-volatility assets, require larger buffers.
-
-When integrating Pyth, use confidence intervals as risk signals, not optional metadata. For critical systems, aggregate across oracle providers, include health monitors, and expose guardian controls to pause actions under anomalous feed behavior.
-
-Finally, test attack scenarios in simulation: manipulated spot pools, delayed updates, and divergent oracles. If your protocol remains solvent under these conditions, your oracle layer is likely robust. If not, the issue is usually insufficient validation policy, not just feed choice.`
+Keep output deterministic for exact assertion.`,
+  starterCode: lesson6StarterCode,
+  testCases: lesson6TestCases,
+  hints: lesson6Hints,
+  solution: lesson6SolutionCode,
 };
 
 const lesson7: Lesson = {
-  id: 'frontrunning-mev',
-  slug: 'frontrunning-mev',
-  title: 'Frontrunning and MEV on Solana',
-  type: 'content',
-  xpReward: 175,
-  duration: '45 min',
-  content: `# Frontrunning and MEV on Solana
+  id: "security-v2-writing-reports",
+  slug: "security-v2-writing-reports",
+  title: "Writing audit reports: severity, likelihood, blast radius, remediation",
+  type: "content",
+  xpReward: 45,
+  duration: "55 min",
+  content: `# Writing audit reports: severity, likelihood, blast radius, remediation
 
-MEV (Maximal Extractable Value) is the profit obtainable by influencing transaction ordering. On Solana, high throughput and low latency do not eliminate MEV; they change its shape. Searchers can still detect profitable pending transactions, submit competing transactions, and capture value from users through sandwiching, arbitrage backruns, or liquidation races.
+A strong audit report is an engineering document, not a narrative essay. It should allow a reader to answer four questions quickly: what failed, how exploitable it is, how much damage it can cause, and what exact change prevents recurrence. Security writing quality directly affects fix quality because implementation teams ship what they can interpret.
 
-A classic sandwich attack has three steps:
+Severity should be tied to impact and exploit preconditions. A missing signer check in a withdraw path is typically critical if it allows unauthorized asset movement with low prerequisites. A PDA mismatch may be high or medium depending on reachable code paths and available controls. Severity labels without rationale are not useful. Include explicit exploit path assumptions and whether attacker capital or privileged positioning is required.
 
-1. Attacker sees user swap with weak slippage limits.
-2. Attacker front-runs by buying the target asset first.
-3. User executes at a worse price.
-4. Attacker back-runs by selling, capturing spread.
+Likelihood should capture practical exploitability, not theoretical possibility. For example, if a bug requires impossible account states under current architecture, likelihood may be low even if impact is high. Conversely, if a bug is reachable by submitting a standard instruction with crafted account metas, likelihood is high. Be specific.
 
-Solana’s parallel runtime complicates ordering dynamics, but practical MEV still depends on leader behavior, mempool visibility, and relayer infrastructure. Jito introduced bundle flow where transactions can be submitted as ordered bundles for atomic inclusion, reducing certain race conditions and enabling protected order flow.
+Blast radius should describe what can be drained or corrupted: one vault, one market, protocol-wide state, or governance authority. This framing helps teams stage incident response and patch rollout.
 
-Defensive patterns for dApps:
+Recommendations must be precise and testable. “Add better validation” is too vague. “Require authority signer, verify authority key matches vault state, verify vault owner equals program id, and verify PDA from ["vault", authority] + bump” is actionable. Include expected error codes so QA can validate behavior reliably.
 
-- Set conservative default slippage and warn users on high slippage.
-- Use quote freshness checks and force re-quote on delays.
-- Support private or protected transaction submission paths when available.
-- Split large trades across time or routing paths to reduce single-shot impact.
-- Use batch auction or request-for-quote designs for high-value swaps.
+Evidence references are also important. Each finding should point to deterministic traces, scenario IDs, and checkpoint artifacts so another engineer can replay without interpretation gaps.
 
-Protocol-level protections:
+Finally, include verification results. A patch is not complete until exploit scenarios fail deterministically and invariants hold. Reports that end before verification force downstream teams to rediscover completion criteria.
 
-- Include minimum output checks on-chain.
-- Validate price impact against oracle-based fair value bands.
-- Reject abnormal execution paths that exceed policy thresholds.
+Report structure should also prioritize scanability. Teams reviewing multiple findings under incident pressure need consistent field ordering and concise language that maps directly to engineering actions. If one finding uses narrative prose while another uses structured reproduction steps, remediation speed drops because readers spend time normalizing format instead of executing fixes.
 
-Example min-out pattern:
+A reliable pattern is one finding per vulnerability class with explicit evidence references grouped by scenario ID. That allows QA, auditors, and protocol engineers to coordinate on the same deterministic artifacts. The same approach also improves long-term maintenance: when code changes, teams can rerun scenario IDs and compare trace hashes to detect regressions in report assumptions.
 
-\`\`\`rust
-require!(actual_out >= min_out, ErrorCode::SlippageExceeded);
-\`\`\`
+## Checklist
+- State explicit vulnerability class and affected instruction path.
+- Include reproducible scenario ID and deterministic trace hash.
+- Quantify impact with concrete state/balance deltas.
+- Assign severity with rationale tied to exploit preconditions.
+- Assign likelihood based on realistic attacker capabilities.
+- Describe blast radius at account/protocol boundary.
+- Provide exact remediation steps and expected error codes.
+- Include verification outcomes and invariant results.
 
-For liquidation systems, MEV is often unavoidable; the goal is fair competition and protocol solvency. Use deterministic reward rules, bounded bonuses, and healthy keeper decentralization.
+## Red flags
+- Severity labels without impact rationale.
+- Recommendations without concrete validation rules.
+- No reproduction steps or trace references.
+- No fixed-mode verification evidence.
+- No distinction between impact and likelihood.
 
-Monitoring is essential. Track slippage anomalies, failed-user-then-successful-searcher patterns, and repeated same-slot adverse fills. These are practical MEV indicators.
+## How to verify (simulator)
+- Generate report JSON from checkpoint builder.
+- Confirm findings include evidenceRefs for each scenario.
+- Confirm remediation includes patch IDs.
+- Confirm verification results mark each scenario as blocked in fixed mode.
+- Generate markdown summary and compare to report content ordering.
+`,
+  blocks: [
+    {
+      type: "quiz",
+      id: "security-v2-l7-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "security-v2-l7-q1",
+          prompt: "What is the key difference between severity and likelihood?",
+          options: [
+            "Severity measures impact; likelihood measures practical exploitability",
+            "They are interchangeable labels",
+            "Likelihood is only for low-severity bugs",
+          ],
+          answerIndex: 0,
+          explanation: "Good reports separate damage potential from exploit feasibility.",
+        },
+        {
+          id: "security-v2-l7-q2",
+          prompt: "Which recommendation is most actionable?",
+          options: [
+            "Require signer + owner + PDA checks with explicit error codes",
+            "Improve security in this function",
+            "Add more comments",
+          ],
+          answerIndex: 0,
+          explanation: "Actionable recommendations map directly to code changes and tests.",
+        },
+      ],
+    },
+  ],
+};
 
-MEV cannot be “removed,” but systems can be engineered to minimize toxic extraction and protect users. Good product defaults, strong on-chain guards, and informed transaction routing are the most effective mitigation stack on Solana today.`
+const lesson8: Challenge = {
+  id: "security-v2-audit-report-checkpoint",
+  slug: "security-v2-audit-report-checkpoint",
+  title: "Checkpoint: deterministic AuditReport JSON + markdown",
+  type: "challenge",
+  xpReward: 70,
+  duration: "45 min",
+  language: "typescript",
+  content: `# Checkpoint: deterministic AuditReport JSON + markdown
+
+Create the final deterministic checkpoint payload:
+- course + version
+- scenario IDs
+- finding count
+
+This checkpoint mirrors the final course artifact produced by the simulator report builder.`,
+  starterCode: lesson8StarterCode,
+  testCases: lesson8TestCases,
+  hints: lesson8Hints,
+  solution: lesson8SolutionCode,
 };
 
 const module1: Module = {
-  id: 'module-common-vulnerabilities',
-  title: 'Common Vulnerabilities',
-  description: 'Critical audit patterns for Solana programs.',
-  lessons: [lesson1, lesson2, lesson3, lesson4],
+  id: "security-v2-threat-model-and-method",
+  title: "Threat Model & Audit Method",
+  description: "Account-centric threat modeling and deterministic evidence chains.",
+  lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
-  id: 'module-advanced-attack-vectors',
-  title: 'Advanced Attack Vectors',
-  description: 'Adversarial modeling for production protocols.',
-  lessons: [lesson5, lesson6, lesson7],
+  id: "security-v2-vuln-lab",
+  title: "Vuln Lab Project Journey",
+  description: "Exploit, patch, verify, and produce an audit artifact.",
+  lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
 export const solanaSecurityCourse: Course = {
-  id: 'course-solana-security',
-  slug: 'solana-security',
-  title: 'Solana Security & Auditing',
+  id: "course-solana-security",
+  slug: "solana-security",
+  title: "Solana Security & Auditing",
   description:
-    'Learn practical security engineering and auditing for Solana programs, from authorization bugs to oracle and MEV attack surfaces.',
-  difficulty: 'advanced',
-  duration: '10 hours',
-  totalXP: 2000,
-  tags: ['security', 'audit', 'exploit', 'advanced'],
-  imageUrl: '/images/courses/solana-security.jpg',
+    "Production-grade deterministic vuln lab for Solana auditors: exploit reproducibility, patch validation, and audit artifacts.",
+  difficulty: "advanced",
+  duration: "10 hours",
+  totalXP: 2200,
+  tags: ["security", "audit", "vuln-lab", "solana"],
+  imageUrl: "/images/courses/solana-security.jpg",
   modules: [module1, module2],
 };
