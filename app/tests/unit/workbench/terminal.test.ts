@@ -10,6 +10,7 @@ import {
 } from "@/lib/workbench/terminal/engine";
 import { createDirectoryNode, createFileSystemFromFiles } from "@/lib/workbench/fs";
 import type { SimulationState, DirectoryNode } from "@/lib/workbench";
+import { resetGitState } from "@/lib/workbench/terminal/commands/git";
 
 describe("Terminal Parser", () => {
   it("should parse simple commands", () => {
@@ -260,6 +261,7 @@ describe("Git Command Simulation", () => {
   beforeEach(() => {
     state = createInitialSimulationState();
     fs = createDirectoryNode("/workspace");
+    resetGitState(); // Clear all git repos for test isolation
   });
 
   it("should initialize git repository", async () => {

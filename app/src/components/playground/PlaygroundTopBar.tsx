@@ -92,20 +92,44 @@ export function PlaygroundTopBar({
   const handleFileUpload = useCallback(
     async (fileList: FileList) => {
       const entries: ZipImportEntry[] = [];
+      const errors: string[] = [];
+      
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
         if (file.name.endsWith(".zip")) {
-          const buffer = await file.arrayBuffer();
-          const result = parseZipFile(buffer);
-          entries.push(...result.entries);
+          try {
+            const buffer = await file.arrayBuffer();
+            const result = parseZipFile(buffer);
+            entries.push(...result.entries);
+            if (result.skipped.length > 0) {
+              console.warn(`Skipped ${result.skipped.length} files in ${file.name}:`, result.skipped);
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            errors.push(`Failed to parse ${file.name}: ${message}`);
+          }
         } else {
           const sanitized = sanitizeZipPath(file.name);
           if (sanitized) {
-            const content = await file.text();
-            entries.push({ path: sanitized, content, sizeBytes: file.size });
+            try {
+              const content = await file.text();
+              entries.push({ path: sanitized, content, sizeBytes: file.size });
+            } catch (error) {
+              const message = error instanceof Error ? error.message : "Unknown error";
+              errors.push(`Failed to read ${file.name}: ${message}`);
+            }
+          } else {
+            errors.push(`Invalid file path: ${file.name}`);
           }
         }
       }
+      
+      if (errors.length > 0) {
+        console.error("Import errors:", errors);
+        // Show the first error to the user
+        alert(`Import errors:\n${errors.slice(0, 3).join("\n")}${errors.length > 3 ? `\n... and ${errors.length - 3} more` : ""}`);
+      }
+      
       if (entries.length > 0) {
         processFiles(entries);
       }

@@ -364,7 +364,11 @@ export const GIT_COMMAND_DEFINITIONS: Omit<CommandDefinition, "handler">[] = [
   },
 ];
 
-export function resetGitState(fs: DirectoryNode): void {
-  const key = getRepoKey(fs);
-  gitRepos.delete(key);
+export function resetGitState(fs?: DirectoryNode): void {
+  if (fs) {
+    const key = getRepoKey(fs);
+    gitRepos.delete(key);
+  } else {
+    gitRepos.clear();
+  }
 }

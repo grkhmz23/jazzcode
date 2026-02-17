@@ -1,6 +1,9 @@
 /**
  * Terminal engine for the Workbench
  * Command parser, dispatcher, and autocomplete
+ * 
+ * NOTE: This module now re-exports from playground/terminal for consistency.
+ * The workbench terminal is unified with the playground terminal engine.
  */
 
 import type {
@@ -17,9 +20,12 @@ import type { DirectoryNode } from "@/lib/workbench/fs";
 import { createTerminalError } from "./errors";
 import { createCoreCommandHandlers, CORE_COMMAND_DEFINITIONS, getCoreAutocompleteWords } from "./commands/core";
 import { handleGitCommand, GIT_COMMAND_DEFINITIONS } from "./commands/git";
-import { handleSolanaCommand, SOLANA_COMMAND_DEFINITIONS } from "./commands/solana";
+import { handleSolanaCommand, handleSolanaKeygen, SOLANA_COMMAND_DEFINITIONS } from "./commands/solana";
 import { handleAnchorCommand, ANCHOR_COMMAND_DEFINITIONS } from "./commands/anchor";
 import { handleSplTokenCommand, SPL_TOKEN_COMMAND_DEFINITIONS } from "./commands/spl-token";
+
+// Note: This module provides its own parseCommandLine and executeCommand
+// implementations that are compatible with the Workbench's DirectoryNode-based FS.
 
 // ============================================================================
 // Command Parser
@@ -93,8 +99,24 @@ export function parseCommandLine(raw: string): ParsedCommand {
       continue;
     }
 
+    // Handle single-dash flags like -m="value" or -m "value"
     if (token.startsWith("-")) {
-      flags[token] = true;
+      // Check for inline value with equals sign (e.g., -m="initial commit")
+      const equalIndex = token.indexOf("=");
+      if (equalIndex > 0) {
+        const flag = token.slice(0, equalIndex);
+        const inlineValue = token.slice(equalIndex + 1);
+        flags[flag] = inlineValue;
+      } else {
+        // Check if next token is a value (not a flag)
+        const next = argv[i + 1];
+        if (next && !next.startsWith("-")) {
+          flags[token] = next;
+          i += 1;
+        } else {
+          flags[token] = true;
+        }
+      }
       continue;
     }
 
@@ -188,7 +210,7 @@ export async function executeCommand(
   }
   // Solana keygen
   else if (parsed.command === "solana-keygen") {
-    result = handleSolanaCommand(parsed, stateWithHistory, fs);
+    result = handleSolanaKeygen(parsed, stateWithHistory, fs);
   }
   // Anchor commands
   else if (parsed.command === "anchor") {

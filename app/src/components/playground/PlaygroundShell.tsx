@@ -40,7 +40,7 @@ import {
   getAutocompleteSuggestions,
   getSpeedrunTimeMs,
   getTemplateByIdV2,
-  importGitHubRepository,
+  importGitHubRepository, ImportProgress,
   listTree,
   loadBurnerWalletFromIndexedDb,
   loadQuestProgressFromIndexedDb,
@@ -62,7 +62,7 @@ import {
 } from "@/lib/playground";
 import { useKeyboardShortcuts } from "@/lib/playground/hooks/use-keyboard-shortcuts";
 import { TaskResult } from "@/lib/playground/tasks/types";
-import { Workspace } from "@/lib/playground/types";
+import { Workspace, WorkspaceFile } from "@/lib/playground/types";
 
 interface PlaygroundShellProps {
   onQuestComplete?: (event: QuestCompleteEvent) => void;
@@ -104,6 +104,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [importRepo, setImportRepo] = useState("");
   const [importBranch, setImportBranch] = useState("");
   const [importBusy, setImportBusy] = useState(false);
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [gitTokenDialogOpen, setGitTokenDialogOpen] = useState(false);
   const [gitTokenInput, setGitTokenInput] = useState("");
   const gitTokenResolveRef = useRef<((token: string | null) => void) | null>(null);
@@ -239,8 +240,71 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
       try {
         const params = new URLSearchParams(window.location.search);
         const snapshot = params.get("w");
+        const shareId = params.get("share");
 
-        if (snapshot) {
+        if (shareId) {
+          // Load from share API
+          const response = await fetch(`/api/playground/share/${shareId}`);
+          if (!response.ok) {
+            throw new Error("Share not found or expired");
+          }
+          const { bundle } = await response.json();
+          
+          // Convert bundle files to workspace format
+          const files: Record<string, WorkspaceFile> = {};
+          bundle.files.forEach((file: { path: string; content: string; language: string }) => {
+            files[file.path] = {
+              path: file.path,
+              content: file.content,
+              language: file.language as WorkspaceFile["language"],
+              updatedAt: Date.now(),
+            };
+          });
+
+          // Add demo page if not present
+          const demoPath = "page.tsx";
+          if (!files[demoPath]) {
+            const importName = bundle.title.replace(/\s+/g, "");
+            const firstFile = bundle.files[0];
+            const componentName = firstFile ? firstFile.path.replace(/\.tsx?$/, "").replace(/\//g, "_") : "Component";
+            
+            files[demoPath] = {
+              path: demoPath,
+              content: `import { ${importName} } from "./${componentName}";
+
+export default function Demo() {
+  return (
+    <div className="min-h-screen bg-zinc-950 p-8">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="mb-8 text-2xl font-bold text-white">${bundle.title} Demo</h1>
+        <${importName} {...${JSON.stringify(bundle.defaultProps || {})}} />
+      </div>
+    </div>
+  );
+}`,
+              language: "typescript",
+              updatedAt: Date.now(),
+            };
+          }
+
+          const workspaceFromShare: Workspace = {
+            templateId: `share-${shareId}`,
+            files,
+            openFiles: Object.keys(files),
+            activeFile: Object.keys(files)[0] || "",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+
+          if (mounted) {
+            dispatch({ type: "load", workspace: workspaceFromShare });
+            setTerminalEntries((previous) => [
+              ...previous,
+              makeTerminalEntry("system", `Loaded component: ${bundle.title}`),
+              makeTerminalEntry("system", `Files: ${bundle.files.length}`),
+            ]);
+          }
+        } else if (snapshot) {
           const fromUrl = await deserializeSnapshot(snapshot);
           if (fromUrl && mounted) {
             dispatch({ type: "load", workspace: fromUrl });
@@ -569,18 +633,22 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
 
   const handleImportGithub = async () => {
     setImportBusy(true);
+    setImportProgress({ total: 1, completed: 0, currentFile: "Starting import..." });
     try {
-      const template = await importGitHubRepository(importRepo, importBranch || undefined);
+      const template = await importGitHubRepository(importRepo, importBranch || undefined, {
+        onProgress: (progress) => setImportProgress(progress),
+      });
       dispatch({ type: "load_template", template });
       setImportModalOpen(false);
       setImportRepo("");
       setImportBranch("");
-      toast.success("GitHub repository imported as read-only workspace");
+      toast.success(`GitHub repository imported: ${template.files.length} files`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "GitHub import failed";
       toast.error(message);
     } finally {
       setImportBusy(false);
+      setImportProgress(null);
     }
   };
 
@@ -854,16 +922,39 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
               onChange={(event) => setImportRepo(event.target.value)}
               placeholder="solana-labs/solana-program-library"
               aria-label="GitHub repository"
+              disabled={importBusy}
             />
             <Input
               value={importBranch}
               onChange={(event) => setImportBranch(event.target.value)}
               placeholder="Branch (optional, defaults to HEAD)"
               aria-label="GitHub branch"
+              disabled={importBusy}
             />
+            {importProgress && (
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Downloading files...</span>
+                  <span>
+                    {importProgress.completed} / {importProgress.total}
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{
+                      width: `${importProgress.total > 0 ? (importProgress.completed / importProgress.total) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+                {importProgress.currentFile && (
+                  <p className="truncate text-xs text-muted-foreground">{importProgress.currentFile}</p>
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setImportModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setImportModalOpen(false)} disabled={importBusy}>
               Cancel
             </Button>
             <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
