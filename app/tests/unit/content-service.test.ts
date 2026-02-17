@@ -88,11 +88,11 @@ describe('CourseContentService', () => {
     });
 
     it('filters by search query in description', async () => {
-      const results = await service.searchCourses('blockchain', {});
+      const results = await service.searchCourses('accounts', {});
       expect(results.length).toBeGreaterThan(0);
       expect(results.every(c => 
-        c.title.toLowerCase().includes('blockchain') || 
-        c.description.toLowerCase().includes('blockchain')
+        c.title.toLowerCase().includes('accounts') || 
+        c.description.toLowerCase().includes('accounts')
       )).toBe(true);
     });
 
@@ -118,10 +118,10 @@ describe('CourseContentService', () => {
 
   describe('getLesson', () => {
     it('returns lesson by id', async () => {
-      const lesson = await service.getLesson('solana-fundamentals', 'what-is-solana');
+      const lesson = await service.getLesson('solana-fundamentals', 'solana-mental-model');
       expect(lesson).not.toBeNull();
-      expect(lesson?.id).toBe('what-is-solana');
-      expect(lesson?.title).toBe('What is Solana?');
+      expect(lesson?.id).toBe('solana-mental-model');
+      expect(lesson?.title).toBe('Solana mental model');
     });
 
     it('returns null for unknown course slug', async () => {
@@ -135,7 +135,7 @@ describe('CourseContentService', () => {
     });
 
     it('returns challenge lesson with additional fields', async () => {
-      const lesson = await service.getLesson('solana-fundamentals', 'first-transaction');
+      const lesson = await service.getLesson('solana-fundamentals', 'build-sol-transfer-transaction');
       expect(lesson).not.toBeNull();
       expect(lesson?.type).toBe('challenge');
       const challenge = lesson as Lesson & { 

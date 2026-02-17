@@ -1,0 +1,10 @@
+{
+  "id": "owner-missing",
+  "name": "Exploit missing owner check",
+  "exploitType": "missing-owner",
+  "amount": "350",
+  "attackerIsSigner": true,
+  "authorityIsSigner": true,
+  "useSpoofedPda": false,
+  "useWrongVaultOwner": true
+}

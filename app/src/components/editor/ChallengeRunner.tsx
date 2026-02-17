@@ -33,6 +33,35 @@ interface ChallengeRunnerProps {
   hints: string[];
   solution: string;
   onComplete: () => void;
+  onRunComplete?: (result: { allPassed: boolean; results: TestResult[] }) => void;
+}
+
+type RunStatus = "idle" | "running" | "passed" | "failed";
+
+function buildSolutionOutline(solution: string): string[] {
+  const lines = solution
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  const signatures = lines.filter(
+    (line) =>
+      line.startsWith("function ") ||
+      line.startsWith("const ") ||
+      line.startsWith("type ") ||
+      line.startsWith("interface ")
+  );
+  const outline = signatures.slice(0, 6).map((line) => line.replace(/\s+/g, " ").slice(0, 100));
+
+  if (outline.length === 0) {
+    return [
+      "1. Parse and validate command/input arguments before computing outputs.",
+      "2. Compute deterministic lamports and transaction summary fields.",
+      "3. Return stable, ordered output for test assertions.",
+    ];
+  }
+
+  return outline.map((line, index) => `${index + 1}. ${line}`);
 }
 
 export function ChallengeRunner({
@@ -42,6 +71,7 @@ export function ChallengeRunner({
   hints,
   solution,
   onComplete,
+  onRunComplete,
 }: ChallengeRunnerProps) {
   const editorRef = useRef<CodeEditorHandle>(null);
   const [code, setCode] = useState(starterCode);
@@ -51,6 +81,7 @@ export function ChallengeRunner({
   const [error, setError] = useState<string | null>(null);
   const [allPassed, setAllPassed] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [runStatus, setRunStatus] = useState<RunStatus>("idle");
 
   // UI state
   const [showHints, setShowHints] = useState(false);
@@ -59,6 +90,7 @@ export function ChallengeRunner({
   const [hasViewedSolution, setHasViewedSolution] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const solutionOutline = buildSolutionOutline(solution);
 
   // Collect all logs from test results
   useEffect(() => {
@@ -79,6 +111,7 @@ export function ChallengeRunner({
 
   const handleRunTests = useCallback(async () => {
     setIsRunning(true);
+    setRunStatus("running");
     setError(null);
     setResults([]);
 
@@ -93,12 +126,14 @@ export function ChallengeRunner({
     setError(result.error);
     setAllPassed(result.allPassed);
     setIsRunning(false);
+    setRunStatus(result.allPassed ? "passed" : "failed");
+    onRunComplete?.({ allPassed: result.allPassed, results: result.testResults });
 
     // Track if all tests passed
     if (result.allPassed) {
       trackEvent("challenge_passed", "editor");
     }
-  }, [code, testCases]);
+  }, [code, onRunComplete, testCases]);
 
   const handleResetCode = useCallback(() => {
     editorRef.current?.setValue(starterCode);
@@ -106,6 +141,7 @@ export function ChallengeRunner({
     setResetDialogOpen(false);
     setResults([]);
     setAllPassed(false);
+    setRunStatus("idle");
     setError(null);
     setLogs([]);
   }, [starterCode]);
@@ -116,14 +152,10 @@ export function ChallengeRunner({
     }
   }, [currentHintIndex, hints.length]);
 
-  const handleShowSolution = useCallback(() => {
+  const handleShowSolutionOutline = useCallback(() => {
     setSolutionDialogOpen(false);
     setHasViewedSolution(true);
-    setCode(solution);
-    if (editorRef.current) {
-      editorRef.current.setValue(solution);
-    }
-  }, [solution]);
+  }, []);
 
   const handleClearLogs = useCallback(() => {
     setLogs([]);
@@ -136,6 +168,7 @@ export function ChallengeRunner({
 
   // Get visible hints (up to current index)
   const visibleHints = hints.slice(0, currentHintIndex + 1);
+  const failedResults = results.filter((result) => !result.passed);
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -166,7 +199,7 @@ export function ChallengeRunner({
           ) : (
             <>
               <Play className="h-4 w-4" />
-              Run Tests
+              {runStatus === "passed" ? "Re-run Tests (Passed)" : "Run Tests"}
             </>
           )}
         </Button>
@@ -178,7 +211,7 @@ export function ChallengeRunner({
           className="gap-2"
         >
           <RotateCcw className="h-4 w-4" />
-          Reset Code
+          Reset to Starter
         </Button>
 
         <Button
@@ -198,8 +231,23 @@ export function ChallengeRunner({
           className="gap-2 border-yellow-500/50 text-yellow-700 hover:bg-yellow-50"
         >
           <Eye className="h-4 w-4" />
-          Show Solution
+          Show Solution Outline
         </Button>
+
+        <span
+          className={cn(
+            "ml-2 rounded-full border px-2 py-1 text-xs",
+            runStatus === "idle" && "text-muted-foreground",
+            runStatus === "running" && "border-blue-300 text-blue-700",
+            runStatus === "passed" && "border-green-300 text-green-700",
+            runStatus === "failed" && "border-red-300 text-red-700"
+          )}
+        >
+          {runStatus === "idle" && "Idle"}
+          {runStatus === "running" && "Running"}
+          {runStatus === "passed" && "Passed"}
+          {runStatus === "failed" && "Failed"}
+        </span>
       </div>
 
       {/* Hints Panel */}
@@ -277,6 +325,29 @@ export function ChallengeRunner({
         </Alert>
       )}
 
+      {runStatus === "failed" && failedResults.length > 0 && (
+        <Alert>
+          <AlertDescription>
+            <p className="mb-2 font-medium">Failing tests:</p>
+            <ul className="list-inside list-disc space-y-1 text-sm">
+              {failedResults.map((result) => (
+                <li key={result.name}>
+                  {result.name}
+                  {result.error ? (
+                    <span className="text-muted-foreground"> - {result.error}</span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      - expected `{result.expectedOutput}` got `{result.actualOutput}`
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Test Results */}
       {(results.length > 0 || isRunning) && (
         <TestResultsPanel
@@ -304,7 +375,7 @@ export function ChallengeRunner({
               Cancel
             </Button>
             <Button onClick={handleResetCode} variant="destructive">
-              Reset Code
+              Reset to Starter
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -314,18 +385,26 @@ export function ChallengeRunner({
       <Dialog open={solutionDialogOpen} onOpenChange={setSolutionDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>View Solution?</DialogTitle>
+            <DialogTitle>Solution Outline</DialogTitle>
             <DialogDescription>
-              Are you sure? Viewing the solution means you won&apos;t get the
-              &quot;Perfect Score&quot; achievement for this challenge.
+              This shows a high-level structure only. Full code is intentionally hidden.
             </DialogDescription>
           </DialogHeader>
+          <div className="rounded-md border bg-muted/40 p-3">
+            <ul className="space-y-1 text-sm">
+              {solutionOutline.map((item) => (
+                <li key={item} className="font-mono">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSolutionDialogOpen(false)}>
-              Keep Trying
+              Keep Coding
             </Button>
-            <Button onClick={handleShowSolution} variant="default">
-              Show Solution
+            <Button onClick={handleShowSolutionOutline} variant="default">
+              I Understand
             </Button>
           </DialogFooter>
         </DialogContent>

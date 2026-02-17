@@ -1,0 +1,83 @@
+{
+  "data": [
+    {
+      "inputMint": "So11111111111111111111111111111111111111112",
+      "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "inAmount": "2000000000",
+      "outAmount": "38620000",
+      "priceImpactPct": "0.0024",
+      "routePlan": [
+        {
+          "percent": 100,
+          "swapInfo": {
+            "ammKey": "7v8nF7M2fF4uP8rX9Qkz8jF3Y4XyQd8XxB6n6o9a8v7K",
+            "label": "Meteora",
+            "inputMint": "So11111111111111111111111111111111111111112",
+            "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "inAmount": "2000000000",
+            "outAmount": "38620000",
+            "feeAmount": "6000000",
+            "feeMint": "So11111111111111111111111111111111111111112"
+          }
+        }
+      ]
+    },
+    {
+      "inputMint": "So11111111111111111111111111111111111111112",
+      "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "inAmount": "2000000000",
+      "outAmount": "38700000",
+      "priceImpactPct": "0.0041",
+      "routePlan": [
+        {
+          "percent": 60,
+          "swapInfo": {
+            "ammKey": "H8xqY7mWf2A5bQ8k3rF3zK8t2uL5wM9pQ1xV6nS4dT3R",
+            "label": "Orca",
+            "inputMint": "So11111111111111111111111111111111111111112",
+            "outputMint": "Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx",
+            "inAmount": "1200000000",
+            "outAmount": "23140000",
+            "feeAmount": "3600000",
+            "feeMint": "So11111111111111111111111111111111111111112"
+          }
+        },
+        {
+          "percent": 40,
+          "swapInfo": {
+            "ammKey": "6N4rB2mS8xQ5kT1cF9gH3jL7pV2dX6wY4rQ8mE3tU9z",
+            "label": "Raydium",
+            "inputMint": "Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx",
+            "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "inAmount": "23140000",
+            "outAmount": "38700000",
+            "feeAmount": "92560",
+            "feeMint": "Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx"
+          }
+        }
+      ]
+    },
+    {
+      "inputMint": "So11111111111111111111111111111111111111112",
+      "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "inAmount": "2000000000",
+      "outAmount": "38620000",
+      "priceImpactPct": "0.0024",
+      "routePlan": [
+        {
+          "percent": 100,
+          "swapInfo": {
+            "ammKey": "FnAaYH2xfUhJFFj7W2JML4D8XbQWfN2swf3zspu8i7M1",
+            "label": "Raydium",
+            "inputMint": "So11111111111111111111111111111111111111112",
+            "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "inAmount": "2000000000",
+            "outAmount": "38620000",
+            "feeAmount": "5800000",
+            "feeMint": "So11111111111111111111111111111111111111112"
+          }
+        }
+      ]
+    }
+  ]
+}

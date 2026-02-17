@@ -90,7 +90,7 @@ describe("LocalContentService", () => {
   });
 
   it("returns lesson by course slug and ID", async () => {
-    const lesson = await service.getLesson("solana-fundamentals", "first-transaction");
+    const lesson = await service.getLesson("solana-fundamentals", "build-sol-transfer-transaction");
     expect(lesson).not.toBeNull();
     expect(lesson!.type).toBe("challenge");
   });

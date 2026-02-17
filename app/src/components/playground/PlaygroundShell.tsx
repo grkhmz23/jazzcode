@@ -577,13 +577,13 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const terminalHeight = bottomCollapsed ? 0 : 220;
 
   return (
-    <div className="h-[calc(100vh-10rem)] min-h-[680px] w-full overflow-hidden rounded-lg border border-[#2f2f2f] bg-[#1e1e1e] text-[#d4d4d4]">
+    <div className="h-[calc(100vh-10rem)] min-h-[680px] w-full rounded-lg border border-[#2f2f2f] bg-[#1e1e1e] text-[#d4d4d4]">
       <div
         className="hidden h-full lg:grid"
         style={{ gridTemplateColumns: gridColumns, gridTemplateRows: `1fr ${terminalHeight}px 36px` }}
       >
         {!leftCollapsed ? (
-          <div style={{ gridColumn: "1", gridRow: "1 / 3" }}>
+          <div className="overflow-hidden" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
             <FileExplorer
               workspace={workspace}
               tree={tree}
@@ -595,7 +595,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
           </div>
         ) : null}
 
-        <div style={{ gridColumn: "2", gridRow: "1 / 2" }}>
+        <div className="relative" style={{ gridColumn: "2", gridRow: "1 / 2" }}>
           <EditorPane
             workspace={workspace}
             onChangeContent={(path, content) => dispatch({ type: "update_content", path, content })}

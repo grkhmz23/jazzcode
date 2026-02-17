@@ -202,6 +202,14 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         vertical: "auto",
         horizontal: "auto",
       },
+      // Fix suggest widget (autocomplete) overflow issues
+      suggest: {
+        showStatusBar: true,
+        showIcons: true,
+        showSnippets: true,
+      },
+      // Use fixed overflow widgets to prevent clipping
+      fixedOverflowWidgets: true,
     };
 
     // Don't render during SSR

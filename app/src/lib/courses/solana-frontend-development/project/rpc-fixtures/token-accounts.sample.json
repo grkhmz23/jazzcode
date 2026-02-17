@@ -1,0 +1,89 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "context": {
+      "slot": 312345678
+    },
+    "value": [
+      {
+        "pubkey": "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
+        "account": {
+          "lamports": 2039280,
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "data": {
+            "program": "spl-token",
+            "parsed": {
+              "type": "account",
+              "info": {
+                "mint": "So11111111111111111111111111111111111111112",
+                "owner": "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
+                "tokenAmount": {
+                  "amount": "1250000000",
+                  "decimals": 9,
+                  "uiAmount": 1.25,
+                  "uiAmountString": "1.25"
+                }
+              }
+            },
+            "space": 165
+          },
+          "executable": false,
+          "rentEpoch": 381
+        }
+      },
+      {
+        "pubkey": "FnAaYH2xfUhJFFj7W2JML4D8XbQWfN2swf3zspu8i7M1",
+        "account": {
+          "lamports": 2039280,
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "data": {
+            "program": "spl-token",
+            "parsed": {
+              "type": "account",
+              "info": {
+                "mint": "Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx",
+                "owner": "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
+                "tokenAmount": {
+                  "amount": "5025000",
+                  "decimals": 6,
+                  "uiAmount": 5.025,
+                  "uiAmountString": "5.025"
+                }
+              }
+            },
+            "space": 165
+          },
+          "executable": false,
+          "rentEpoch": 381
+        }
+      },
+      {
+        "pubkey": "31HksMdb7GnK2fJj1pJhR2F45Ne2rk87oiK56f2tzA9q",
+        "account": {
+          "lamports": 2039280,
+          "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "data": {
+            "program": "spl-token",
+            "parsed": {
+              "type": "account",
+              "info": {
+                "mint": "4k3Dyjzvzp8eMZWUXb7T4iS4sFyx87Q6L9QmN7A8f7w6",
+                "owner": "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
+                "tokenAmount": {
+                  "amount": "420000000",
+                  "decimals": 5,
+                  "uiAmount": 4200,
+                  "uiAmountString": "4200"
+                }
+              }
+            },
+            "space": 165
+          },
+          "executable": false,
+          "rentEpoch": 381
+        }
+      }
+    ]
+  },
+  "id": 1
+}

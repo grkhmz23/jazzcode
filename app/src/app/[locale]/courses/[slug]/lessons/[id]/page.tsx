@@ -60,6 +60,7 @@ function buildLessonPayload(
       slug: lesson.slug,
       type: toClientLessonType(lesson.type),
       content: lesson.content,
+      blocks: lesson.blocks,
       xpReward: lesson.xpReward,
       challenge: toChallenge(lesson),
     },

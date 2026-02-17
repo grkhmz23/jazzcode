@@ -1,0 +1,9 @@
+{
+  "programId": "VaultProgram111111111111111111111111111111111",
+  "authority": "Auth111111111111111111111111111111111111111",
+  "attacker": "Attacker1111111111111111111111111111111111111",
+  "recipient": "Recipient111111111111111111111111111111111111",
+  "vaultBump": 7,
+  "initialVaultBalance": "1000",
+  "initialRecipientLamports": "10"
+}

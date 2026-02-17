@@ -70,3 +70,26 @@
     background-color: rgba(255, 208, 0, 0.14);
   }
 }
+
+/* Monaco Editor Suggest Widget Fixes */
+@layer components {
+  /* Ensure suggest widget has high z-index and doesn't get clipped */
+  .monaco-editor .suggest-widget {
+    z-index: 100 !important;
+  }
+  
+  /* Fixed overflow widgets container */
+  .monaco-editor .overflowingContentWidgets {
+    z-index: 100 !important;
+  }
+  
+  /* Parameter hints widget */
+  .monaco-editor .parameter-hints-widget {
+    z-index: 100 !important;
+  }
+  
+  /* Hover widget */
+  .monaco-editor .hover-widget {
+    z-index: 100 !important;
+  }
+}

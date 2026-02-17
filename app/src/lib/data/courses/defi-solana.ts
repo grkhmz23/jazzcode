@@ -1,887 +1,453 @@
-import type { Course, Module, Lesson, Challenge } from '@/types/content';
+import type { Challenge, Course, Lesson, Module } from "@/types/content";
+import {
+  lesson4Hints,
+  lesson4SolutionCode,
+  lesson4StarterCode,
+  lesson4TestCases,
+} from "@/lib/courses/defi-on-solana/challenges/lesson-4-quote-cpmm";
+import {
+  lesson5Hints,
+  lesson5SolutionCode,
+  lesson5StarterCode,
+  lesson5TestCases,
+} from "@/lib/courses/defi-on-solana/challenges/lesson-5-router-best";
+import {
+  lesson6Hints,
+  lesson6SolutionCode,
+  lesson6StarterCode,
+  lesson6TestCases,
+} from "@/lib/courses/defi-on-solana/challenges/lesson-6-safety-minout";
+import {
+  lesson8Hints,
+  lesson8SolutionCode,
+  lesson8StarterCode,
+  lesson8TestCases,
+} from "@/lib/courses/defi-on-solana/challenges/lesson-8-checkpoint";
 
 const lesson1: Lesson = {
-  id: 'token-swaps-amms',
-  title: 'Token Swaps & AMMs',
-  slug: 'token-swaps-and-amms',
-  type: 'content',
-  content: `# Token Swaps & AMMs
+  id: "defi-v2-amm-basics-fees-slippage-impact",
+  slug: "defi-v2-amm-basics-fees-slippage-impact",
+  title: "AMM basics on Solana: pools, fees, slippage, and price impact",
+  type: "content",
+  xpReward: 35,
+  duration: "50 min",
+  content: `# AMM basics on Solana: pools, fees, slippage, and price impact
 
-Automated Market Makers (AMMs) form the foundation of DeFi trading. Unlike traditional orderbook exchanges, AMMs use mathematical formulas to price assets and enable permissionless trading without requiring buyers and sellers to match.
+When users click “Swap,” they usually assume there is one objective truth: the current price. In practice, frontend swap systems compute an estimate from pool reserves and route assumptions. The estimate can be excellent, but it is still a model. DeFi UI quality depends on how honestly and consistently that model is represented.
 
-## The Constant Product Formula
+In a constant-product AMM, each pool maintains an invariant close to x * y = k. A swap changes reserves asymmetrically, and the output amount is non-linear relative to input size. Small trades can track spot estimates closely, while larger trades move further along the curve and experience more impact. That non-linearity is why frontend code must never compare routes using only “price per token” labels. You need route-aware output calculations at the target trade size.
 
-The most common AMM model uses the constant product formula: **x * y = k**
+On Solana, swaps also occur across varied pool designs and fee tiers. Some pools are deep and low fee; others are shallow but still attractive for small size due to path composition. Fee bps are often compared in isolation, but total execution quality comes from three interacting pieces: fee deduction, reserve depth, and route hop count. A route with slightly higher fee can still produce higher net output if reserves are materially deeper.
 
-Where:
-- **x**: Reserve of token A
-- **y**: Reserve of token B
-- **k**: Constant product (invariant)
+Slippage and price impact are often conflated in UI copy, but they answer different questions. Price impact asks: what movement does this trade itself induce against current reserves? Slippage tolerance asks: what worst-case output should still be accepted at execution time? One is descriptive of current route mechanics, the other is a user safety bound. Production interfaces should surface both values clearly and compute minOut deterministically from outAmount and slippage bps.
 
-When a trader swaps token A for token B, the product x*y must remain constant (excluding fees). This creates the price curve where larger trades have higher price impact.
+Deterministic arithmetic matters as much as financial logic. If planners use floating-point shortcuts, two environments can produce subtly different minOut values and route ranking. Those tiny differences create major operational pain in tests, incident response, and support reproductions. Integer arithmetic over u64-style amount strings should remain the primary model path; formatting for users should happen only at presentation boundaries.
 
-Price calculation example:
-\`\`\`
-Pool: 1000 SOL + 20000 USDC (k = 20,000,000)
-Trader wants to swap 10 SOL for USDC
+Even in an offline educational planner, safety invariants belong at the core. Outputs must never exceed reserveOut. Reserves must remain non-negative after virtual simulation. Missing pools should fail fast with typed errors, not fallback behavior. These checks mirror production expectations and train the same engineering discipline needed for real integrations.
 
-New SOL reserve: 1000 + 10 = 1010
-New USDC reserve: k / 1010 = 19,801.98
-USDC received: 20,000 - 19,801.98 = 198.02
+A robust frontend mental model is therefore: token universe + pool universe + deterministic quote math + route ranking policy + user safety constraints. If any layer is implicit, the system will still run, but behavior under volatility becomes hard to explain. If all layers are explicit and typed, the same planner can power UI previews, tests, and diagnostics with minimal drift.
 
-Effective price: 198.02 / 10 = 19.802 USDC/SOL
-Spot price before: 20,000 / 1000 = 20 USDC/SOL
-\`\`\`
+### Pitfalls
 
-## Liquidity Pools
+1. Comparing routes by headline “price” instead of exact outAmount at the user’s size.
+2. Treating slippage tolerance as if it were the same metric as price impact.
+3. Using floating point in route ranking or minOut logic.
 
-Users deposit token pairs into liquidity pools and receive LP tokens representing their share:
+### Production Checklist
 
-\`\`\`typescript
-// Calculate LP tokens minted for deposit
-const lpTokens = Math.min(
-  (tokenA_Amount * totalLpSupply) / poolTokenA_Reserve,
-  (tokenB_Amount * totalLpSupply) / poolTokenB_Reserve
-);
-\`\`\`
-
-LP providers earn fees (typically 0.3% per trade) proportional to their share but face **impermanent loss**—the opportunity cost of providing liquidity versus holding tokens.
-
-## Concentrated Liquidity (CLMM)
-
-Orca and Raydium V4 implement concentrated liquidity where LPs specify price ranges. Instead of spreading liquidity across all prices (0 to infinity), LPs concentrate capital where trading happens most:
-
-- Higher capital efficiency (10-100x)
-- Custom price ranges
-- Multiple positions per LP
-- Trading fees only earned within the active range
-
-## MEV on Solana
-
-Maximum Extractable Value (MEV) includes:
-
-**Sandwich Attacks**: Attacker sees large pending swap, front-runs with buy, victim executes at worse price, attacker back-sells for profit.
-
-**Jito Bundles**: Solana's MEV solution bundles transactions atomically, ensuring fair ordering and protecting users from sandwich attacks.
-
-## Slippage & Price Impact
-
-- **Price Impact**: How much the trade moves the pool price (inherent to AMM math)
-- **Slippage Tolerance**: Maximum acceptable price movement between quote and execution (typically 0.5-1%)
-
-Understanding these mechanics is essential for building trading interfaces that protect users from excessive losses.
+1. Keep amount math in integer-safe paths.
+2. Surface outAmount, fee impact, and minOut separately.
+3. Enforce invariant checks for each hop simulation.
+4. Keep route ranking deterministic with explicit tie-breakers.
+5. Log enough context to reproduce route decisions.
 `,
-  xpReward: 30,
-  duration: '30 min',
+  blocks: [
+    {
+      type: "quiz",
+      id: "defi-v2-l1-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "defi-v2-l1-q1",
+          prompt: "Which metric should drive route selection at execution size?",
+          options: [
+            "Deterministic outAmount from full route simulation",
+            "Displayed ticker price only",
+            "Lowest hop count only",
+          ],
+          answerIndex: 0,
+          explanation: "Route quality is output-at-size, not headline spot labels.",
+        },
+        {
+          id: "defi-v2-l1-q2",
+          prompt: "What does slippage tolerance directly determine?",
+          options: [
+            "The minOut acceptance bound",
+            "Pool fee tier",
+            "Route enumeration depth",
+          ],
+          answerIndex: 0,
+          explanation: "minOut is computed from quote outAmount and slippage bps.",
+        },
+      ],
+    },
+  ],
 };
 
 const lesson2: Lesson = {
-  id: 'lending-protocols',
-  title: 'Lending Protocols',
-  slug: 'lending-protocols',
-  type: 'content',
-  content: `# Lending Protocols
+  id: "defi-v2-quote-anatomy-and-risk",
+  slug: "defi-v2-quote-anatomy-and-risk",
+  title: "Quote anatomy: in/out, fees, minOut, and worst-case execution",
+  type: "content",
+  xpReward: 35,
+  duration: "50 min",
+  content: `# Quote anatomy: in/out, fees, minOut, and worst-case execution
 
-Lending protocols enable users to supply assets for yield or borrow assets against collateral. Solana's high throughput makes lending operations efficient and composable across the DeFi ecosystem.
+A production quote is not one number. It is a structured object that must tell users what they send, what they likely receive, how much they pay in fees, and what minimum output protection applies. When frontend systems treat quote payloads as loose JSON blobs, users lose trust quickly because route changes and execution deviations look arbitrary.
 
-## Overcollateralized Lending Model
+The first mandatory fields are inAmount and outAmount in raw integer units. Without raw values, deterministic checks become fragile. UI formatting should be derived from token decimals, but core state should retain raw strings for exact comparisons and invariant logic. If an app compares rounded display numbers, route ties can break unpredictably.
 
-Unlike traditional lending, DeFi loans require collateral worth more than the borrowed amount:
+Second, quote systems should expose fee breakdown per hop. Aggregate fee bps is useful, but it hides which pools drive cost. For route explainability and debugging, users and engineers need pool-level fee contributions. This is particularly important for two-hop routes where one leg may be cheap and the other expensive.
 
-**Example Flow:**
-1. User deposits 100 SOL worth \$10,000 as collateral
-2. Protocol allows borrowing up to 70% LTV (Loan-to-Value) = \$7,000
-3. User borrows 7,000 USDC
-4. User must repay USDC + interest to reclaim SOL
+Third, minOut must be explicit, reproducible, and tied to user-configured slippage bps. The computation is deterministic: floor(outAmount * (10000 - slippageBps) / 10000). Showing this value is not optional for serious UX. It is the user’s principal safety guard against stale quotes and rapid market movement between quote and submission.
 
-## Interest Rate Curves
+Fourth, quote freshness and worst-case framing should be visible. Even in offline training systems, the planner should model the idea that the route is valid for a moment, not forever. In production, stale quote handling and forced re-quote boundaries prevent accidental execution with outdated assumptions.
 
-Borrowing costs follow utilization-based curves:
+A useful engineering pattern is to model quote objects as immutable snapshots. Each snapshot includes selected route, per-hop details, total fees, impact estimate, and minOut. If selection changes, produce a new snapshot instead of mutating fields in place. This gives deterministic audit trails and cleaner state transitions.
 
-\`\`\`
-Utilization = Total Borrowed / Total Supplied
-Borrow APY = Base Rate + (Multiplier * Utilization)
-\`\`\`
+For this course, lesson logic remains offline and deterministic, but the same design prepares teams for real Jupiter integrations later. By the time network adapters are introduced, your model and tests already guarantee stable route math and explainability.
 
-At low utilization (few borrowers), rates are low to attract borrowing. At high utilization, rates spike to attract suppliers and prevent bank runs. Solend and Kamino use dynamic curves that adjust based on market conditions.
+Quote anatomy also influences support burden. When a user asks why they received less than expected, the answer is much faster if the system preserves route path, slippage setting, and minOut from the exact planning state. Without that, teams rely on post-hoc guesses.
 
-## Health Factor & Liquidation
+### Pitfalls
 
-The **Health Factor** measures position safety:
+1. Displaying outAmount without minOut and route-level fees.
+2. Mutating selected quote objects in place instead of creating snapshots.
+3. Computing fee percentages from rounded UI values instead of raw amounts.
 
-\`\`\`
-Health Factor = (Collateral Value * Liquidation Threshold) / Borrowed Value
-Health Factor < 1.0 → Position eligible for liquidation
-\`\`\`
+### Production Checklist
 
-**Liquidation Mechanics:**
-- Liquidators repay a portion of the debt
-- They receive collateral at a discount (liquidation bonus, typically 5-10%)
-- This incentivizes liquidators to monitor and close risky positions
-- Liquidation threshold is typically lower than max LTV to create a safety buffer
-
-## Flash Loans
-
-Solana supports flash loans—borrow assets without collateral, use them in same transaction, repay plus fee. If not repaid, transaction reverts atomically. Common uses:
-
-- Arbitrage between DEXs
-- Collateral swapping
-- Self-liquidation
-- Yield farming optimization
-
-## Protocol Comparison
-
-| Protocol | Max LTV | Liquidation Bonus | Unique Features |
-|----------|---------|-------------------|-----------------|
-| Solend | 75% | 5% | Isolated pools, mSOL rewards |
-| MarginFi | 80% | 2.5% | Native yield bearing deposits |
-| Kamino | 85% | 5% | Automated vault strategies |
-
-Lending protocol integration requires careful monitoring of health factors and liquidation risks.
+1. Keep quote payloads immutable and versioned.
+2. Store per-hop fee contributions and total fee amount.
+3. Compute and show minOut from explicit slippage bps.
+4. Preserve raw amounts and decimals separately.
+5. Expose route freshness metadata in UI state.
 `,
-  xpReward: 30,
-  duration: '30 min',
+  blocks: [
+    {
+      type: "explorer",
+      id: "defi-v2-l2-explorer",
+      title: "Quote Account Snapshot",
+      explorer: "AccountExplorer",
+      props: {
+        samples: [
+          {
+            label: "Pool SOL/USDC Vault A",
+            address: "PoolVaultSol1111111111111111111111111111111111",
+            lamports: 1000000000,
+            owner: "AMMProgram1111111111111111111111111111111111",
+            executable: false,
+            dataLen: 256,
+          },
+          {
+            label: "Pool SOL/USDC Vault B",
+            address: "PoolVaultUsdc11111111111111111111111111111111",
+            lamports: 230000000,
+            owner: "AMMProgram1111111111111111111111111111111111",
+            executable: false,
+            dataLen: 256,
+          },
+        ],
+      },
+    },
+    {
+      type: "quiz",
+      id: "defi-v2-l2-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "defi-v2-l2-q1",
+          prompt: "What is the deterministic minOut formula?",
+          options: [
+            "floor(outAmount * (10000 - slippageBps) / 10000)",
+            "outAmount + slippageBps",
+            "floor(outAmount / slippageBps)",
+          ],
+          answerIndex: 0,
+          explanation: "minOut is a bounded percentage reduction from outAmount.",
+        },
+        {
+          id: "defi-v2-l2-q2",
+          prompt: "Why keep per-hop fee breakdowns?",
+          options: [
+            "For explainability and debugging route-level cost",
+            "Only for CSS rendering",
+            "To replace route IDs",
+          ],
+          answerIndex: 0,
+          explanation: "Per-hop fee attribution makes route behavior auditable.",
+        },
+      ],
+    },
+  ],
 };
 
 const lesson3: Lesson = {
-  id: 'oracles-price-feeds',
-  title: 'Oracles & Price Feeds',
-  slug: 'oracles-and-price-feeds',
-  type: 'content',
-  content: `# Oracles & Price Feeds
+  id: "defi-v2-routing-fragmentation-two-hop",
+  slug: "defi-v2-routing-fragmentation-two-hop",
+  title: "Routing: why two-hop can beat one-hop",
+  type: "content",
+  xpReward: 35,
+  duration: "50 min",
+  content: `# Routing: why two-hop can beat one-hop
 
-DeFi protocols need accurate price data to determine collateral values, liquidations, and swap rates. Blockchains cannot natively access external market data—this is the **oracle problem** that Pyth and Switchboard solve.
+Users often assume direct pair routes are always best because they are simpler. In fragmented liquidity systems, that assumption fails frequently. A direct SOL -> JUP pool might have shallow depth, while SOL -> USDC and USDC -> JUP pools together can produce better net output despite two fees and two curve traversals. A production router should evaluate both one-hop and two-hop candidates and rank them deterministically.
 
-## Why DeFi Needs Oracles
+The engineering challenge is not just finding paths. It is comparing paths under consistent assumptions. Every candidate should be quoted with the same input amount, same deterministic arithmetic, and same fee/impact accounting. If one path uses rounded display math while another uses raw amounts, route ranking loses meaning.
 
-Without external price feeds:
-- Lending protocols cannot value collateral
-- AMMs cannot detect arbitrage opportunities
-- Perpetual exchanges cannot mark positions to market
-- Stablecoins cannot maintain pegs
+Two-hop routing also requires stable tie-break policies. Suppose two candidates produce equal outAmount at integer precision. One has one hop; the other has two hops. A deterministic system should prefer fewer hops. If hop count also ties, lexicographic route ID ordering can resolve final rank. The exact policy can vary, but it must be explicit and stable.
 
-On-chain manipulation is trivial (single large trade), so protocols rely on off-chain oracle networks.
+Liquidity fragmentation introduces another subtle point: intermediate mint risk. A two-hop path through a highly liquid stable pair can be excellent, but if the second pool is thin, the route can still degrade at larger sizes. This is why route scoring should be quote-size aware and not reused blindly across different trade amounts.
 
-## Pyth Network (Pull Oracle)
+For offline course logic, we model pools as a static universe and simulate reserves virtually per quote path. Even this simplified model teaches key production habits: avoid mutating source fixtures, isolate simulation state per candidate, and validate safety constraints at each hop.
 
-Pyth uses a **pull model** where protocols request prices when needed rather than having prices pushed continuously.
+Routing quality is also a UX problem. If a selected route changes due to input edits or quote refresh, users should see why: outAmount delta, fee change, and path change. Silent route switching feels suspicious even when mathematically correct.
 
-**Price Account Structure:**
-\`\`\`typescript
-interface PriceData {
-  price: bigint;        // Current price (integer representation)
-  confidence: bigint;   // Uncertainty range (95% confidence)
-  exponent: number;     // Price = price * 10^exponent
-  status: number;       // 1=trading, 2=auction, 3=halted
-  publishTime: bigint;  // Unix timestamp of last update
-}
-\`\`\`
+In larger systems, routers may consider split routes, gas/compute constraints, or venue reliability. This course intentionally limits scope to one-hop and two-hop deterministic candidates so core reasoning remains clear and testable.
 
-**Using @pythnetwork/price-service-client:**
+From an implementation perspective, route objects should be treated as typed artifacts with stable IDs and explicit hop metadata. That discipline reduces accidental coupling between UI state and planner internals. When engineers can serialize a route candidate, replay it with the same input, and get the same result, incident response becomes straightforward.
 
-\`\`\`typescript
-import { PriceServiceConnection } from '@pythnetwork/price-service-client';
-import { PublicKey } from '@solana/web3.js';
+### Pitfalls
 
-const connection = new PriceServiceConnection('https://hermes.pyth.network');
+1. Assuming direct pairs always outperform multi-hop routes.
+2. Reusing quotes computed for one trade size at another size.
+3. Non-deterministic tie-breaking that causes route flicker.
 
-// SOL/USD price feed ID
-const SOL_PRICE_FEED_ID = '0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d';
+### Production Checklist
 
-async function getSolPrice() {
-  const priceFeeds = await connection.getLatestPriceFeeds([SOL_PRICE_FEED_ID]);
-  const feed = priceFeeds[0];
-  
-  const price = feed.getPriceUnchecked();
-  const readablePrice = Number(price.price) * Math.pow(10, price.exponent);
-  const confidence = Number(price.confidence) * Math.pow(10, price.exponent);
-  
-  console.log(\`SOL/USD: \$\${readablePrice} ± \$\${confidence}\`);
-  
-  // Check confidence interval
-  if (confidence / readablePrice > 0.01) { // >1% uncertainty
-    console.warn('High price uncertainty!');
-  }
-  
-  return { price: readablePrice, confidence };
-}
-\`\`\`
-
-## Switchboard (Push Oracle)
-
-Switchboard uses a **push model** where oracles continuously update on-chain:
-
-- **Oracle Queues**: Validators stake tokens and run oracle software
-- **Aggregators**: Combine multiple data sources (CEX, DEX, aggregators)
-- **VRF**: Verifiable Random Function for on-chain randomness
-
-## Oracle Attacks & Mitigations
-
-**Flash Loan Manipulation**: Attacker borrows millions to manipulate on-chain price for single block.
-**Mitigation**: Use time-weighted average prices (TWAP), multi-source aggregation.
-
-**Outdated Prices**: Stale data during volatility.
-**Mitigation**: Confidence intervals, max staleness checks.
-
-**Single Source Failure**: One exchange glitching.
-**Mitigation**: Pyth aggregates 40+ sources, Switchboard uses multiple oracles.
-
-## Best Practices
-
-- Always check confidence intervals
-- Implement circuit breakers for extreme deviations
-- Use multiple oracle providers for critical systems
-- Validate price freshness with publishTime
+1. Enumerate one-hop and two-hop routes systematically.
+2. Quote every candidate with the same deterministic math path.
+3. Keep tie-break policy explicit and stable.
+4. Simulate virtual reserves without mutating source fixtures.
+5. Surface route-change reasons in UI.
 `,
-  xpReward: 30,
-  duration: '30 min',
+  blocks: [
+    {
+      type: "quiz",
+      id: "defi-v2-l3-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "defi-v2-l3-q1",
+          prompt: "What is the primary ranking objective in this course router?",
+          options: [
+            "Maximize outAmount",
+            "Minimize hop count always",
+            "Choose first enumerated route",
+          ],
+          answerIndex: 0,
+          explanation: "outAmount is primary; hops and route ID are tie-breakers.",
+        },
+        {
+          id: "defi-v2-l3-q2",
+          prompt: "Why simulate virtual reserves per candidate route?",
+          options: [
+            "To keep route quotes deterministic and independent",
+            "To avoid computing fees",
+            "To bypass slippage bounds",
+          ],
+          answerIndex: 0,
+          explanation: "Virtual simulation avoids shared-state contamination.",
+        },
+      ],
+    },
+  ],
 };
 
+const lesson4: Challenge = {
+  id: "defi-v2-quote-cpmm",
+  slug: "defi-v2-quote-cpmm",
+  title: "Implement token/pool model + constant-product quote calc",
+  type: "challenge",
+  xpReward: 45,
+  duration: "35 min",
+  content: `# Implement token/pool model + constant-product quote calc
 
-const lesson4: Lesson = {
-  id: 'integrating-jupiter',
-  title: 'Integrating Jupiter',
-  slug: 'integrating-jupiter',
-  type: 'content',
-  content: `# Integrating Jupiter
-
-Jupiter is Solana's premier DEX aggregator, routing trades across all major liquidity sources to find the best prices. The Jupiter v6 API provides programmatic access to swap routing for dApp integrations.
-
-## Jupiter API Overview
-
-**Base URL**: \`https://quote-api.jup.ag/v6\`
-
-The swap flow has two steps:
-1. **Quote**: Get route information (price, slippage, route)
-2. **Swap**: Get transaction for user to sign and send
-
-## Getting a Quote
-
-**GET /quote** endpoint parameters:
-
-\`\`\`typescript
-interface QuoteParams {
-  inputMint: string;      // Token to sell (e.g., SOL mint)
-  outputMint: string;     // Token to buy (e.g., USDC mint)
-  amount: string;         // Amount in input token's smallest unit (lamports)
-  slippageBps: number;    // Slippage tolerance in basis points (50 = 0.5%)
-  onlyDirectRoutes?: boolean; // Skip intermediate hops
-  asLegacyTransaction?: boolean; // Use legacy vs versioned tx
-  platformFeeBps?: number;  // Platform fee (e.g., 25 = 0.25%)
-}
-\`\`\`
-
-**Quote Response:**
-
-\`\`\`typescript
-interface QuoteResponse {
-  inputMint: string;
-  outputMint: string;
-  inAmount: string;
-  outAmount: string;
-  otherAmountThreshold: string; // Min out with slippage
-  swapMode: 'ExactIn' | 'ExactOut';
-  slippageBps: number;
-  priceImpactPct: string;
-  routePlan: Array<{
-    swapInfo: {
-      ammKey: string;
-      label: string;  // e.g., "Raydium", "Orca"
-      inputMint: string;
-      outputMint: string;
-      inAmount: string;
-      outAmount: string;
-      feeAmount: string;
-      feeMint: string;
-    };
-    percent: number;
-  }>;
-}
-\`\`\`
-
-## Complete Swap Flow
-
-\`\`\`typescript
-import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js';
-import { WalletContextState } from '@solana/wallet-adapter-react';
-
-const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
-const JUPITER_SWAP_API = 'https://quote-api.jup.ag/v6/swap';
-
-const SOL_MINT = 'So11111111111111111111111111111111111111112';
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-async function executeSwap(
-  wallet: WalletContextState,
-  connection: Connection,
-  amountLamports: number
-) {
-  // Step 1: Get quote
-  const quoteParams = new URLSearchParams({
-    inputMint: SOL_MINT,
-    outputMint: USDC_MINT,
-    amount: amountLamports.toString(),
-    slippageBps: '50', // 0.5%
-  });
-
-  const quoteRes = await fetch(\`\${JUPITER_QUOTE_API}?\${quoteParams}\`);
-  const quote: QuoteResponse = await quoteRes.json();
-
-  console.log('Expected output:', quote.outAmount);
-  console.log('Price impact:', quote.priceImpactPct, '%');
-  console.log('Route:', quote.routePlan.map(r => r.swapInfo.label).join(' -> '));
-
-  // Step 2: Get swap transaction
-  const swapBody = {
-    quoteResponse: quote,
-    userPublicKey: wallet.publicKey!.toBase58(),
-    wrapAndUnwrapSol: true, // Auto-wrap/unwrap SOL
-    feeAccount: undefined,  // Set if collecting platform fees
-  };
-
-  const swapRes = await fetch(JUPITER_SWAP_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(swapBody),
-  });
-
-  const { swapTransaction } = await swapRes.json();
-
-  // Step 3: Deserialize and sign
-  const transaction = VersionedTransaction.deserialize(
-    Buffer.from(swapTransaction, 'base64')
-  );
-
-  const signed = await wallet.signTransaction!(transaction);
-
-  // Step 4: Send and confirm
-  const signature = await connection.sendTransaction(signed, {
-    maxRetries: 3,
-    skipPreflight: false,
-  });
-
-  await connection.confirmTransaction(signature, 'confirmed');
-  
-  return signature;
-}
-\`\`\`
-
-## Jupiter SDK
-
-For React apps, use the official SDK:
-
-\`\`\`bash
-npm install @jup-ag/react-hook
-\`\`\`
-
-\`\`\`typescript
-import { useJupiter } from '@jup-ag/react-hook';
-
-function SwapComponent() {
-  const { routeMap, getQuote, executeSwap } = useJupiter({
-    connection,
-    routeCacheDuration: 10000, // Cache routes for 10s
-  });
-
-  // Get available input tokens
-  const inputTokens = routeMap.getInputTokens();
-}
-\`\`\`
-
-## Advanced Features
-
-**Strict Token List**: Filter to validated tokens only:
-\`\`\`
-strictTokenList=true
-\`\`\`
-
-**Direct Routes Only**: Skip intermediate swaps:
-\`\`\`
-onlyDirectRoutes=true
-\`\`\`
-
-Jupiter's aggregation provides better prices than any single DEX, making it essential for DeFi applications.
+Implement deterministic CPMM quoting:
+- out = (reserveOut * inAfterFee) / (reserveIn + inAfterFee)
+- fee = floor(inAmount * feeBps / 10000)
+- impactBps from spot vs effective execution price
+- return outAmount, feeAmount, inAfterFee, impactBps
 `,
-  xpReward: 35,
-  duration: '30 min',
+  language: "typescript",
+  starterCode: lesson4StarterCode,
+  testCases: lesson4TestCases,
+  hints: lesson4Hints,
+  solution: lesson4SolutionCode,
 };
 
-const lesson5: Lesson = {
-  id: 'building-a-vault',
-  title: 'Building a Vault',
-  slug: 'building-a-vault',
-  type: 'content',
-  content: `# Building a Vault
+const lesson5: Challenge = {
+  id: "defi-v2-router-best",
+  slug: "defi-v2-router-best",
+  title: "Implement route enumeration and best-route selection",
+  type: "challenge",
+  xpReward: 45,
+  duration: "35 min",
+  content: `# Implement route enumeration and best-route selection
 
-Vaults are smart contracts that accept deposits, issue share tokens, and deploy capital into yield strategies. They're the foundation of yield aggregators like Kamino and Tulip.
-
-## Vault Architecture
-
-**Core Components:**
-
-\`\`\`rust
-#[account]
-pub struct Vault {
-    pub authority: Pubkey,           // Admin address
-    pub token_mint: Pubkey,          // Underlying asset (e.g., USDC)
-    pub share_mint: Pubkey,          // Vault share token (e.g., vUSDC)
-    pub total_deposits: u64,         // Total assets under management
-    pub total_shares: u64,           // Total share token supply
-    pub strategies: Vec<Pubkey>,     // Approved strategy accounts
-    pub performance_fee_bps: u16,    // Fee on yield (e.g., 1000 = 10%)
-    pub management_fee_bps: u16,     // Annual fee on AUM (e.g., 100 = 1%)
-    pub bump: u8,
-}
-
-#[account]
-pub struct Strategy {
-    pub vault: Pubkey,
-    pub protocol: String,           // e.g., "Solend", "Raydium"
-    pub allocation_bps: u16,        // Percentage of funds (10000 = 100%)
-    pub total_deposited: u64,
-    pub is_active: bool,
-}
-\`\`\`
-
-## Deposit Flow
-
-When users deposit, the vault:
-1. Transfers tokens from user to vault
-2. Calculates shares to mint: \`shares = deposit_amount * total_shares / total_deposits\`
-3. Mints share tokens to user
-4. Updates total_deposits
-
-\`\`\`rust
-pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
-    let vault = &mut ctx.accounts.vault;
-    let user_shares = &mut ctx.accounts.user_shares;
-    
-    // Transfer tokens to vault
-    token::transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.user_token_account.to_account_info(),
-                to: ctx.accounts.vault_token_account.to_account_info(),
-                authority: ctx.accounts.user.to_account_info(),
-            },
-        ),
-        amount,
-    )?;
-    
-    // Calculate shares
-    let shares_to_mint = if vault.total_shares == 0 {
-        amount // First deposit gets 1:1 shares
-    } else {
-        amount.checked_mul(vault.total_shares)
-            .unwrap()
-            .checked_div(vault.total_deposits)
-            .unwrap()
-    };
-    
-    // Mint share tokens
-    token::mint_to(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            MintTo {
-                mint: ctx.accounts.share_mint.to_account_info(),
-                to: user_shares.to_account_info(),
-                authority: ctx.accounts.vault.to_account_info(),
-            },
-            &[&[b"vault", vault.token_mint.as_ref(), &[vault.bump]]],
-        ),
-        shares_to_mint,
-    )?;
-    
-    vault.total_deposits = vault.total_deposits.checked_add(amount).unwrap();
-    vault.total_shares = vault.total_shares.checked_add(shares_to_mint).unwrap();
-    
-    Ok(())
-}
-\`\`\`
-
-## Share Price Calculation
-
-Share price represents the value of one share in underlying tokens:
-
-\`\`\`
-Share Price = Total Assets / Total Shares
-
-Example:
-- Vault has 10,000 USDC
-- 9,000 shares outstanding
-- Share price = 1.111 USDC per share
-
-User redeems 100 shares → receives 111.11 USDC
-\`\`\`
-
-## Withdraw Flow
-
-1. Burn user's share tokens
-2. Calculate redemption: \`amount = shares * total_deposits / total_shares\`
-3. Withdraw from strategies (may involve strategy-specific logic)
-4. Transfer tokens to user
-
-## Fee Structure
-
-**Management Fee**: Charged on AUM annually
-\`\`\`rust
-let management_fee = vault.total_deposits
-    .checked_mul(vault.management_fee_bps)
-    .unwrap()
-    .checked_div(10000)
-    .unwrap()
-    .checked_div(365) // Daily accrual
-    .unwrap();
-\`\`\`
-
-**Performance Fee**: Charged on yield
-\`\`\`rust
-let yield_earned = current_value - previous_value;
-let performance_fee = yield_earned
-    .checked_mul(vault.performance_fee_bps)
-    .unwrap()
-    .checked_div(10000)
-    .unwrap();
-\`\`\`
-
-## Security Considerations
-
-- **Reentrancy**: Use checks-effects-interactions pattern
-- **Oracle Dependency**: Use multiple price sources
-- **Access Control**: Restrict strategy management to multisig
-- **Emergency Pause**: Circuit breaker for extreme conditions
-
-Vaults abstract yield complexity from users while taking fees for management—a sustainable DeFi business model.
+Implement deterministic route planner:
+- enumerate one-hop and two-hop candidates
+- quote each candidate at exact input size
+- select best route using stable tie-breakers
 `,
-  xpReward: 35,
-  duration: '30 min',
+  language: "typescript",
+  starterCode: lesson5StarterCode,
+  testCases: lesson5TestCases,
+  hints: lesson5Hints,
+  solution: lesson5SolutionCode,
 };
 
 const lesson6: Challenge = {
-  id: 'build-a-swap-ui',
-  title: 'Build a Swap UI',
-  slug: 'build-a-swap-ui',
-  type: 'challenge',
-  content: `# Build a Swap UI
+  id: "defi-v2-safety-minout",
+  slug: "defi-v2-safety-minout",
+  title: "Implement slippage/minOut, fee breakdown, and safety invariants",
+  type: "challenge",
+  xpReward: 45,
+  duration: "35 min",
+  content: `# Implement slippage/minOut, fee breakdown, and safety invariants
 
-In this challenge, you will build a complete swap interface using Jupiter's v6 API. The component will allow users to swap SOL for USDC with real-time quotes and transaction execution.
-
-## Challenge
-
-Complete the SwapComponent below. The wallet connection and basic UI structure are provided. You need to:
-
-1. Call Jupiter /quote API when the user enters an amount
-2. Display the quote information (expected output, price impact, route)
-3. Call /swap endpoint to get the transaction
-4. Sign and send the transaction using the wallet
-
-## Requirements
-
-- Handle loading states during API calls
-- Display human-readable amounts (not raw lamports)
-- Show error messages if the swap fails
-- Display a link to the transaction on Solana Explorer after success
+Implement deterministic safety layer:
+- apply slippage to compute minOut
+- simulate route with virtual reserve updates
+- return structured errors for invalid pools/routes
+- enforce non-negative reserve and bounded output invariants
 `,
-  xpReward: 150,
-  duration: '30 min',
-  starterCode: `import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { VersionedTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { useState, useCallback } from 'react';
-
-const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
-const JUPITER_SWAP_API = 'https://quote-api.jup.ag/v6/swap';
-const SOL_MINT = 'So11111111111111111111111111111111111111112';
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-export function SwapComponent() {
-  const { publicKey, signTransaction } = useWallet();
-  const { connection } = useConnection();
-  
-  const [amount, setAmount] = useState('');
-  const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [txSignature, setTxSignature] = useState<string | null>(null);
-
-  // TODO: Fetch quote from Jupiter when amount changes
-  const fetchQuote = useCallback(async (solAmount: string) => {
-    // Convert SOL to lamports
-    // Call Jupiter /quote API
-    // Set quote state
-  }, []);
-
-  // TODO: Execute the swap
-  const executeSwap = async () => {
-    if (!quote || !publicKey || !signTransaction) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Call Jupiter /swap API with quoteResponse and userPublicKey
-      // Deserialize the transaction (VersionedTransaction.deserialize)
-      // Sign the transaction
-      // Send and confirm
-      // Set txSignature for success display
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Swap failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!publicKey) {
-    return <p>Connect wallet to swap</p>;
-  }
-
-  return (
-    <div className="swap-container">
-      <h2>Swap SOL → USDC</h2>
-      
-      <div>
-        <input
-          type="number"
-          placeholder="Amount in SOL"
-          value={amount}
-          onChange={(e) => {
-            setAmount(e.target.value);
-            fetchQuote(e.target.value);
-          }}
-        />
-      </div>
-
-      {quote && (
-        <div className="quote-info">
-          {/* TODO: Display quote details */}
-          {/* Show expected USDC output */}
-          {/* Show price impact */}
-          {/* Show route info */}
-        </div>
-      )}
-
-      <button 
-        onClick={executeSwap} 
-        disabled={!quote || loading}
-      >
-        {loading ? 'Swapping...' : 'Swap'}
-      </button>
-
-      {error && <p className="error">{error}</p>}
-      
-      {txSignature && (
-        <a 
-          href={\`https://explorer.solana.com/tx/\${txSignature}?cluster=devnet\`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View on Explorer
-        </a>
-      )}
-    </div>
-  );
-}
-
-interface QuoteResponse {
-  outAmount: string;
-  priceImpactPct: string;
-  routePlan: Array<{ swapInfo: { label: string } }>;
-}`,
-  language: 'typescript',
-  testCases: [
-    {
-      name: 'Fetches quote correctly',
-      input: 'amount: 1 SOL',
-      expectedOutput: 'quote.outAmount is set with expected USDC',
-    },
-    {
-      name: 'Displays swap details',
-      input: 'valid quote',
-      expectedOutput: 'price impact and route are shown',
-    },
-    {
-      name: 'Handles errors gracefully',
-      input: 'invalid amount or network error',
-      expectedOutput: 'error message displayed to user',
-    },
-  ],
-  hints: [
-    'Convert SOL to lamports: Number(solAmount) * LAMPORTS_PER_SOL',
-    'Jupiter quote URL: \`\${JUPITER_QUOTE_API}?inputMint=\${SOL_MINT}&outputMint=\${USDC_MINT}&amount=\${lamports}&slippageBps=50\`',
-    'Deserialize swap transaction: VersionedTransaction.deserialize(Buffer.from(swapTransaction, \'base64\'))',
-    'Always set slippageBps (50 = 0.5% slippage tolerance)',
-    'Convert output amount from USDC (6 decimals): (Number(quote.outAmount) / 1e6).toFixed(2)',
-  ],
-  solution: `import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { VersionedTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { useState, useCallback } from 'react';
-
-const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
-const JUPITER_SWAP_API = 'https://quote-api.jup.ag/v6/swap';
-const SOL_MINT = 'So11111111111111111111111111111111111111112';
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-export function SwapComponent() {
-  const { publicKey, signTransaction } = useWallet();
-  const { connection } = useConnection();
-  
-  const [amount, setAmount] = useState('');
-  const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [txSignature, setTxSignature] = useState<string | null>(null);
-
-  const fetchQuote = useCallback(async (solAmount: string) => {
-    if (!solAmount || Number(solAmount) <= 0) {
-      setQuote(null);
-      return;
-    }
-    
-    try {
-      const lamports = Math.floor(Number(solAmount) * LAMPORTS_PER_SOL);
-      const params = new URLSearchParams({
-        inputMint: SOL_MINT,
-        outputMint: USDC_MINT,
-        amount: lamports.toString(),
-        slippageBps: '50',
-      });
-      
-      const response = await fetch(\`\${JUPITER_QUOTE_API}?\${params}\`);
-      const data = await response.json();
-      setQuote(data);
-    } catch (err) {
-      console.error('Quote error:', err);
-      setQuote(null);
-    }
-  }, []);
-
-  const executeSwap = async () => {
-    if (!quote || !publicKey || !signTransaction) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Get swap transaction
-      const response = await fetch(JUPITER_SWAP_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          quoteResponse: quote,
-          userPublicKey: publicKey.toBase58(),
-          wrapAndUnwrapSol: true,
-        }),
-      });
-      
-      const { swapTransaction } = await response.json();
-      
-      // Deserialize and sign
-      const transaction = VersionedTransaction.deserialize(
-        Buffer.from(swapTransaction, 'base64')
-      );
-      
-      const signed = await signTransaction(transaction);
-      
-      // Send transaction
-      const signature = await connection.sendTransaction(signed, {
-        maxRetries: 3,
-      });
-      
-      await connection.confirmTransaction(signature, 'confirmed');
-      setTxSignature(signature);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Swap failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!publicKey) {
-    return <p>Connect wallet to swap</p>;
-  }
-
-  const expectedOutput = quote 
-    ? (Number(quote.outAmount) / 1e6).toFixed(2)
-    : null;
-
-  return (
-    <div className="swap-container">
-      <h2>Swap SOL → USDC</h2>
-      
-      <div>
-        <input
-          type="number"
-          placeholder="Amount in SOL"
-          value={amount}
-          onChange={(e) => {
-            setAmount(e.target.value);
-            fetchQuote(e.target.value);
-          }}
-        />
-      </div>
-
-      {quote && expectedOutput && (
-        <div className="quote-info">
-          <p>Expected output: {expectedOutput} USDC</p>
-          <p>Price impact: {Number(quote.priceImpactPct).toFixed(4)}%</p>
-          <p>Route: {quote.routePlan.map(r => r.swapInfo.label).join(' → ')}</p>
-        </div>
-      )}
-
-      <button 
-        onClick={executeSwap} 
-        disabled={!quote || loading}
-      >
-        {loading ? 'Swapping...' : 'Swap'}
-      </button>
-
-      {error && <p className="error">{error}</p>}
-      
-      {txSignature && (
-        <a 
-          href={\`https://explorer.solana.com/tx/\${txSignature}?cluster=devnet\`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View on Explorer
-        </a>
-      )}
-    </div>
-  );
-}
-
-interface QuoteResponse {
-  outAmount: string;
-  priceImpactPct: string;
-  routePlan: Array<{ swapInfo: { label: string } }>;
-}`,
+  language: "typescript",
+  starterCode: lesson6StarterCode,
+  testCases: lesson6TestCases,
+  hints: lesson6Hints,
+  solution: lesson6SolutionCode,
 };
 
+const lesson7: Lesson = {
+  id: "defi-v2-production-swap-ux",
+  slug: "defi-v2-production-swap-ux",
+  title: "Production swap UX: stale quotes, protection, and simulation",
+  type: "content",
+  xpReward: 35,
+  duration: "50 min",
+  content: `# Production swap UX: stale quotes, protection, and simulation
+
+A deterministic route engine is necessary but not sufficient for production. Users experience DeFi through timing, messaging, and safety affordances. A mathematically correct planner can still feel broken if stale quote handling, retry behavior, and error communication are weak.
+
+Stale quotes are the most common operational issue. In volatile markets, quote quality decays quickly. Interfaces should track quote age and invalidate plans beyond a strict threshold. When invalidation happens, route and minOut should be recomputed before submit. Reusing stale plans to “speed up” UX usually creates worse outcomes and support burden.
+
+User protection should be layered. Slippage bounds protect against adverse movement, but they do not protect against malformed route payloads or mismatched account assumptions. Safety validation should run before any wallet prompt and should return explicit, typed errors. “Something went wrong” is not enough in swap flows.
+
+Simulation messaging matters as much as simulation itself. If route simulation fails pre-send, users need actionable context: which hop failed, whether pool liquidity was insufficient, whether the route is missing required pools, and whether re-quoting could help. Generic error banners create user churn.
+
+Retry logic must be bounded and stateful. Blind retries with unchanged input are often just repeated failures. Good UX distinguishes retryable states (temporary network issue) from deterministic planner errors (invalid route topology). For deterministic planner errors, force state change before retry.
+
+Another production concern is observability. Record route ID, inAmount, outAmount, minOut, fee totals, and invariant results for each attempt. These logs make incident triage and postmortems dramatically faster. Without structured traces, teams often blame “market conditions” for planner bugs.
+
+Pagination and list updates also affect trust. Swap history UIs should preserve deterministic ordering and avoid jitter when data refreshes. If past swaps reorder unpredictably, users perceive reliability issues even when transactions are correct.
+
+Optional live integrations should be feature-flagged and isolated. The offline deterministic engine should remain the source of truth, while live adapters map external responses into the same internal types. That boundary keeps tests stable and protects core behavior from third-party schema changes.
+
+Finally, production swap UX should make deterministic planner outcomes explainable to non-expert users. If a route is rejected, the interface should provide a concrete reason and a clear next action such as reducing size or selecting a different output token. Clear messaging converts system correctness into user trust.
+
+### Pitfalls
+
+1. Allowing stale quotes to remain actionable without forced re-quote.
+2. Retrying deterministic planner errors without changing route or inputs.
+3. Hiding failure reason details behind generic notifications.
+
+### Production Checklist
+
+1. Track quote freshness and invalidate aggressively.
+2. Enforce pre-submit invariant validation.
+3. Separate retryable network failures from deterministic planner failures.
+4. Log route and safety metadata for every attempt.
+5. Keep offline engine as canonical model for optional live adapters.
+`,
+  blocks: [
+    {
+      type: "quiz",
+      id: "defi-v2-l7-quiz",
+      title: "Concept Check",
+      questions: [
+        {
+          id: "defi-v2-l7-q1",
+          prompt: "What should happen when quote freshness expires?",
+          options: [
+            "Re-quote and recompute route/minOut before submit",
+            "Submit with stale plan",
+            "Increase slippage automatically without notifying user",
+          ],
+          answerIndex: 0,
+          explanation: "Freshness boundaries should trigger deterministic recomputation.",
+        },
+        {
+          id: "defi-v2-l7-q2",
+          prompt: "Which failures are not solved by blind retries?",
+          options: [
+            "Deterministic planner and invariant failures",
+            "Transient network congestion",
+            "Temporary RPC timeout",
+          ],
+          answerIndex: 0,
+          explanation: "Planner errors require input/route changes, not repetition.",
+        },
+      ],
+    },
+  ],
+};
+
+const lesson8: Challenge = {
+  id: "defi-v2-checkpoint",
+  slug: "defi-v2-checkpoint",
+  title: "Produce stable SwapPlan + SwapSummary checkpoint",
+  type: "challenge",
+  xpReward: 60,
+  duration: "45 min",
+  content: `# Produce stable SwapPlan + SwapSummary checkpoint
+
+Compose deterministic checkpoint artifacts:
+- build swap plan from selected route quote
+- include fixtureHash and modelVersion
+- emit stable summary with path, minOut, fee totals, impact, and invariants
+`,
+  language: "typescript",
+  starterCode: lesson8StarterCode,
+  testCases: lesson8TestCases,
+  hints: lesson8Hints,
+  solution: lesson8SolutionCode,
+};
 
 const module1: Module = {
-  id: 'module-1-defi-primitives',
-  title: 'DeFi Primitives',
-  description: '',
+  id: "defi-v2-module-swap-fundamentals",
+  title: "Swap Fundamentals",
+  description: "Understand CPMM math, quote semantics, and deterministic routing tradeoffs.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
-  id: 'module-2-building-defi',
-  title: 'Building DeFi',
-  description: '',
-  lessons: [lesson4, lesson5, lesson6],
+  id: "defi-v2-module-offline-jupiter-planner",
+  title: "Jupiter-Style Swap Planner Project (Offline)",
+  description: "Build deterministic quoting, route selection, safety checks, and final checkpoint outputs.",
+  lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
 export const defiSolanaCourse: Course = {
-  id: 'course-defi-solana',
-  title: 'DeFi on Solana',
-  slug: 'defi-solana',
+  id: "course-defi-solana",
+  slug: "defi-solana",
+  title: "DeFi on Solana",
   description:
-    'Understand and build DeFi applications on Solana. Learn about AMMs, lending, oracles, Jupiter integration, and vault program design.',
-  difficulty: 'advanced',
-  duration: '12 hours',
-  totalXP: 310,
-  imageUrl: '/images/courses/defi-solana.jpg',
+    "Project-journey course: build a deterministic offline Jupiter-style swap planner with route ranking, minOut safety, and stable checkpoint outputs.",
+  difficulty: "advanced",
+  duration: "12 hours",
+  totalXP: 335,
+  imageUrl: "/images/courses/defi-solana.jpg",
+  tags: ["defi", "swap", "routing", "jupiter", "offline", "deterministic"],
   modules: [module1, module2],
-  tags: ['defi', 'jupiter', 'trading', 'advanced'],
 };
