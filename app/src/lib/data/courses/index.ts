@@ -31,6 +31,7 @@ import { rustPerfOnchainThinkingCourse } from './rust-perf-onchain-thinking';
 import { rustAsyncIndexerPipelineCourse } from './rust-async-indexer-pipeline';
 import { rustProcMacrosCodegenSafetyCourse } from './rust-proc-macros-codegen-safety';
 import { anchorUpgradesMigrationsCourse } from './anchor-upgrades-migrations';
+import { solanaCourses10To18 } from './solana-courses-10-18';
 import type { Course } from '@/types/content';
 
 /**
@@ -71,10 +72,11 @@ export const courses: Course[] = [
   rustAsyncIndexerPipelineCourse,
   rustProcMacrosCodegenSafetyCourse,
   anchorUpgradesMigrationsCourse,
+  ...solanaCourses10To18,
 ];
 
-if (courses.length !== 33) {
-  throw new Error(`Expected 33 courses, received ${courses.length}`);
+if (courses.length !== 42) {
+  throw new Error(`Expected 42 courses, received ${courses.length}`);
 }
 
 /**
