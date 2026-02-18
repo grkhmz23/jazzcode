@@ -297,21 +297,14 @@ export default function CourseDetailPage() {
                   </Button>
                 </Link>
               ) : isEnrolled ? (
-                <div className="space-y-2">
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    variant="solana"
-                    onClick={handleContinue}
-                  >
-                    {completionPercent > 0 ? t("continue") : t("startCourse")}
-                  </Button>
-                  <Link href={`/courses/${params.slug}/learn`}>
-                    <Button className="w-full" size="lg" variant="outline">
-                      Learn Runtime (V2)
-                    </Button>
-                  </Link>
-                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  variant="solana"
+                  onClick={handleContinue}
+                >
+                  {completionPercent > 0 ? t("continue") : t("startCourse")}
+                </Button>
               ) : (
                 <Button
                   className="w-full"
