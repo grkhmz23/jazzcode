@@ -11,7 +11,7 @@ type ChallengeLesson = Lesson & {
 
 describe("course contract", () => {
   it("all registered courses satisfy baseline module and lesson contract", () => {
-    expect(courses.length).toBe(42);
+    expect(courses.length).toBe(51);
 
     for (const course of courses) {
       expect(course.modules.length).toBeGreaterThan(0);
