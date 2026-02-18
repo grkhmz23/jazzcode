@@ -11,6 +11,25 @@ import { solanaPaymentsCourse } from './solana-payments';
 import { solanaNftCompressionCourse } from './solana-nft-compression';
 import { solanaGovernanceMultisigCourse } from './solana-governance-multisig';
 import { solanaPerformanceCourse } from './solana-performance';
+import { defiSwapAggregatorCourse } from './defi-swap-aggregator';
+import { defiClmmLiquidityCourse } from './defi-clmm-liquidity';
+import { defiLendingRiskCourse } from './defi-lending-risk';
+import { defiPerpsRiskConsoleCourse } from './defi-perps-risk-console';
+import { defiTxOptimizerCourse } from './defi-tx-optimizer';
+import { solanaMobileSigningCourse } from './solana-mobile-signing';
+import { solanaPayCommerceCourse } from './solana-pay-commerce';
+import { walletUxEngineeringCourse } from './wallet-ux-engineering';
+import { signInWithSolanaCourse } from './sign-in-with-solana';
+import { priorityFeesComputeBudgetCourse } from './priority-fees-compute-budget';
+import { bundlesAtomicityCourse } from './bundles-atomicity';
+import { mempoolUxDefenseCourse } from './mempool-ux-defense';
+import { indexingWebhooksPipelinesCourse } from './indexing-webhooks-pipelines';
+import { rpcReliabilityLatencyCourse } from './rpc-reliability-latency';
+import { rustDataLayoutBorshCourse } from './rust-data-layout-borsh';
+import { rustErrorsInvariantsCourse } from './rust-errors-invariants';
+import { rustPerfOnchainThinkingCourse } from './rust-perf-onchain-thinking';
+import { rustAsyncIndexerPipelineCourse } from './rust-async-indexer-pipeline';
+import { rustProcMacrosCodegenSafetyCourse } from './rust-proc-macros-codegen-safety';
 import type { Course } from '@/types/content';
 
 /**
@@ -31,10 +50,29 @@ export const courses: Course[] = [
   solanaNftCompressionCourse,
   solanaGovernanceMultisigCourse,
   solanaPerformanceCourse,
+  defiSwapAggregatorCourse,
+  defiClmmLiquidityCourse,
+  defiLendingRiskCourse,
+  defiPerpsRiskConsoleCourse,
+  defiTxOptimizerCourse,
+  solanaMobileSigningCourse,
+  solanaPayCommerceCourse,
+  walletUxEngineeringCourse,
+  signInWithSolanaCourse,
+  priorityFeesComputeBudgetCourse,
+  bundlesAtomicityCourse,
+  mempoolUxDefenseCourse,
+  indexingWebhooksPipelinesCourse,
+  rpcReliabilityLatencyCourse,
+  rustDataLayoutBorshCourse,
+  rustErrorsInvariantsCourse,
+  rustPerfOnchainThinkingCourse,
+  rustAsyncIndexerPipelineCourse,
+  rustProcMacrosCodegenSafetyCourse,
 ];
 
-if (courses.length !== 13) {
-  throw new Error(`Expected 13 courses, received ${courses.length}`);
+if (courses.length !== 32) {
+  throw new Error(`Expected 32 courses, received ${courses.length}`);
 }
 
 /**
@@ -54,4 +92,23 @@ export {
   solanaNftCompressionCourse,
   solanaGovernanceMultisigCourse,
   solanaPerformanceCourse,
+  defiSwapAggregatorCourse,
+  defiClmmLiquidityCourse,
+  defiLendingRiskCourse,
+  defiPerpsRiskConsoleCourse,
+  defiTxOptimizerCourse,
+  solanaMobileSigningCourse,
+  solanaPayCommerceCourse,
+  walletUxEngineeringCourse,
+  signInWithSolanaCourse,
+  priorityFeesComputeBudgetCourse,
+  bundlesAtomicityCourse,
+  mempoolUxDefenseCourse,
+  indexingWebhooksPipelinesCourse,
+  rpcReliabilityLatencyCourse,
+  rustDataLayoutBorshCourse,
+  rustErrorsInvariantsCourse,
+  rustPerfOnchainThinkingCourse,
+  rustAsyncIndexerPipelineCourse,
+  rustProcMacrosCodegenSafetyCourse,
 };

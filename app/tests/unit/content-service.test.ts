@@ -7,9 +7,9 @@ describe('CourseContentService', () => {
   const service = new LocalContentService();
 
   describe('getCourses', () => {
-    it('returns exactly 8 courses', async () => {
+    it('returns exactly all registered courses', async () => {
       const courses = await service.getCourses();
-      expect(courses.length).toBe(8);
+      expect(courses.length).toBe(allCourses.length);
     });
 
     it('returns all available courses', async () => {
@@ -66,7 +66,7 @@ describe('CourseContentService', () => {
   describe('searchCourses', () => {
     it('returns all courses with empty query', async () => {
       const results = await service.searchCourses('', {});
-      expect(results.length).toBe(8);
+      expect(results.length).toBe(allCourses.length);
     });
 
     it('filters by difficulty correctly', async () => {

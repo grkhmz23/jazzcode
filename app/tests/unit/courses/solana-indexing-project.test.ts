@@ -125,7 +125,7 @@ describe("solana indexing project helpers", () => {
 
     it("has hints for aggregation", () => {
       expect(lesson8Hints.length).toBeGreaterThan(0);
-      expect(lesson8Hints.some((h) => h.includes("aggregate"))).toBe(true);
+      expect(lesson8Hints.some((h) => h.toLowerCase().includes("aggregate"))).toBe(true);
     });
   });
 

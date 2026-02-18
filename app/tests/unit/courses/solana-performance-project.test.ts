@@ -100,11 +100,11 @@ describe("solana performance project helpers", () => {
     });
 
     it("has solution code with performance logic", () => {
-      expect(lesson8SolutionCode).toContain("generatePerformanceReport");
+      expect(lesson8SolutionCode).toContain("buildPerformanceCheckpoint");
     });
 
     it("has starter code with performance placeholder", () => {
-      expect(lesson8StarterCode).toContain("generatePerformanceReport");
+      expect(lesson8StarterCode).toContain("buildPerformanceCheckpoint");
     });
 
     it("has hints for performance", () => {

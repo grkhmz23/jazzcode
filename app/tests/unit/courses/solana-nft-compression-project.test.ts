@@ -97,11 +97,11 @@ describe("solana nft compression project helpers", () => {
     });
 
     it("has solution code with compression logic", () => {
-      expect(lesson8SolutionCode).toContain("simulateMintAndVerify");
+      expect(lesson8SolutionCode).toContain("simulateMintAndGenerateAudit");
     });
 
     it("has starter code with checkpoint placeholder", () => {
-      expect(lesson8StarterCode).toContain("simulateMintAndVerify");
+      expect(lesson8StarterCode).toContain("simulateMintAndGenerateAudit");
     });
 
     it("has hints for compression", () => {

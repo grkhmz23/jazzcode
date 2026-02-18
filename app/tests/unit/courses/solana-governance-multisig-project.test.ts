@@ -106,11 +106,11 @@ describe("solana governance multisig project helpers", () => {
     });
 
     it("has solution code with execution logic", () => {
-      expect(lesson8SolutionCode).toContain("executeProposal");
+      expect(lesson8SolutionCode).toContain("validateAndExecuteTreasuryProposal");
     });
 
     it("has starter code with execution placeholder", () => {
-      expect(lesson8StarterCode).toContain("executeProposal");
+      expect(lesson8StarterCode).toContain("validateAndExecuteTreasuryProposal");
     });
 
     it("has hints for execution", () => {

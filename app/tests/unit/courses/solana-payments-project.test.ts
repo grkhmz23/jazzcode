@@ -68,12 +68,12 @@ describe("solana payments project helpers", () => {
     });
 
     it("has solution code with transaction building logic", () => {
-      expect(lesson5SolutionCode).toContain("buildTransferTransaction");
+      expect(lesson5SolutionCode).toContain("buildTransferInstructionBundle");
       expect(lesson5SolutionCode).toContain("SystemProgram");
     });
 
     it("has starter code with transaction placeholder", () => {
-      expect(lesson5StarterCode).toContain("buildTransferTransaction");
+      expect(lesson5StarterCode).toContain("buildTransferInstructionBundle");
     });
 
     it("has hints for transaction building", () => {

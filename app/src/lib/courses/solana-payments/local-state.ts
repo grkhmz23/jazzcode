@@ -55,6 +55,31 @@ function normalizeLessonIds(value: unknown): string[] {
   return [...set];
 }
 
+export function normalizePaymentIntent(entry: unknown): PaymentIntent | null {
+  if (
+    entry &&
+    typeof entry === "object" &&
+    typeof (entry as Record<string, unknown>).id === "string" &&
+    typeof (entry as Record<string, unknown>).recipient === "string" &&
+    typeof (entry as Record<string, unknown>).amount === "string" &&
+    typeof (entry as Record<string, unknown>).idempotencyKey === "string"
+  ) {
+    const e = entry as Record<string, unknown>;
+    return {
+      id: e.id as string,
+      recipient: e.recipient as string,
+      amount: e.amount as string,
+      currency: typeof e.currency === "string" ? e.currency : "SOL",
+      idempotencyKey: e.idempotencyKey as string,
+      status: ["pending", "processing", "completed", "failed"].includes(e.status as string)
+        ? (e.status as PaymentIntent["status"])
+        : "pending",
+      createdAt: typeof e.createdAt === "string" ? e.createdAt : new Date().toISOString(),
+    };
+  }
+  return null;
+}
+
 function normalizePaymentIntents(value: unknown): PaymentIntent[] {
   if (!Array.isArray(value)) {
     return [];
