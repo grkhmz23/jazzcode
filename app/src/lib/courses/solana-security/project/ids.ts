@@ -1,6 +1,6 @@
 export const COURSE_ID = "solana-security" as const;
-export const REPORT_VERSION = "v1" as const;
-export const MODEL_VERSION = "solana-security-vuln-lab-v1" as const;
+export const REPORT_VERSION = "v2" as const;
+export const MODEL_VERSION = "solana-security-vuln-lab-v2" as const;
 
 export const SCENARIO_IDS = {
   SIGNER_MISSING: "signer-missing",

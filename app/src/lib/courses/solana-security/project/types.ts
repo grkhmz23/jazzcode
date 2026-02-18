@@ -146,7 +146,7 @@ export interface Finding {
 
 export interface AuditReport {
   course: "solana-security";
-  version: "v1";
+  version: "v2";
   fixturesHash: string;
   findings: Finding[];
   reproduction: {

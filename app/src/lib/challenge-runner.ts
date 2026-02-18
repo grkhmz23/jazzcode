@@ -89,11 +89,13 @@ export async function runChallengeTests(
         }
 
         const results = e.data.results || [];
+        const error =
+          results.length === 0 ? "Runner returned no test results. Check challenge entrypoint configuration." : null;
         resolve({
           testResults: results,
           allPassed: results.every((r) => r.passed),
           totalTime: Date.now() - startTime,
-          error: null,
+          error,
         });
       };
 

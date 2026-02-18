@@ -8,7 +8,6 @@ import {
   Eye,
   ExternalLink,
   Info,
-  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +21,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor";
 import { ConsoleOutput } from "./ConsoleOutput";
+import { HintsPanel } from "@/components/lessons/HintsPanel";
 import {
   runStructuralChecks,
   validateRustCode,
@@ -100,7 +100,6 @@ export function RustChallenge({
 
   // UI state
   const [showHints, setShowHints] = useState(false);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [solutionDialogOpen, setSolutionDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [hasViewedSolution, setHasViewedSolution] = useState(false);
@@ -136,12 +135,6 @@ export function RustChallenge({
     setError(null);
   }, [starterCode]);
 
-  const handleShowNextHint = useCallback(() => {
-    if (currentHintIndex < hints.length - 1) {
-      setCurrentHintIndex((prev) => prev + 1);
-    }
-  }, [currentHintIndex, hints.length]);
-
   const handleShowSolution = useCallback(() => {
     setSolutionDialogOpen(false);
     setHasViewedSolution(true);
@@ -155,9 +148,6 @@ export function RustChallenge({
     setIsCompleted(true);
     onComplete();
   }, [onComplete]);
-
-  // Get visible hints (up to current index)
-  const visibleHints = hints.slice(0, currentHintIndex + 1);
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -252,32 +242,7 @@ export function RustChallenge({
       </div>
 
       {/* Hints Panel */}
-      {showHints && (
-        <div className="space-y-2 animate-in slide-in-from-top-2">
-          {visibleHints.map((hint, index) => (
-            <Alert key={index} className="bg-blue-50 border-blue-200">
-              <Lightbulb className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                <span className="font-medium">
-                  Hint {index + 1} of {hints.length}:{" "}
-                </span>
-                {hint}
-              </AlertDescription>
-            </Alert>
-          ))}
-          {currentHintIndex < hints.length - 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleShowNextHint}
-              className="gap-1 text-blue-600"
-            >
-              Next Hint
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      )}
+      {showHints && <HintsPanel hints={hints} defaultOpen />}
 
       {/* Solution Warning */}
       {hasViewedSolution && (

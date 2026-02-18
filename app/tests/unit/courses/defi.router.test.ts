@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import universeFixture from "@/lib/courses/defi-on-solana/project/fixtures/universe.v1.json";
-import routesFixture from "@/lib/courses/defi-on-solana/project/fixtures/routes.v1.json";
+import universeFixture from "@/lib/courses/defi-on-solana/project/fixtures/universe.v2.json";
+import routesFixture from "@/lib/courses/defi-on-solana/project/fixtures/routes.v2.json";
 import { enumerateRoutes } from "@/lib/courses/defi-on-solana/project/router/enumerate";
 import { pickBestRoute } from "@/lib/courses/defi-on-solana/project/router/best";
 

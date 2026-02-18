@@ -9,7 +9,7 @@ function buildPerformanceCheckpoint(input) {
   // Calculate savings in compute units, rent, and transaction costs
   return {
     course: "solana-performance",
-    version: "v1",
+    version: "v2",
     optimizations: [],
     beforeMetrics: null,
     afterMetrics: null,
@@ -45,7 +45,7 @@ function buildPerformanceCheckpoint(input) {
   
   return {
     course: "solana-performance",
-    version: "v1",
+    version: "v2",
     optimizations: input.optimizations.map(o => o.name),
     beforeMetrics: {
       computeUnits: before.computeUnits,
@@ -71,7 +71,7 @@ export const lesson8Hints: string[] = [
   "Compute savings by subtracting 'after' from 'before' metrics.",
   "Use approximate conversion: 1 SOL = $20, 1 SOL = 1,000,000,000 lamports.",
   "Count only optimizations where improved=true for totalImprovements.",
-  "Include course name as 'solana-performance' and version as 'v1'.",
+  "Include course name as 'solana-performance' and version as 'v2'.",
 ];
 
 export const lesson8TestCases: TestCase[] = [
@@ -95,7 +95,7 @@ export const lesson8TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '{"course":"solana-performance","version":"v1","optimizations":["packed-account-layout","reduced-account-allocations","optimized-cpi-calls"],"beforeMetrics":{"computeUnits":50000,"accountSize":256,"rentLamports":1792000},"afterMetrics":{"computeUnits":35000,"accountSize":128,"rentLamports":896000},"savings":{"computeUnits":15000,"rentLamports":896000,"estimatedCostUsd":"0.017920"},"totalImprovements":2}',
+      '{"course":"solana-performance","version":"v2","optimizations":["packed-account-layout","reduced-account-allocations","optimized-cpi-calls"],"beforeMetrics":{"computeUnits":50000,"accountSize":256,"rentLamports":1792000},"afterMetrics":{"computeUnits":35000,"accountSize":128,"rentLamports":896000},"savings":{"computeUnits":15000,"rentLamports":896000,"estimatedCostUsd":"0.017920"},"totalImprovements":2}',
   },
   {
     name: "builds checkpoint with no improvements",
@@ -115,6 +115,6 @@ export const lesson8TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '{"course":"solana-performance","version":"v1","optimizations":["packed-account-layout"],"beforeMetrics":{"computeUnits":10000,"accountSize":64,"rentLamports":448000},"afterMetrics":{"computeUnits":10000,"accountSize":64,"rentLamports":448000},"savings":{"computeUnits":0,"rentLamports":0,"estimatedCostUsd":"0.000000"},"totalImprovements":0}',
+      '{"course":"solana-performance","version":"v2","optimizations":["packed-account-layout"],"beforeMetrics":{"computeUnits":10000,"accountSize":64,"rentLamports":448000},"afterMetrics":{"computeUnits":10000,"accountSize":64,"rentLamports":448000},"savings":{"computeUnits":0,"rentLamports":0,"estimatedCostUsd":"0.000000"},"totalImprovements":0}',
   },
 ];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import streamFixture from "@/lib/courses/solana-frontend/project/fixtures/dashboard.stream.v1.json";
+import streamFixture from "@/lib/courses/solana-frontend/project/fixtures/dashboard.stream.v2.json";
 import { buildSnapshotsFromFixture } from "@/lib/courses/solana-frontend/project/stream/replay";
 import { buildDashboardView } from "@/lib/courses/solana-frontend/project/queries/filter";
 import { computeDeltaBetweenSnapshots } from "@/lib/courses/solana-frontend/project/model/selectors";

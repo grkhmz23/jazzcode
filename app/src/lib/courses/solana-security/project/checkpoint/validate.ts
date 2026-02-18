@@ -6,8 +6,8 @@ export function validateAuditReport(report: AuditReport): string[] {
   if (report.course !== "solana-security") {
     issues.push("course must equal solana-security");
   }
-  if (report.version !== "v1") {
-    issues.push("version must equal v1");
+  if (report.version !== "v2") {
+    issues.push("version must equal v2");
   }
   if (report.findings.length < 3) {
     issues.push("at least three findings required");

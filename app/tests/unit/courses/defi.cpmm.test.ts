@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import universeFixture from "@/lib/courses/defi-on-solana/project/fixtures/universe.v1.json";
-import quoteVectorsFixture from "@/lib/courses/defi-on-solana/project/fixtures/quotes.v1.json";
+import universeFixture from "@/lib/courses/defi-on-solana/project/fixtures/universe.v2.json";
+import quoteVectorsFixture from "@/lib/courses/defi-on-solana/project/fixtures/quotes.v2.json";
 import { toVirtualPool } from "@/lib/courses/defi-on-solana/project/model/pools";
 import { cpmmQuote } from "@/lib/courses/defi-on-solana/project/quote/cpmm";
 

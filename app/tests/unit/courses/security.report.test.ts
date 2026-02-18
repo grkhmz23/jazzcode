@@ -8,7 +8,7 @@ describe("solana security audit report", () => {
     const report = buildAuditReport();
 
     expect(report.course).toBe("solana-security");
-    expect(report.version).toBe("v1");
+    expect(report.version).toBe("v2");
     expect(report.reproduction.scenarios.map((scenario) => scenario.id)).toEqual([
       "signer-missing",
       "owner-missing",

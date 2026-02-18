@@ -79,7 +79,7 @@ export const lesson8SolutionCode = `function run(input) {
     ],
     determinism: {
       fixturesHash: simpleHash(JSON.stringify(input.fixture)),
-      encodingVersion: "token-launch-pack-v1",
+      encodingVersion: "token-launch-pack-v2",
     },
   };
 
@@ -132,6 +132,6 @@ export const lesson8TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '{"mint":"MintPseudo111","token":{"name":"Jazz Fee Token","symbol":"JFEE","decimals":6},"authorities":{"mintAuthority":"AUTH_A","freezeAuthority":null,"updateAuthority":"AUTH_A"},"extensions":{"metadataPointer":null,"transferFee":{"authority":"AUTH_A","feeBps":250,"maxFee":"5000000"},"defaultAccountState":{"state":"initialized"},"permanentDelegate":null},"supply":{"initialSupply":"50000000000","recipientsTotal":"20000000000","remaining":"30000000000"},"feeModel":{"feeBps":250,"maxFee":"5000000","examples":[{"amount":"1000000","fee":"25000"},{"amount":"250000000","fee":"5000000"}]},"plan":{"initSteps":4,"distributionSteps":2,"labels":["create-mint-account","init-mint-decimals-6","extension-transfer-fee","extension-default-account-state","mint-to:OWNER_1","mint-to:OWNER_2"]},"invariants":["initialSupply >= recipientsTotal","distribution has no negative balances","plan labels are deterministic","encoding version is pinned"],"determinism":{"fixturesHash":"de4946a5","encodingVersion":"token-launch-pack-v1"}}',
+      '{"mint":"MintPseudo111","token":{"name":"Jazz Fee Token","symbol":"JFEE","decimals":6},"authorities":{"mintAuthority":"AUTH_A","freezeAuthority":null,"updateAuthority":"AUTH_A"},"extensions":{"metadataPointer":null,"transferFee":{"authority":"AUTH_A","feeBps":250,"maxFee":"5000000"},"defaultAccountState":{"state":"initialized"},"permanentDelegate":null},"supply":{"initialSupply":"50000000000","recipientsTotal":"20000000000","remaining":"30000000000"},"feeModel":{"feeBps":250,"maxFee":"5000000","examples":[{"amount":"1000000","fee":"25000"},{"amount":"250000000","fee":"5000000"}]},"plan":{"initSteps":4,"distributionSteps":2,"labels":["create-mint-account","init-mint-decimals-6","extension-transfer-fee","extension-default-account-state","mint-to:OWNER_1","mint-to:OWNER_2"]},"invariants":["initialSupply >= recipientsTotal","distribution has no negative balances","plan labels are deterministic","encoding version is pinned"],"determinism":{"fixturesHash":"de4946a5","encodingVersion":"token-launch-pack-v2"}}',
   },
 ];

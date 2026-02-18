@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChallengeRunner } from "@/components/editor/ChallengeRunner";
 import { RustChallenge } from "@/components/editor/RustChallenge";
+import { getLessonHints } from "@/components/lessons/challenge-utils";
 import type { Challenge } from "@/types/content";
 import type { CompletionResult } from "@/types/progress";
 import type { SolanaTransferSummary } from "@/lib/courses/solana-fundamentals/local-state";
@@ -58,6 +59,7 @@ export function LessonChallenge({
 
   // Determine the starter code (use saved code if available, otherwise use challenge starter)
   const starterCode = savedCode ?? challenge.starterCode;
+  const hints = getLessonHints(challenge);
 
   // Handle challenge completion
   const handleComplete = useCallback(async () => {
@@ -165,7 +167,7 @@ export function LessonChallenge({
         <RustChallenge
           starterCode={starterCode}
           testCases={challenge.testCases}
-          hints={challenge.hints}
+          hints={hints}
           solution={challenge.solution}
           onComplete={handleComplete}
         />
@@ -175,7 +177,7 @@ export function LessonChallenge({
           starterCode={starterCode}
           language="typescript"
           testCases={challenge.testCases}
-          hints={challenge.hints}
+          hints={hints}
           solution={challenge.solution}
           onComplete={handleComplete}
           onRunComplete={handleRunComplete}

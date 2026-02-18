@@ -73,7 +73,7 @@ function step(label, params) {
     label,
     programId: "Token2022OfflineProgram",
     keys: [{ pubkey: "mint", isSigner: false, isWritable: true }],
-    dataBase64: toBase64(JSON.stringify({ version: "token-launch-pack-v1", label, params: sorted })),
+    dataBase64: toBase64(JSON.stringify({ version: "token-launch-pack-v2", label, params: sorted })),
   };
 }
 

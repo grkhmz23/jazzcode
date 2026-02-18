@@ -39,20 +39,34 @@ function toErrorString(error) {
   return `Error: ${String(error)}`;
 }
 
-function stripTypeAnnotations(code) {
+function sanitizeModuleSyntax(code) {
   return code
-    .replace(/\bexport\s+/g, "")
-    .replace(/interface\s+\w+\s*{[\s\S]*?}\s*/g, "")
-    .replace(/type\s+\w+\s*=\s*[\s\S]*?;\s*/g, "")
-    .replace(/(const|let|var)\s+([A-Za-z_$][\w$]*)\s*:\s*[^=;]+/g, "$1 $2")
-    .replace(/([,(]\s*[A-Za-z_$][\w$]*)\s*:\s*[^,)\n]+/g, "$1")
-    .replace(/\)\s*:\s*[^({=>\n]+/g, ")")
-    .replace(/\s+as\s+[A-Za-z_$][\w$<>\[\]\|&, ]*/g, "");
+    .replace(/\bexport\s+default\s+/g, "")
+    .replace(/\bexport\s+/g, "");
 }
 
-function findFunctionName(source) {
-  const match = source.match(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/);
-  return match ? match[1] : null;
+function deterministicNowMsForInput(input) {
+  if (!input || typeof input !== "object") {
+    return 1234567890;
+  }
+
+  const timestamp = input.timestamp;
+  if (typeof timestamp === "string" && /^\d+$/.test(timestamp)) {
+    const numeric = Number(timestamp);
+    if (Number.isFinite(numeric)) {
+      // 10-digit timestamps are usually unix seconds.
+      if (timestamp.length === 10) {
+        return numeric * 1000;
+      }
+      return numeric;
+    }
+  }
+
+  if (typeof timestamp === "number" && Number.isFinite(timestamp)) {
+    return timestamp > 10_000_000_000 ? timestamp : timestamp * 1000;
+  }
+
+  return 1234567890;
 }
 
 function parseInput(rawInput) {
@@ -73,27 +87,67 @@ async function runTest(code, testCase, timeoutMs) {
 
   try {
     const input = parseInput(testCase.input);
-    const transpiledCode = stripTypeAnnotations(code);
-    const functionName = findFunctionName(transpiledCode);
-    const functionResolver = functionName
-      ? `typeof ${functionName} === "function" ? ${functionName} : null`
-      : "null";
+    const safeCode = sanitizeModuleSyntax(code);
+    const deterministicNow = deterministicNowMsForInput(input);
+    const deterministicRandom = Number.parseInt("abc123", 36) / Math.pow(36, 6);
 
     const execute = new Function(
       "console",
       "input",
-      `${transpiledCode}
-const __challengeFn = ${functionResolver};
-if (typeof __challengeFn === "function") {
-  return Array.isArray(input) ? __challengeFn(...input) : __challengeFn(input);
+      "__deterministicNow",
+      "__deterministicRandom",
+      `const exports = {};
+const module = { exports };
+const __previousDateNow = Date.now;
+const __previousRandom = Math.random;
+Date.now = () => __deterministicNow;
+Math.random = () => __deterministicRandom;
+try {
+${safeCode}
+const __challengeFn =
+  typeof run === "function"
+    ? run
+    : typeof main === "function"
+      ? main
+      : typeof module.exports === "function"
+        ? module.exports
+        : typeof module.exports.run === "function"
+          ? module.exports.run
+          : typeof exports.run === "function"
+            ? exports.run
+            : null;
+if (typeof __challengeFn !== "function") {
+  throw new Error("Runner misconfigured: entry function run(input) not found.");
 }
-return undefined;
+const __result = Array.isArray(input) ? __challengeFn(...input) : __challengeFn(input);
+return __result;
+} finally {
+  Date.now = __previousDateNow;
+  Math.random = __previousRandom;
+}
 //# sourceURL=challenge-user-code.js`
     );
 
-    const value = await runWithTimeout(() => execute(mockConsole, input), timeoutMs);
-    const actualOutput =
-      value !== undefined ? String(value) : logs.join("\n");
+    const value = await runWithTimeout(
+      () => execute(mockConsole, input, deterministicNow, deterministicRandom),
+      timeoutMs
+    );
+    const actualOutput = (() => {
+      if (value === undefined) {
+        return logs.join("\n");
+      }
+      if (typeof value === "string") {
+        return value;
+      }
+      if (value && typeof value === "object") {
+        try {
+          return JSON.stringify(value);
+        } catch {
+          return String(value);
+        }
+      }
+      return String(value);
+    })();
     const expectedOutput = String(testCase.expectedOutput ?? "");
 
     return {

@@ -2,6 +2,6 @@ export const TOKEN_2022_PROGRAM_ID_LABEL = "TokenzQdOfflineLabel1111111111111111
 export const ASSOCIATED_TOKEN_PROGRAM_ID_LABEL = "ATokenOfflineLabel111111111111111111111111111";
 export const LAUNCH_PACK_PROGRAM_ID_LABEL = "LaunchPackOfflineProgram1111111111111111111111";
 
-export const ENCODING_VERSION = "token-launch-pack-v1";
+export const ENCODING_VERSION = "token-launch-pack-v2";
 export const DECIMALS_MIN = 0;
 export const DECIMALS_MAX = 9;

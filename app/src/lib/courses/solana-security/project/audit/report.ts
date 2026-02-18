@@ -1,4 +1,4 @@
-import fixturesJson from "@/lib/courses/solana-security/project/scenarios/fixtures.v1.json";
+import fixturesJson from "@/lib/courses/solana-security/project/scenarios/fixtures.v2.json";
 import { buildFindings } from "@/lib/courses/solana-security/project/audit/findings";
 import { canonicalJson } from "@/lib/courses/solana-security/project/crypto/canonical-json";
 import { sha256Hex } from "@/lib/courses/solana-security/project/crypto/sha256";

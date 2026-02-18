@@ -24,18 +24,21 @@ function toChallenge(lesson: Lesson): Challenge | undefined {
     (challengeLesson.language !== "typescript" &&
       challengeLesson.language !== "rust") ||
     !Array.isArray(challengeLesson.testCases) ||
-    !Array.isArray(challengeLesson.hints) ||
     typeof challengeLesson.solution !== "string"
   ) {
     return undefined;
   }
+
+  const hints = Array.isArray(challengeLesson.hints)
+    ? challengeLesson.hints.filter((entry): entry is string => typeof entry === "string")
+    : [];
 
   return {
     ...lesson,
     starterCode: challengeLesson.starterCode,
     language: challengeLesson.language,
     testCases: challengeLesson.testCases,
-    hints: challengeLesson.hints,
+    hints,
     solution: challengeLesson.solution,
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Play, RotateCcw, Lightbulb, Eye, CheckCircle2, ChevronRight, Trophy } from "lucide-react";
+import { Play, RotateCcw, Lightbulb, Eye, CheckCircle2, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
 import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor";
 import { TestResultsPanel } from "./TestResultsPanel";
 import { ConsoleOutput } from "./ConsoleOutput";
 import { runChallengeTests, type TestResult } from "@/lib/challenge-runner";
 import { cn } from "@/lib/utils";
+import { HintsPanel } from "@/components/lessons/HintsPanel";
+import {
+  createFinishedChallengeRunState,
+  createInitialChallengeRunState,
+  createRunningChallengeRunState,
+} from "@/components/editor/challenge-run-state";
 
 interface TestCase {
   name: string;
@@ -37,6 +46,32 @@ interface ChallengeRunnerProps {
 }
 
 type RunStatus = "idle" | "running" | "passed" | "failed";
+
+function statusLabel(status: RunStatus): string {
+  switch (status) {
+    case "running":
+      return "Running";
+    case "passed":
+      return "Passed";
+    case "failed":
+      return "Failed";
+    default:
+      return "Idle";
+  }
+}
+
+function statusBadgeClass(status: RunStatus): string {
+  switch (status) {
+    case "running":
+      return "border-blue-300 text-blue-700";
+    case "passed":
+      return "border-green-300 text-green-700";
+    case "failed":
+      return "border-red-300 text-red-700";
+    default:
+      return "text-muted-foreground";
+  }
+}
 
 function buildSolutionOutline(solution: string): string[] {
   const lines = solution
@@ -76,16 +111,11 @@ export function ChallengeRunner({
   const editorRef = useRef<CodeEditorHandle>(null);
   const [code, setCode] = useState(starterCode);
   const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<TestResult[]>([]);
-  const [totalTime, setTotalTime] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [allPassed, setAllPassed] = useState(false);
+  const [runState, setRunState] = useState(() => createInitialChallengeRunState());
   const [isCompleted, setIsCompleted] = useState(false);
-  const [runStatus, setRunStatus] = useState<RunStatus>("idle");
 
   // UI state
   const [showHints, setShowHints] = useState(false);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [solutionDialogOpen, setSolutionDialogOpen] = useState(false);
   const [hasViewedSolution, setHasViewedSolution] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
@@ -94,39 +124,33 @@ export function ChallengeRunner({
 
   // Collect all logs from test results
   useEffect(() => {
-    const allLogs = results.flatMap((r) => r.logs);
+    const allLogs = runState.results.flatMap((r) => r.logs);
     setLogs(allLogs);
-  }, [results]);
+  }, [runState.results]);
 
   // Trigger confetti when all tests pass
   useEffect(() => {
-    if (allPassed && !isCompleted) {
+    if (runState.allPassed && !isCompleted) {
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
       });
     }
-  }, [allPassed, isCompleted]);
+  }, [runState.allPassed, isCompleted]);
 
   const handleRunTests = useCallback(async () => {
     setIsRunning(true);
-    setRunStatus("running");
-    setError(null);
-    setResults([]);
+    setRunState((previous) => createRunningChallengeRunState(previous));
 
     // Track challenge run attempt
     trackEvent("run_challenge", "editor");
 
     const currentCode = editorRef.current?.getValue() ?? code;
     const result = await runChallengeTests(currentCode, testCases);
-
-    setResults(result.testResults);
-    setTotalTime(result.totalTime);
-    setError(result.error);
-    setAllPassed(result.allPassed);
+    const finishedState = createFinishedChallengeRunState(result);
+    setRunState(finishedState);
     setIsRunning(false);
-    setRunStatus(result.allPassed ? "passed" : "failed");
     onRunComplete?.({ allPassed: result.allPassed, results: result.testResults });
 
     // Track if all tests passed
@@ -139,18 +163,9 @@ export function ChallengeRunner({
     editorRef.current?.setValue(starterCode);
     setCode(starterCode);
     setResetDialogOpen(false);
-    setResults([]);
-    setAllPassed(false);
-    setRunStatus("idle");
-    setError(null);
+    setRunState(createInitialChallengeRunState());
     setLogs([]);
   }, [starterCode]);
-
-  const handleShowNextHint = useCallback(() => {
-    if (currentHintIndex < hints.length - 1) {
-      setCurrentHintIndex((prev) => prev + 1);
-    }
-  }, [currentHintIndex, hints.length]);
 
   const handleShowSolutionOutline = useCallback(() => {
     setSolutionDialogOpen(false);
@@ -166,9 +181,8 @@ export function ChallengeRunner({
     onComplete();
   }, [onComplete]);
 
-  // Get visible hints (up to current index)
-  const visibleHints = hints.slice(0, currentHintIndex + 1);
-  const failedResults = results.filter((result) => !result.passed);
+  const failedResults = runState.results.filter((result) => !result.passed);
+  const firstFailure = failedResults[0] ?? null;
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -199,7 +213,7 @@ export function ChallengeRunner({
           ) : (
             <>
               <Play className="h-4 w-4" />
-              {runStatus === "passed" ? "Re-run Tests (Passed)" : "Run Tests"}
+              {runState.status === "passed" ? "Re-run Tests (Passed)" : "Run Tests"}
             </>
           )}
         </Button>
@@ -234,47 +248,43 @@ export function ChallengeRunner({
           Show Solution Outline
         </Button>
 
-        <span
-          className={cn(
-            "ml-2 rounded-full border px-2 py-1 text-xs",
-            runStatus === "idle" && "text-muted-foreground",
-            runStatus === "running" && "border-blue-300 text-blue-700",
-            runStatus === "passed" && "border-green-300 text-green-700",
-            runStatus === "failed" && "border-red-300 text-red-700"
-          )}
-        >
-          {runStatus === "idle" && "Idle"}
-          {runStatus === "running" && "Running"}
-          {runStatus === "passed" && "Passed"}
-          {runStatus === "failed" && "Failed"}
-        </span>
+        <Badge variant="outline" className={cn("ml-2", statusBadgeClass(runState.status))}>
+          {statusLabel(runState.status)}
+        </Badge>
       </div>
 
       {/* Hints Panel */}
-      {showHints && (
-        <div className="space-y-2 animate-in slide-in-from-top-2">
-          {visibleHints.map((hint, index) => (
-            <Alert key={index} className="bg-blue-50 border-blue-200">
-              <Lightbulb className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                <span className="font-medium">Hint {index + 1} of {hints.length}: </span>
-                {hint}
-              </AlertDescription>
-            </Alert>
-          ))}
-          {currentHintIndex < hints.length - 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleShowNextHint}
-              className="gap-1 text-blue-600"
-            >
-              Next Hint
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+      {showHints && <HintsPanel hints={hints} defaultOpen />}
+
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Run Summary</span>
+            <Badge variant="outline" className={statusBadgeClass(runState.status)}>
+              {statusLabel(runState.status)}
+            </Badge>
+          </div>
+          <Separator />
+          <p className="text-sm text-muted-foreground">
+            {runState.status === "idle" && "No test run yet."}
+            {runState.status === "running" && "Executing deterministic test cases..."}
+            {runState.status === "passed" && `All tests passed in ${runState.totalTime}ms.`}
+            {runState.status === "failed" && `Run failed in ${runState.totalTime}ms.`}
+          </p>
+          {runState.status === "failed" && firstFailure && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm">
+              <p className="font-medium text-red-700">{firstFailure.name}</p>
+              {firstFailure.error ? (
+                <p className="mt-1 text-red-700">{firstFailure.error}</p>
+              ) : (
+                <p className="mt-1 text-red-700">
+                  Expected `{firstFailure.expectedOutput}` but got `{firstFailure.actualOutput}`.
+                </p>
+              )}
+            </div>
           )}
-        </div>
-      )}
+        </CardContent>
+      </Card>
 
       {/* Solution Warning */}
       {hasViewedSolution && (
@@ -287,7 +297,7 @@ export function ChallengeRunner({
       )}
 
       {/* Success Banner */}
-      {allPassed && !isCompleted && (
+      {runState.allPassed && !isCompleted && (
         <div className="animate-in zoom-in-95 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-green-700">
             <Trophy className="h-6 w-6" />
@@ -319,13 +329,13 @@ export function ChallengeRunner({
       )}
 
       {/* Error Message */}
-      {error && (
+      {runState.error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{runState.error}</AlertDescription>
         </Alert>
       )}
 
-      {runStatus === "failed" && failedResults.length > 0 && (
+      {runState.status === "failed" && failedResults.length > 0 && (
         <Alert>
           <AlertDescription>
             <p className="mb-2 font-medium">Failing tests:</p>
@@ -344,16 +354,33 @@ export function ChallengeRunner({
                 </li>
               ))}
             </ul>
+            <details className="mt-3 rounded border p-2">
+              <summary className="cursor-pointer text-sm font-medium">Full output</summary>
+              <pre className="mt-2 whitespace-pre-wrap text-xs">
+                {failedResults
+                  .map((result) =>
+                    [
+                      `[${result.name}]`,
+                      `expected: ${result.expectedOutput}`,
+                      `actual: ${result.actualOutput}`,
+                      result.error ? `error: ${result.error}` : "",
+                    ]
+                      .filter(Boolean)
+                      .join("\n")
+                  )
+                  .join("\n\n")}
+              </pre>
+            </details>
           </AlertDescription>
         </Alert>
       )}
 
       {/* Test Results */}
-      {(results.length > 0 || isRunning) && (
+      {(runState.results.length > 0 || isRunning) && (
         <TestResultsPanel
-          results={results}
+          results={runState.results}
           isRunning={isRunning}
-          totalTime={totalTime}
+          totalTime={runState.totalTime}
         />
       )}
 
