@@ -14,8 +14,10 @@ interface ComponentDetailProps {
 }
 
 export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
+  // All hooks must be at the top level
   const [selectedFile, setSelectedFile] = useState(component.files[0]?.path || "");
   const [copied, setCopied] = useState(false);
+  const [isCreatingShare, setIsCreatingShare] = useState(false);
   const [activeProps, setActiveProps] = useState<Record<string, unknown>>(() => {
     // Initialize props with defaults
     const defaults: Record<string, unknown> = {};
@@ -44,8 +46,6 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
     await navigator.clipboard.writeText(installCommand);
     toast.success("Install command copied!");
   };
-
-  const [isCreatingShare, setIsCreatingShare] = useState(false);
 
   const openInPlayground = async () => {
     setIsCreatingShare(true);

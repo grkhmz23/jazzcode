@@ -6,6 +6,11 @@ import { solanaSecurityCourse } from './solana-security';
 import { tokenEngineeringCourse } from './token-engineering';
 import { solanaMobileCourse } from './solana-mobile';
 import { solanaTestingCourse } from './solana-testing';
+import { solanaIndexingCourse } from './solana-indexing';
+import { solanaPaymentsCourse } from './solana-payments';
+import { solanaNftCompressionCourse } from './solana-nft-compression';
+import { solanaGovernanceMultisigCourse } from './solana-governance-multisig';
+import { solanaPerformanceCourse } from './solana-performance';
 import type { Course } from '@/types/content';
 
 /**
@@ -21,10 +26,15 @@ export const courses: Course[] = [
   tokenEngineeringCourse,
   solanaMobileCourse,
   solanaTestingCourse,
+  solanaIndexingCourse,
+  solanaPaymentsCourse,
+  solanaNftCompressionCourse,
+  solanaGovernanceMultisigCourse,
+  solanaPerformanceCourse,
 ];
 
-if (courses.length !== 8) {
-  throw new Error(`Expected 8 courses, received ${courses.length}`);
+if (courses.length !== 13) {
+  throw new Error(`Expected 13 courses, received ${courses.length}`);
 }
 
 /**
@@ -39,4 +49,9 @@ export {
   tokenEngineeringCourse,
   solanaMobileCourse,
   solanaTestingCourse,
+  solanaIndexingCourse,
+  solanaPaymentsCourse,
+  solanaNftCompressionCourse,
+  solanaGovernanceMultisigCourse,
+  solanaPerformanceCourse,
 };

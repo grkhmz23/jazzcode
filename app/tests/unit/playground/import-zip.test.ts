@@ -77,14 +77,14 @@ describe("parseZipFile", () => {
       files[`file${i}.txt`] = "content";
     }
     const buffer = makeTestZip(files);
-    expect(() => parseZipFile(buffer, { maxFiles: 5 })).toThrow("maximum file count");
+    expect(() => parseZipFile(buffer, { maxFiles: 5 })).toThrow("too many files");
   });
 
   it("enforces max total bytes", () => {
     const buffer = makeTestZip({
       "big.txt": "x".repeat(1000),
     });
-    expect(() => parseZipFile(buffer, { maxTotalBytes: 100 })).toThrow("maximum total size");
+    expect(() => parseZipFile(buffer, { maxTotalBytes: 100 })).toThrow("exceed");
   });
 
   it("skips directory entries", () => {
@@ -96,6 +96,55 @@ describe("parseZipFile", () => {
     const result = parseZipFile(zipped.buffer.slice(0) as ArrayBuffer);
     expect(result.entries).toHaveLength(1);
     expect(result.entries[0].path).toBe("src/main.ts");
+  });
+
+  it("skips macOS metadata files (__MACOSX, .DS_Store)", () => {
+    const buffer = makeTestZip({
+      "src/main.ts": "code",
+      ".DS_Store": "mac metadata",
+      "__MACOSX/._file": "mac resource fork",
+      "__MACOSX/src/._main.ts": "mac resource fork",
+    });
+    const result = parseZipFile(buffer);
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0].path).toBe("src/main.ts");
+    expect(result.skipped).toContain(".DS_Store");
+    expect(result.skipped).toContain("__MACOSX/._file");
+    expect(result.skipped).toContain("__MACOSX/src/._main.ts");
+  });
+
+  it("skips Windows metadata files (Thumbs.db, desktop.ini)", () => {
+    const buffer = makeTestZip({
+      "src/main.ts": "code",
+      "Thumbs.db": "windows thumbs",
+      "desktop.ini": "windows config",
+      "folder/Desktop.ini": "windows config",
+    });
+    const result = parseZipFile(buffer);
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0].path).toBe("src/main.ts");
+    expect(result.skipped).toContain("Thumbs.db");
+    expect(result.skipped).toContain("desktop.ini");
+  });
+
+  it("skips IDE config files (.vscode, .idea)", () => {
+    const buffer = makeTestZip({
+      "src/main.ts": "code",
+      ".vscode/settings.json": "vscode config",
+      ".idea/workspace.xml": "intellij config",
+    });
+    const result = parseZipFile(buffer);
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0].path).toBe("src/main.ts");
+    expect(result.skipped).toContain(".vscode/settings.json");
+    expect(result.skipped).toContain(".idea/workspace.xml");
+  });
+
+  it("provides helpful error for oversized compressed files", () => {
+    // Create a buffer larger than 10MB to trigger compressed size check
+    const largeBuffer = new ArrayBuffer(11 * 1024 * 1024);
+    expect(() => parseZipFile(largeBuffer)).toThrow("ZIP file size");
+    expect(() => parseZipFile(largeBuffer)).toThrow("maximum allowed");
   });
 });
 

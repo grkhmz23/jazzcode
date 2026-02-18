@@ -40,7 +40,8 @@ import {
   getAutocompleteSuggestions,
   getSpeedrunTimeMs,
   getTemplateByIdV2,
-  importGitHubRepository, ImportProgress,
+  importGitHubRepositoryServer,
+  ImportProgress,
   listTree,
   loadBurnerWalletFromIndexedDb,
   loadQuestProgressFromIndexedDb,
@@ -635,7 +636,7 @@ export default function Demo() {
     setImportBusy(true);
     setImportProgress({ total: 1, completed: 0, currentFile: "Starting import..." });
     try {
-      const template = await importGitHubRepository(importRepo, importBranch || undefined, {
+      const template = await importGitHubRepositoryServer(importRepo, importBranch || undefined, {
         onProgress: (progress) => setImportProgress(progress),
       });
       dispatch({ type: "load_template", template });

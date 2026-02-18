@@ -16,13 +16,67 @@ export interface ZipImportResult {
 
 export type ConflictResolution = "overwrite" | "keep_both" | "skip";
 
-interface ParseZipOptions {
-  maxFiles?: number;
-  maxTotalBytes?: number;
-}
-
 const DEFAULT_MAX_FILES = 500;
-const DEFAULT_MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10 MB
+const DEFAULT_MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50 MB uncompressed
+const MAX_COMPRESSED_BYTES = 10 * 1024 * 1024; // 10 MB compressed input limit
+
+/**
+ * Common metadata/system paths that should be skipped during import
+ */
+const SKIP_PATH_PREFIXES = [
+  "__MACOSX/",
+  ".DS_Store",
+  "Thumbs.db",
+  "desktop.ini",
+  ".svn/",
+  ".hg/",
+  ".idea/",
+  ".vscode/",
+  ".vs/",
+  "*.tmp",
+  "*.temp",
+  "~$",
+];
+
+/**
+ * Check if a path should be skipped as metadata/system file
+ */
+function isMetadataPath(rawPath: string): boolean {
+  const lowerPath = rawPath.toLowerCase();
+
+  for (const prefix of SKIP_PATH_PREFIXES) {
+    const lowerPrefix = prefix.toLowerCase();
+
+    if (prefix.endsWith("/")) {
+      // Directory prefix - check if path starts with this directory
+      if (lowerPath.startsWith(lowerPrefix) || lowerPath.includes("/" + lowerPrefix)) {
+        return true;
+      }
+    } else if (prefix.startsWith("*.")) {
+      // Extension pattern
+      const ext = prefix.slice(1).toLowerCase();
+      if (lowerPath.endsWith(ext)) {
+        return true;
+      }
+    } else if (prefix.startsWith("~$")) {
+      // Office temp file prefix
+      if (lowerPath.includes("/~$") || lowerPath.startsWith("~$")) {
+        return true;
+      }
+    } else {
+      // Exact match or contains as path component
+      if (
+        lowerPath === lowerPrefix ||
+        lowerPath.includes("/" + lowerPrefix) ||
+        lowerPath.startsWith(lowerPrefix + "/")
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 export function sanitizeZipPath(rawPath: string): string | null {
   if (!rawPath || rawPath.includes("\0")) {
@@ -64,21 +118,56 @@ export function sanitizeZipPath(rawPath: string): string | null {
   }
 }
 
+export interface ParseZipOptions {
+  maxFiles?: number;
+  maxTotalBytes?: number;
+  maxCompressedBytes?: number;
+  onProgress?: (current: number, total: number, currentFile: string) => void;
+}
+
 export function parseZipFile(
   buffer: ArrayBuffer,
   options?: ParseZipOptions
 ): ZipImportResult {
   const maxFiles = options?.maxFiles ?? DEFAULT_MAX_FILES;
   const maxTotalBytes = options?.maxTotalBytes ?? DEFAULT_MAX_TOTAL_BYTES;
+  const maxCompressedBytes = options?.maxCompressedBytes ?? MAX_COMPRESSED_BYTES;
 
-  const decompressed = unzipSync(new Uint8Array(buffer));
+  // Check compressed size first
+  if (buffer.byteLength > maxCompressedBytes) {
+    throw new Error(
+      `ZIP file size (${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB) exceeds ` +
+        `maximum allowed (${(maxCompressedBytes / 1024 / 1024).toFixed(0)} MB). ` +
+        `Try splitting your archive or removing large files.`
+    );
+  }
+
+  let decompressed: Record<string, Uint8Array>;
+  try {
+    decompressed = unzipSync(new Uint8Array(buffer));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Failed to parse ZIP file: ${message}. The archive may be corrupted.`);
+  }
+
   const entries: ZipImportEntry[] = [];
   const skipped: string[] = [];
   let totalBytes = 0;
 
-  for (const [rawPath, data] of Object.entries(decompressed)) {
-    // Skip directories (trailing slash or empty data)
-    if (rawPath.endsWith("/")) {
+  const filesToProcess = Object.entries(decompressed).filter(
+    ([rawPath]) => !rawPath.endsWith("/")
+  );
+  const totalFiles = filesToProcess.length;
+
+  for (let i = 0; i < filesToProcess.length; i++) {
+    const [rawPath, data] = filesToProcess[i];
+
+    // Report progress
+    options?.onProgress?.(i, totalFiles, rawPath);
+
+    // Skip metadata/system files
+    if (isMetadataPath(rawPath)) {
+      skipped.push(rawPath);
       continue;
     }
 
@@ -99,12 +188,17 @@ export function parseZipFile(
 
     if (totalBytes > maxTotalBytes) {
       throw new Error(
-        `ZIP exceeds maximum total size of ${(maxTotalBytes / 1024 / 1024).toFixed(0)} MB.`
+        `ZIP would exceed maximum total size of ${(maxTotalBytes / 1024 / 1024).toFixed(0)} MB ` +
+          `when uncompressed (${(totalBytes / 1024 / 1024).toFixed(1)} MB). ` +
+          `Try removing large files or splitting into smaller archives.`
       );
     }
 
     if (entries.length >= maxFiles) {
-      throw new Error(`ZIP exceeds maximum file count of ${maxFiles}.`);
+      throw new Error(
+        `ZIP contains too many files (${totalFiles}). ` +
+          `Maximum allowed is ${maxFiles}. Try removing unnecessary files.`
+      );
     }
 
     const content = strFromU8(data);
