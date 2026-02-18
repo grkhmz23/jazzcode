@@ -71,7 +71,7 @@
   }
 }
 
-/* Monaco Editor Suggest Widget Fixes */
+/* Monaco Editor Fixes */
 @layer components {
   /* Ensure suggest widget has high z-index and doesn't get clipped */
   .monaco-editor .suggest-widget {
@@ -91,5 +91,25 @@
   /* Hover widget */
   .monaco-editor .hover-widget {
     z-index: 100 !important;
+  }
+
+  /*
+   * Prevent global textarea styles (Tailwind preflight + base layer) from
+   * leaking into Monaco's internal textarea.inputarea. Without this, the
+   * textarea inherits browser-default background, resize handle, and border
+   * which renders as a visible grey rectangle overlay in the editor viewport.
+   */
+  .monaco-editor textarea {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    resize: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .monaco-editor textarea.inputarea {
+    opacity: 0 !important;
   }
 }
