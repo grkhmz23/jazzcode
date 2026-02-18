@@ -530,7 +530,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                       </div>
                       {renderLessonBlocks(lesson.blocks)}
                     </div>
-                    <div className="h-1/2 overflow-hidden md:h-full md:w-3/5">
+                    <div className="h-1/2 overflow-y-auto md:h-full md:w-3/5">
                       <LessonChallenge
                         challenge={lesson.challenge!}
                         courseSlug={courseSlug}
