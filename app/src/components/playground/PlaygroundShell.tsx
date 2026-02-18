@@ -12,6 +12,7 @@ import { QuickOpenPalette } from "@/components/playground/QuickOpenPalette";
 import { StatusBar } from "@/components/playground/StatusBar";
 import { TaskPanel } from "@/components/playground/TaskPanel";
 import { TerminalPane } from "@/components/playground/TerminalPane";
+import { WelcomeScreen } from "@/components/playground/WelcomeScreen";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,11 +34,13 @@ import {
   deserializeSnapshot,
   downloadSingleFile,
   downloadWorkspaceZip,
+  emptyWorkspaceTemplate,
   evaluateAchievements,
   evaluateQuest,
   executeTerminalCommand,
   formatDuration,
   getAutocompleteSuggestions,
+  getMission,
   getSpeedrunTimeMs,
   getTemplateByIdV2,
   importGitHubRepositoryServer,
@@ -54,12 +57,11 @@ import {
   saveQuestProgressToIndexedDb,
   saveWorkspaceToIndexedDb,
   serializeSnapshot,
-  solanaFundamentalsQuest,
-  solanaFundamentalsTemplate,
   stopSpeedrun,
   toggleSpeedrun,
   updateFileContent,
   workspaceReducer,
+  WorkspaceMode,
 } from "@/lib/playground";
 import { useKeyboardShortcuts } from "@/lib/playground/hooks/use-keyboard-shortcuts";
 import { TaskResult } from "@/lib/playground/tasks/types";
@@ -88,9 +90,11 @@ const DEFAULT_TERMINAL_ENTRIES = [
 export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [workspace, dispatch] = useReducer(
     workspaceReducer,
-    solanaFundamentalsTemplate,
+    emptyWorkspaceTemplate,
     createWorkspaceFromTemplate
   );
+  const [mode, setMode] = useState<WorkspaceMode>({ type: "standalone" });
+  const [showWelcome, setShowWelcome] = useState(false);
   const [terminalState, setTerminalState] = useState(createInitialTerminalState);
   const [terminalEntries, setTerminalEntries] = useState(DEFAULT_TERMINAL_ENTRIES);
   const [revealedHintsByTask, setRevealedHintsByTask] = useState<Record<string, number>>({});
@@ -130,10 +134,14 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const workspaceRef = useRef(workspace);
   const terminalRef = useRef(terminalState);
   const terminalInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { connection } = useConnection();
   const { publicKey, connected, disconnect, sendTransaction } = useWallet();
   const { setVisible } = useWalletModal();
+
+  const activeQuest = mode.type === "mission" ? mode.quest : null;
+  const hasTasks = mode.type === "mission";
 
   useEffect(() => {
     workspaceRef.current = workspace;
@@ -145,14 +153,16 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
 
   const activeTemplate = useMemo(() => {
     const byWorkspace = getTemplateByIdV2(workspace.templateId);
-    return byWorkspace ?? solanaFundamentalsTemplate;
+    return byWorkspace ?? emptyWorkspaceTemplate;
   }, [workspace.templateId]);
 
   const tree = useMemo(() => listTree(workspace), [workspace]);
 
   const checkpoints = useMemo(() => {
+    if (!activeQuest) return [];
+
     const completeTaskIds = new Set<string>();
-    const contextResults = evaluateQuest(solanaFundamentalsQuest, {
+    const contextResults = evaluateQuest(activeQuest, {
       workspace,
       terminalState,
       checkpoints: [],
@@ -163,20 +173,19 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
       }
     });
 
-    return solanaFundamentalsQuest.tasks
+    return activeQuest.tasks
       .filter((task) => task.checkpointId && completeTaskIds.has(task.id))
       .map((task) => task.checkpointId as string);
-  }, [workspace, terminalState]);
+  }, [workspace, terminalState, activeQuest]);
 
-  const taskResults: TaskResult[] = useMemo(
-    () =>
-      evaluateQuest(solanaFundamentalsQuest, {
-        workspace,
-        terminalState,
-        checkpoints,
-      }),
-    [workspace, terminalState, checkpoints]
-  );
+  const taskResults: TaskResult[] = useMemo(() => {
+    if (!activeQuest) return [];
+    return evaluateQuest(activeQuest, {
+      workspace,
+      terminalState,
+      checkpoints,
+    });
+  }, [workspace, terminalState, checkpoints, activeQuest]);
 
   const speedrunTimeMs = useMemo(() => getSpeedrunTimeMs(speedrunState, clockTick), [speedrunState, clockTick]);
 
@@ -242,15 +251,54 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
         const params = new URLSearchParams(window.location.search);
         const snapshot = params.get("w");
         const shareId = params.get("share");
+        const missionParam = params.get("mission");
 
-        if (shareId) {
+        // Detect mission mode
+        if (missionParam) {
+          const descriptor = getMission(missionParam);
+          if (descriptor) {
+            setMode({
+              type: "mission",
+              questId: descriptor.questId,
+              quest: descriptor.quest,
+              template: descriptor.template,
+            });
+            // Load mission template as default unless saved workspace exists
+            const saved = await loadWorkspaceFromIndexedDb();
+            if (saved && mounted) {
+              dispatch({ type: "load", workspace: saved });
+              setTerminalEntries((previous) => [
+                ...previous,
+                makeTerminalEntry("system", "Loaded saved workspace from IndexedDB."),
+              ]);
+            } else if (mounted) {
+              dispatch({ type: "load_template", template: descriptor.template });
+              setTerminalEntries((previous) => [
+                ...previous,
+                makeTerminalEntry("system", `Mission loaded: ${descriptor.quest.title}`),
+              ]);
+            }
+
+            // Load quest progress
+            const progress = await loadQuestProgressFromIndexedDb(descriptor.questId);
+            if (mounted && progress) {
+              setPersistedAchievements(progress.achievements);
+              setBestTimeMs(progress.speedrunBestMs);
+            }
+          } else if (mounted) {
+            setTerminalEntries((previous) => [
+              ...previous,
+              makeTerminalEntry("error", `Unknown mission: ${missionParam}`),
+            ]);
+          }
+        } else if (shareId) {
           // Load from share API
           const response = await fetch(`/api/playground/share/${shareId}`);
           if (!response.ok) {
             throw new Error("Share not found or expired");
           }
           const { bundle } = await response.json();
-          
+
           // Convert bundle files to workspace format
           const files: Record<string, WorkspaceFile> = {};
           bundle.files.forEach((file: { path: string; content: string; language: string }) => {
@@ -268,7 +316,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
             const importName = bundle.title.replace(/\s+/g, "");
             const firstFile = bundle.files[0];
             const componentName = firstFile ? firstFile.path.replace(/\.tsx?$/, "").replace(/\//g, "_") : "Component";
-            
+
             files[demoPath] = {
               path: demoPath,
               content: `import { ${importName} } from "./${componentName}";
@@ -322,6 +370,9 @@ export default function Demo() {
               ...previous,
               makeTerminalEntry("system", "Loaded saved workspace from IndexedDB."),
             ]);
+          } else if (mounted) {
+            // No saved workspace, no mission, no share — show welcome
+            setShowWelcome(true);
           }
         }
 
@@ -331,12 +382,6 @@ export default function Demo() {
             publicKey: burner.publicKey,
             secretKey: burner.secretKey,
           });
-        }
-
-        const progress = await loadQuestProgressFromIndexedDb(solanaFundamentalsQuest.id);
-        if (mounted && progress) {
-          setPersistedAchievements(progress.achievements);
-          setBestTimeMs(progress.speedrunBestMs);
         }
       } catch (error) {
         if (mounted) {
@@ -372,6 +417,8 @@ export default function Demo() {
   }, [workspace, ready]);
 
   useEffect(() => {
+    if (!activeQuest) return;
+
     const allComplete = taskResults.length > 0 && taskResults.every((item) => item.complete);
     if (!allComplete || emittedQuestRef.current) {
       return;
@@ -385,7 +432,7 @@ export default function Demo() {
     void serializeSnapshot(workspaceRef.current).then((snapshotValue) => {
       const url = `${window.location.origin}${window.location.pathname}?w=${snapshotValue}`;
       const event: QuestCompleteEvent = {
-        questId: solanaFundamentalsQuest.id,
+        questId: activeQuest.id,
         timeMs,
         achievements,
         snapshotUrl: url,
@@ -401,13 +448,13 @@ export default function Demo() {
     }
 
     void saveQuestProgressToIndexedDb({
-      questId: solanaFundamentalsQuest.id,
+      questId: activeQuest.id,
       speedrunBestMs: nextBest,
       achievements: achievements.map((entry) => entry.id),
       completions: 1,
       updatedAt: Date.now(),
     });
-  }, [taskResults, speedrunState, workspaceRef, achievements, onQuestComplete, bestTimeMs]);
+  }, [taskResults, speedrunState, workspaceRef, achievements, onQuestComplete, bestTimeMs, activeQuest]);
 
   const createOrUpdateFileInWorkspace = (current: Workspace, path: string, content: string): Workspace => {
     if (current.files[path]) {
@@ -623,7 +670,8 @@ export default function Demo() {
   };
 
   const resetWorkspace = () => {
-    dispatch({ type: "load_template", template: solanaFundamentalsTemplate });
+    const template = mode.type === "mission" ? mode.template : emptyWorkspaceTemplate;
+    dispatch({ type: "load_template", template });
     setTerminalState(createInitialTerminalState());
     setTerminalEntries(DEFAULT_TERMINAL_ENTRIES);
     setRevealedHintsByTask({});
@@ -643,6 +691,7 @@ export default function Demo() {
       setImportModalOpen(false);
       setImportRepo("");
       setImportBranch("");
+      setShowWelcome(false);
       toast.success(`GitHub repository imported: ${template.files.length} files`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "GitHub import failed";
@@ -676,6 +725,10 @@ export default function Demo() {
     }
   };
 
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+  };
+
   const shortcutHandlers = useMemo(
     () => ({
       save: () => void saveWorkspaceToIndexedDb(workspaceRef.current),
@@ -686,8 +739,122 @@ export default function Demo() {
   );
   useKeyboardShortcuts(shortcutHandlers);
 
-  const gridColumns = `${leftCollapsed ? 0 : 260}px 1fr ${rightCollapsed ? 0 : 340}px`;
+  const rightColumnWidth = hasTasks && !rightCollapsed ? 340 : 0;
+  const gridColumns = `${leftCollapsed ? 0 : 260}px 1fr ${rightColumnWidth}px`;
+  const gridColumnSpan = hasTasks ? "1 / 4" : "1 / 3";
+  const terminalColumnSpan = hasTasks ? "1 / 3" : "1 / 3";
   const terminalHeight = bottomCollapsed ? 0 : 220;
+
+  if (showWelcome) {
+    return (
+      <div className="h-[calc(100vh-10rem)] min-h-[680px] w-full rounded-lg border border-[#2f2f2f] bg-[#1e1e1e] text-[#d4d4d4]">
+        <WelcomeScreen
+          templates={playgroundTemplatesV2}
+          onSelectTemplate={(template) => {
+            dispatch({ type: "load_template", template });
+            dismissWelcome();
+          }}
+          onNewEmpty={() => {
+            dispatch({ type: "load_template", template: emptyWorkspaceTemplate });
+            dismissWelcome();
+          }}
+          onOpenGithubImport={() => {
+            dismissWelcome();
+            setImportModalOpen(true);
+          }}
+          onOpenFileUpload={() => {
+            dismissWelcome();
+            fileInputRef.current?.click();
+          }}
+        />
+        {/* Hidden file input for welcome screen upload */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              // Convert files to workspace format inline
+              const fileList = e.target.files;
+              const now = Date.now();
+              const files: Record<string, WorkspaceFile> = {};
+              const promises = Array.from(fileList).map(async (file) => {
+                const content = await file.text();
+                const path = file.name;
+                const { inferLanguageFromPath } = await import("@/lib/playground/workspace");
+                files[path] = {
+                  path,
+                  language: inferLanguageFromPath(path),
+                  content,
+                  updatedAt: now,
+                };
+              });
+              void Promise.all(promises).then(() => {
+                dispatch({ type: "import_files", files });
+              });
+            }
+            e.target.value = "";
+          }}
+        />
+
+        {/* GitHub import dialog available from welcome screen */}
+        <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Public GitHub Repo</DialogTitle>
+              <DialogDescription>Supports owner/repo or full URL. Imports files as read-only.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <Input
+                value={importRepo}
+                onChange={(event) => setImportRepo(event.target.value)}
+                placeholder="solana-labs/solana-program-library"
+                aria-label="GitHub repository"
+                disabled={importBusy}
+              />
+              <Input
+                value={importBranch}
+                onChange={(event) => setImportBranch(event.target.value)}
+                placeholder="Branch (optional, defaults to HEAD)"
+                aria-label="GitHub branch"
+                disabled={importBusy}
+              />
+              {importProgress && (
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Downloading files...</span>
+                    <span>
+                      {importProgress.completed} / {importProgress.total}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{
+                        width: `${importProgress.total > 0 ? (importProgress.completed / importProgress.total) * 100 : 0}%`,
+                      }}
+                    />
+                  </div>
+                  {importProgress.currentFile && (
+                    <p className="truncate text-xs text-muted-foreground">{importProgress.currentFile}</p>
+                  )}
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setImportModalOpen(false)} disabled={importBusy}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
+                {importBusy ? "Importing..." : "Import"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-10rem)] min-h-[680px] w-full rounded-lg border border-[#2f2f2f] bg-[#1e1e1e] text-[#d4d4d4]">
@@ -704,7 +871,7 @@ export default function Demo() {
         className="hidden h-full lg:grid"
         style={{ gridTemplateColumns: gridColumns, gridTemplateRows: `40px 1fr ${terminalHeight}px 36px` }}
       >
-        <div style={{ gridColumn: "1 / 4", gridRow: "1" }}>
+        <div style={{ gridColumn: gridColumnSpan, gridRow: "1" }}>
           <PlaygroundTopBar
             workspaceName={activeTemplate.title}
             workspaceFiles={workspace.files}
@@ -727,6 +894,7 @@ export default function Demo() {
               onCreateFile={(path) => dispatch({ type: "create_file", path })}
               onRenameFile={(oldPath, newPath) => dispatch({ type: "rename_file", oldPath, newPath })}
               onDeleteFile={(path) => dispatch({ type: "delete_file", path })}
+              onImportFiles={(files) => dispatch({ type: "import_files", files })}
             />
           </div>
         ) : null}
@@ -740,10 +908,10 @@ export default function Demo() {
           />
         </div>
 
-        {!rightCollapsed ? (
+        {hasTasks && !rightCollapsed ? (
           <div style={{ gridColumn: "3", gridRow: "2 / 4" }}>
             <TaskPanel
-              quest={solanaFundamentalsQuest}
+              quest={activeQuest!}
               results={taskResults}
               revealedHintsByTask={revealedHintsByTask}
               onRevealHint={(taskId) =>
@@ -751,7 +919,7 @@ export default function Demo() {
                   ...previous,
                   [taskId]: Math.min(
                     (previous[taskId] ?? 0) + 1,
-                    solanaFundamentalsQuest.tasks.find((task) => task.id === taskId)?.hints.length ?? 0
+                    activeQuest!.tasks.find((task) => task.id === taskId)?.hints.length ?? 0
                   ),
                 }))
               }
@@ -780,7 +948,7 @@ export default function Demo() {
         ) : null}
 
         {!bottomCollapsed ? (
-          <div style={{ gridColumn: "1 / 3", gridRow: "3" }}>
+          <div style={{ gridColumn: terminalColumnSpan, gridRow: "3" }}>
             <TerminalPane
               entries={terminalEntries}
               commandHistory={terminalState.commandHistory}
@@ -792,12 +960,13 @@ export default function Demo() {
           </div>
         ) : null}
 
-        <div style={{ gridColumn: "1 / 4", gridRow: "4" }}>
+        <div style={{ gridColumn: gridColumnSpan, gridRow: "4" }}>
           <StatusBar
             leftCollapsed={leftCollapsed}
             rightCollapsed={rightCollapsed}
             bottomCollapsed={bottomCollapsed}
             saveState={saveState}
+            hasTasks={hasTasks}
             onToggleLeft={() => setLeftCollapsed((previous) => !previous)}
             onToggleRight={() => setRightCollapsed((previous) => !previous)}
             onToggleBottom={() => setBottomCollapsed((previous) => !previous)}
@@ -813,7 +982,7 @@ export default function Demo() {
       </div>
 
       <div className="flex h-full flex-col lg:hidden">
-        <div className="h-[45%] min-h-0">
+        <div className={hasTasks ? "h-[45%] min-h-0" : "h-[60%] min-h-0"}>
           <EditorPane
             workspace={workspace}
             onChangeContent={(path, content) => dispatch({ type: "update_content", path, content })}
@@ -821,7 +990,7 @@ export default function Demo() {
             onCloseFile={(path) => dispatch({ type: "close_file", path })}
           />
         </div>
-        <div className="h-[28%] min-h-0 border-t border-[#2f2f2f]">
+        <div className={hasTasks ? "h-[28%] min-h-0 border-t border-[#2f2f2f]" : "h-[40%] min-h-0 border-t border-[#2f2f2f]"}>
           <TerminalPane
             entries={terminalEntries}
             commandHistory={terminalState.commandHistory}
@@ -830,39 +999,41 @@ export default function Demo() {
             onApplySuggestion={applySuggestion}
           />
         </div>
-        <div className="h-[27%] min-h-0 border-t border-[#2f2f2f]">
-          <TaskPanel
-            quest={solanaFundamentalsQuest}
-            results={taskResults}
-            revealedHintsByTask={revealedHintsByTask}
-            onRevealHint={(taskId) =>
-              setRevealedHintsByTask((previous) => ({
-                ...previous,
-                [taskId]: Math.min(
-                  (previous[taskId] ?? 0) + 1,
-                  solanaFundamentalsQuest.tasks.find((task) => task.id === taskId)?.hints.length ?? 0
-                ),
-              }))
-            }
-            speedrunEnabled={speedrunState.enabled}
-            speedrunLabel={`Timer: ${formatDuration(speedrunTimeMs)}`}
-            onToggleSpeedrun={(enabled) => setSpeedrunState((previous) => toggleSpeedrun(previous, enabled))}
-            achievements={achievements}
-            walletMode={walletMode}
-            onSetWalletMode={setWalletMode}
-            burnerAddress={burnerWallet?.publicKey ?? null}
-            externalAddress={publicKey?.toBase58() ?? null}
-            balanceLabel={balanceLabel}
-            onRefreshBalance={() => void handleRefreshBalance()}
-            onCreateBurner={handleCreateBurner}
-            onResetBurner={handleResetBurner}
-            onExportBurner={handleExportBurner}
-            onConnectExternal={() => setVisible(true)}
-            onDisconnectExternal={() => void disconnect()}
-            externalConnected={connected}
-            terminalHints={terminalState.errors.slice(-3).map((entry) => entry.hint)}
-          />
-        </div>
+        {hasTasks && (
+          <div className="h-[27%] min-h-0 border-t border-[#2f2f2f]">
+            <TaskPanel
+              quest={activeQuest!}
+              results={taskResults}
+              revealedHintsByTask={revealedHintsByTask}
+              onRevealHint={(taskId) =>
+                setRevealedHintsByTask((previous) => ({
+                  ...previous,
+                  [taskId]: Math.min(
+                    (previous[taskId] ?? 0) + 1,
+                    activeQuest!.tasks.find((task) => task.id === taskId)?.hints.length ?? 0
+                  ),
+                }))
+              }
+              speedrunEnabled={speedrunState.enabled}
+              speedrunLabel={`Timer: ${formatDuration(speedrunTimeMs)}`}
+              onToggleSpeedrun={(enabled) => setSpeedrunState((previous) => toggleSpeedrun(previous, enabled))}
+              achievements={achievements}
+              walletMode={walletMode}
+              onSetWalletMode={setWalletMode}
+              burnerAddress={burnerWallet?.publicKey ?? null}
+              externalAddress={publicKey?.toBase58() ?? null}
+              balanceLabel={balanceLabel}
+              onRefreshBalance={() => void handleRefreshBalance()}
+              onCreateBurner={handleCreateBurner}
+              onResetBurner={handleResetBurner}
+              onExportBurner={handleExportBurner}
+              onConnectExternal={() => setVisible(true)}
+              onDisconnectExternal={() => void disconnect()}
+              externalConnected={connected}
+              terminalHints={terminalState.errors.slice(-3).map((entry) => entry.hint)}
+            />
+          </div>
+        )}
       </div>
 
       <Dialog open={Boolean(confirmAction)} onOpenChange={(open) => (!open ? setConfirmAction(null) : null)}>

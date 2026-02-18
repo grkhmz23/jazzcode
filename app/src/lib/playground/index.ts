@@ -29,3 +29,6 @@ export { importGitHubRepository } from "@/lib/playground/github-import";
 export * from "@/lib/playground/export-zip";
 export * from "@/lib/playground/import-zip";
 export * from "@/lib/playground/runtime";
+export * from "@/lib/playground/mode";
+export * from "@/lib/playground/missions/registry";
+export * from "@/lib/playground/templates/empty";

@@ -40,6 +40,7 @@ export function PlaygroundTopBar({
 }: PlaygroundTopBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
   const [importDropdownOpen, setImportDropdownOpen] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -137,6 +138,39 @@ export function PlaygroundTopBar({
     [processFiles]
   );
 
+  const handleFolderUpload = useCallback(
+    async (fileList: FileList) => {
+      const entries: ZipImportEntry[] = [];
+      const errors: string[] = [];
+
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const relativePath = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+        const sanitized = sanitizeZipPath(relativePath);
+        if (sanitized) {
+          try {
+            const content = await file.text();
+            entries.push({ path: sanitized, content, sizeBytes: file.size });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            errors.push(`Failed to read ${relativePath}: ${message}`);
+          }
+        } else {
+          errors.push(`Invalid file path: ${relativePath}`);
+        }
+      }
+
+      if (errors.length > 0) {
+        console.error("Folder import errors:", errors);
+      }
+
+      if (entries.length > 0) {
+        processFiles(entries);
+      }
+    },
+    [processFiles]
+  );
+
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -203,6 +237,17 @@ export function PlaygroundTopBar({
               >
                 <FolderUp className="h-3 w-3" />
                 Upload file(s)
+              </button>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
+                onClick={() => {
+                  folderInputRef.current?.click();
+                  setImportDropdownOpen(false);
+                }}
+              >
+                <FolderUp className="h-3 w-3" />
+                Upload folder
               </button>
               <button
                 type="button"
@@ -314,6 +359,20 @@ export function PlaygroundTopBar({
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
               void handleFileUpload(e.target.files);
+            }
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={(el) => {
+            (folderInputRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+            if (el) el.setAttribute("webkitdirectory", "");
+          }}
+          type="file"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              void handleFolderUpload(e.target.files);
             }
             e.target.value = "";
           }}

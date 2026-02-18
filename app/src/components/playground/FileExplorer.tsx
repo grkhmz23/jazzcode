@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, FileCode2, FileJson, FileText, FolderClosed, FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { FileTreeNode, Workspace } from "@/lib/playground/types";
+import { FileTreeNode, Workspace, WorkspaceFile } from "@/lib/playground/types";
+import { inferLanguageFromPath } from "@/lib/playground/workspace";
+import { sanitizeZipPath } from "@/lib/playground/import-zip";
 
 type ExplorerDialog =
   | { mode: "create"; initialPath: string }
@@ -27,6 +29,7 @@ interface FileExplorerProps {
   onCreateFile: (path: string) => void;
   onRenameFile: (oldPath: string, nextPath: string) => void;
   onDeleteFile: (path: string) => void;
+  onImportFiles?: (files: Record<string, WorkspaceFile>) => void;
 }
 
 function iconForFile(path: string) {
@@ -42,10 +45,43 @@ export function FileExplorer({
   onCreateFile,
   onRenameFile,
   onDeleteFile,
+  onImportFiles,
 }: FileExplorerProps) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [dialog, setDialog] = useState<ExplorerDialog>(null);
   const [nextPath, setNextPath] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragOver(false);
+      if (!onImportFiles || !e.dataTransfer.files.length) return;
+
+      const now = Date.now();
+      const files: Record<string, WorkspaceFile> = {};
+
+      for (let i = 0; i < e.dataTransfer.files.length; i++) {
+        const file = e.dataTransfer.files[i];
+        const relativePath = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+        const sanitized = sanitizeZipPath(relativePath);
+        if (!sanitized) continue;
+        const content = await file.text();
+        files[sanitized] = {
+          path: sanitized,
+          language: inferLanguageFromPath(sanitized),
+          content,
+          updatedAt: now,
+        };
+      }
+
+      if (Object.keys(files).length > 0) {
+        onImportFiles(files);
+      }
+    },
+    [onImportFiles]
+  );
 
   const paths = useMemo(() => Object.keys(workspace.files).sort(), [workspace.files]);
 
@@ -150,7 +186,13 @@ export function FileExplorer({
   };
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-[#252526] text-[#d4d4d4]" aria-label="File explorer">
+    <section
+      className={`flex h-full min-h-0 flex-col text-[#d4d4d4] ${dragOver ? "bg-[#007acc]/10" : "bg-[#252526]"}`}
+      aria-label="File explorer"
+      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
+      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
+      onDrop={(e) => void handleDrop(e)}
+    >
       <div className="flex items-center justify-between border-b border-[#313131] px-3 py-2">
         <p className="text-xs uppercase tracking-wide text-[#9d9d9d]">Explorer</p>
         <Button

@@ -3,9 +3,21 @@ import { z } from "zod";
 import { importPublicGithubRepository } from "@/lib/runner/github-import";
 
 const importSchema = z.object({
-  repoUrl: z.string().url(),
+  repoUrl: z.string().min(1),
   branch: z.string().optional(),
 });
+
+/**
+ * Normalize owner/repo shorthand to a full GitHub URL on the server side.
+ */
+function normalizeRepoUrl(input: string): string {
+  const trimmed = input.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(trimmed)) {
+    return `https://github.com/${trimmed}`;
+  }
+  return trimmed;
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -14,17 +26,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid request: repoUrl must be a valid URL" },
+        { error: "Invalid request: provide a GitHub URL or owner/repo shorthand" },
         { status: 400 }
       );
     }
 
-    const { repoUrl, branch } = parsed.data;
+    const repoUrl = normalizeRepoUrl(parsed.data.repoUrl);
+    const branch = parsed.data.branch;
 
     // Validate it's a GitHub URL
     if (!repoUrl.includes("github.com")) {
       return NextResponse.json(
-        { error: "Only github.com URLs are supported" },
+        { error: "Only github.com URLs or owner/repo shorthand are supported" },
         { status: 400 }
       );
     }

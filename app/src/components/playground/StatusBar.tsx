@@ -8,6 +8,7 @@ interface StatusBarProps {
   rightCollapsed: boolean;
   bottomCollapsed: boolean;
   saveState: "idle" | "saving" | "saved" | "error";
+  hasTasks: boolean;
   onToggleLeft: () => void;
   onToggleRight: () => void;
   onToggleBottom: () => void;
@@ -25,6 +26,7 @@ export function StatusBar({
   rightCollapsed,
   bottomCollapsed,
   saveState,
+  hasTasks,
   onToggleLeft,
   onToggleRight,
   onToggleBottom,
@@ -45,9 +47,11 @@ export function StatusBar({
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleBottom}>
           {bottomCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Terminal
         </Button>
-        <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleRight}>
-          {rightCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Tasks
-        </Button>
+        {hasTasks && (
+          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleRight}>
+            {rightCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Tasks
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-1">

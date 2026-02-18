@@ -18,6 +18,21 @@ interface ImportResponse {
 }
 
 /**
+ * Normalize an owner/repo shorthand to a full GitHub URL.
+ * Full URLs are passed through unchanged.
+ */
+export function normalizeRepoInput(input: string): string {
+  const trimmed = input.trim();
+  // Already a URL
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  // owner/repo pattern (e.g. "solana-labs/solana-program-library")
+  if (/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(trimmed)) {
+    return `https://github.com/${trimmed}`;
+  }
+  return trimmed;
+}
+
+/**
  * Import a GitHub repository using the server-side API.
  * This avoids CORS issues and rate limits that occur when calling
  * the GitHub API directly from the browser.
@@ -29,6 +44,8 @@ export async function importGitHubRepositoryServer(
 ): Promise<WorkspaceTemplate> {
   const { onProgress } = options ?? {};
 
+  const normalized = normalizeRepoInput(repoUrl);
+
   onProgress?.({ total: 1, completed: 0, currentFile: "Fetching repository..." });
 
   const response = await fetch("/api/playground/import/github", {
@@ -37,7 +54,7 @@ export async function importGitHubRepositoryServer(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      repoUrl: repoUrl.trim(),
+      repoUrl: normalized,
       branch: branch?.trim() || undefined,
     }),
   });
@@ -60,7 +77,7 @@ export async function importGitHubRepositoryServer(
   });
 
   // Parse owner/repo from URL for the template ID
-  const url = new URL(repoUrl.trim());
+  const url = new URL(normalized);
   const pathParts = url.pathname.split("/").filter(Boolean);
   const owner = pathParts[0] || "unknown";
   const repo = (pathParts[1] || "unknown").replace(/\.git$/, "");

@@ -140,11 +140,15 @@ describe("parseZipFile", () => {
     expect(result.skipped).toContain(".idea/workspace.xml");
   });
 
-  it("provides helpful error for oversized compressed files", () => {
-    // Create a buffer larger than 10MB to trigger compressed size check
+  it("compressed size error contains 'compressed' annotation", () => {
     const largeBuffer = new ArrayBuffer(11 * 1024 * 1024);
-    expect(() => parseZipFile(largeBuffer)).toThrow("ZIP file size");
-    expect(() => parseZipFile(largeBuffer)).toThrow("maximum allowed");
+    expect(() => parseZipFile(largeBuffer)).toThrow(/compressed/i);
+    expect(() => parseZipFile(largeBuffer)).toThrow(/upload limit/i);
+  });
+
+  it("uncompressed size error contains 'uncompressed' annotation", () => {
+    const buffer = makeTestZip({ "big.txt": "x".repeat(1000) });
+    expect(() => parseZipFile(buffer, { maxTotalBytes: 1 })).toThrow(/uncompressed/i);
   });
 });
 

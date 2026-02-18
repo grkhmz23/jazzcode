@@ -136,8 +136,8 @@ export function parseZipFile(
   // Check compressed size first
   if (buffer.byteLength > maxCompressedBytes) {
     throw new Error(
-      `ZIP file size (${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB) exceeds ` +
-        `maximum allowed (${(maxCompressedBytes / 1024 / 1024).toFixed(0)} MB). ` +
+      `ZIP file size (${(buffer.byteLength / 1024 / 1024).toFixed(1)} MB compressed) exceeds ` +
+        `the upload limit of ${(maxCompressedBytes / 1024 / 1024).toFixed(0)} MB (compressed). ` +
         `Try splitting your archive or removing large files.`
     );
   }
@@ -188,8 +188,9 @@ export function parseZipFile(
 
     if (totalBytes > maxTotalBytes) {
       throw new Error(
-        `ZIP would exceed maximum total size of ${(maxTotalBytes / 1024 / 1024).toFixed(0)} MB ` +
-          `when uncompressed (${(totalBytes / 1024 / 1024).toFixed(1)} MB). ` +
+        `ZIP contents exceed the maximum size of ${(maxTotalBytes / 1024 / 1024).toFixed(0)} MB (uncompressed) ` +
+          `when extracted (${(totalBytes / 1024 / 1024).toFixed(1)} MB uncompressed). ` +
+          `The ZIP was within compressed limits, but the contents are too large when extracted. ` +
           `Try removing large files or splitting into smaller archives.`
       );
     }
