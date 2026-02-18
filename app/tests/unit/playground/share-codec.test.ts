@@ -117,9 +117,31 @@ describe("share/codec", () => {
         if (decoded) {
           expect(decoded.workspace.templateId).toBe("custom-template");
           expect(decoded.workspace.files["main.ts"].content).toBe("const x = 42;");
+          expect(decoded.workspace.files["main.ts"].readOnly).toBe(true);
           expect(decoded.terminalSeed).toBe("test-seed");
         }
       }
+    });
+
+    it("rejects path traversal entries in share payload", async () => {
+      const malicious = {
+        v: 2,
+        w: {
+          t: "x",
+          f: [["../../etc/passwd", "owned"]],
+          o: ["../../etc/passwd"],
+          a: "../../etc/passwd",
+        },
+        m: { c: Date.now() },
+      };
+      const encoded = Buffer.from(JSON.stringify(malicious), "utf8")
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "");
+
+      const decoded = await decodeWorkspaceShare(`#share=u2.${encoded}`);
+      expect(decoded).toBeNull();
     });
 
     it("returns null for invalid hash", async () => {

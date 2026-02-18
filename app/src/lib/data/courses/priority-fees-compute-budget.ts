@@ -56,6 +56,10 @@ Finally, keep user education integrated into the product flow. A short explanati
 
 This material should be operationalized with deterministic fixtures and explicit release criteria. Teams should preserve a small set of baseline scenarios that represent normal traffic, moderate stress, and severe stress. For each scenario, compare policy outputs before and after changes, and require review notes when confidence labels, warnings, or recommendations move in a meaningful way. This discipline prevents accidental drift, keeps support playbooks aligned with runtime behavior, and makes incident response faster because everyone shares the same deterministic artifact language. In practice, the strongest reliability teams treat these artifacts as release gates, not optional documentation, and they keep fixture ownership explicit so updates remain intentional and auditable.
 
+## Operator mindset
+
+Fee policy is an inclusion-probability model, not a guarantee engine. Good systems expose confidence, assumptions, and fallback actions explicitly so operators can respond quickly when regimes shift.
+
 ## Checklist
 - Couple compute limit and compute price decisions in one policy output.
 - Use percentile targeting plus volatility guard for unstable markets.
@@ -296,14 +300,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "pfcb-v2-foundations",
   title: "Fee and Compute Foundations",
-  description: "Inclusion mechanics, compute planning, and explorer-driven policy design.",
+  description:
+    "Inclusion mechanics, compute/fee coupling, and explorer-driven policy design with deterministic reliability framing.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "pfcb-v2-project-journey",
   title: "Fee Optimizer Project Journey",
-  description: "Implement deterministic planners and ship a stable fee plan report.",
+  description:
+    "Implement deterministic planners, confirmation policy engines, and stable fee strategy artifacts for release review.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -312,7 +318,7 @@ export const priorityFeesComputeBudgetCourse: Course = {
   slug: "priority-fees-compute-budget",
   title: "Priority Fees & Compute Budget",
   description:
-    "Defensive Solana fee engineering with deterministic compute planning, priority fee policy, and confirmation-aware UX.",
+    "Defensive Solana fee engineering with deterministic compute planning, adaptive priority policy, and confirmation-aware UX reliability contracts.",
   difficulty: "advanced",
   duration: "9 hours",
   totalXP: 445,

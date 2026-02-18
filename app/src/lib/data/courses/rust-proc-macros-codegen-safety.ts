@@ -61,7 +61,12 @@ In this course, we simulate proc-macro behavior with deterministic TypeScript pa
 
 A macro mental model helps avoid two mistakes: trusting generated behavior blindly and over-generalizing DSL syntax. Good macro design keeps syntax explicit, expansion predictable, and errors readable.
 
-Treat generated checks as code artifacts, not opaque internals. Store them in tests, compare them in diffs, and validate behavior on controlled fixtures.${appendix}`,
+Treat generated checks as code artifacts, not opaque internals. Store them in tests, compare them in diffs, and validate behavior on controlled fixtures.
+
+## Operator mindset
+
+Codegen safety depends on reviewable output. If generated checks are not deterministic and diff-friendly, teams lose trust and incidents take longer to diagnose.
+${appendix}`,
   blocks: [
     {
       type: "quiz",
@@ -237,14 +242,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "rpmcs-v2-foundations",
   title: "Macro and Codegen Foundations",
-  description: "Macro mental models and safety-driven code generation concepts.",
+  description:
+    "Macro mental models, constraint DSL design, and safety-driven code generation fundamentals.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "rpmcs-v2-project-journey",
   title: "Account Constraint Codegen (Sim)",
-  description: "Parse, generate, evaluate, and report deterministic safety checks.",
+  description:
+    "Parse DSL constraints, generate checks, run deterministic evaluations, and publish stable safety reports.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -252,7 +259,8 @@ export const rustProcMacrosCodegenSafetyCourse: Course = {
   id: "course-rust-proc-macros-codegen-safety",
   slug: "rust-proc-macros-codegen-safety",
   title: "Procedural Macros & Codegen for Safety",
-  description: "Rust macro concepts taught through deterministic parser/codegen safety tooling.",
+  description:
+    "Rust macro/codegen safety taught through deterministic parser and check-generation tooling with audit-friendly outputs.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 445,

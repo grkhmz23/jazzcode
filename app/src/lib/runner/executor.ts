@@ -13,6 +13,7 @@ export async function executeCommandWithLimits(input: {
   args: string[];
   timeoutMs: number;
   maxOutputBytes: number;
+  env?: Record<string, string>;
 }): Promise<CommandExecution> {
   return new Promise((resolve) => {
     const child = spawn(input.command, input.args, {
@@ -22,6 +23,7 @@ export async function executeCommandWithLimits(input: {
         PATH: process.env.PATH ?? "",
         HOME: "/tmp",
         NODE_ENV: "production",
+        ...(input.env ?? {}),
       },
     });
 

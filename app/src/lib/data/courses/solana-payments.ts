@@ -37,6 +37,13 @@ Memo best practices: keep under 256 bytes for efficiency, use structured formats
 
 Address poisoning is an attack vector where attackers create addresses visually similar to legitimate ones. Countermeasures include: displaying addresses with checksums, using name services (Solana Name Service, Bonfida) where appropriate, and implementing confirmation steps for large transfers.
 
+## Merchant-safe memo template
+
+A practical memo format is:
+\`v1|order:<id>|shop:<merchantId>|nonce:<shortHash>\`
+
+This keeps memos short, parseable, and versioned while avoiding direct storage of sensitive user details.
+
 ## Checklist
 - Validate base58 encoding and 32-byte length
 - Distinguish between on-curve and off-curve addresses
@@ -390,14 +397,16 @@ This validates the complete payment flow from intent to receipt.`,
 const module1: Module = {
   id: "payments-v2-foundations",
   title: "Payment Foundations",
-  description: "Address validation, idempotency, and payment intent creation.",
+  description:
+    "Address validation, idempotency strategy, and payment intent design for reliable checkout behavior.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "payments-v2-implementation",
   title: "Implementation & Verification",
-  description: "Transaction building, webhooks, and receipt generation.",
+  description:
+    "Transaction building, webhook authenticity checks, and deterministic receipt generation with clear error-state handling.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -406,7 +415,7 @@ export const solanaPaymentsCourse: Course = {
   slug: "solana-payments",
   title: "Solana Payments & Checkout Flows",
   description:
-    "Build production-grade payment flows: validation, idempotency, transaction building, webhooks, and deterministic receipt generation.",
+    "Build production-grade Solana payment flows with robust validation, replay-safe idempotency, secure webhooks, and deterministic receipts for reconciliation.",
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 400,

@@ -47,6 +47,16 @@ Even in an offline educational planner, safety invariants belong at the core. Ou
 
 A robust frontend mental model is therefore: token universe + pool universe + deterministic quote math + route ranking policy + user safety constraints. If any layer is implicit, the system will still run, but behavior under volatility becomes hard to explain. If all layers are explicit and typed, the same planner can power UI previews, tests, and diagnostics with minimal drift.
 
+## Quick numeric intuition
+
+If two routes have spot prices that look similar, a larger input can still produce materially different output because you travel further on each curve. That is why route comparison must happen at the exact user amount, not a tiny reference trade.
+
+## What you should internalize from this lesson
+
+- Execution quality is output-at-size, not headline spot price.
+- Slippage tolerance is a user protection bound, not a market forecast.
+- Deterministic integer math is a product feature, not only a technical preference.
+
 ### Pitfalls
 
 1. Comparing routes by headline “price” instead of exact outAmount at the user’s size.
@@ -427,14 +437,16 @@ Compose deterministic checkpoint artifacts:
 const module1: Module = {
   id: "defi-v2-module-swap-fundamentals",
   title: "Swap Fundamentals",
-  description: "Understand CPMM math, quote semantics, and deterministic routing tradeoffs.",
+  description:
+    "Understand CPMM math, quote anatomy, and deterministic routing tradeoffs with safety-first user protections.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "defi-v2-module-offline-jupiter-planner",
   title: "Jupiter-Style Swap Planner Project (Offline)",
-  description: "Build deterministic quoting, route selection, safety checks, and final checkpoint outputs.",
+  description:
+    "Build deterministic quoting, route selection, and minOut safety checks, then package stable checkpoint artifacts for reproducible reviews.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -443,7 +455,7 @@ export const defiSolanaCourse: Course = {
   slug: "defi-solana",
   title: "DeFi on Solana",
   description:
-    "Project-journey course: build a deterministic offline Jupiter-style swap planner with route ranking, minOut safety, and stable checkpoint outputs.",
+    "Advanced project-journey course for engineers building swap systems: deterministic offline Jupiter-style planning, route ranking, minOut safety, and reproducible diagnostics.",
   difficulty: "advanced",
   duration: "12 hours",
   totalXP: 335,

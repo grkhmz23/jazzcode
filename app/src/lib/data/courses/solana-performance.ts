@@ -37,6 +37,16 @@ Cost categories include: fixed costs (signature verification, account loading), 
 
 Metering happens during execution. If a transaction exceeds its compute budget, execution halts and the transaction fails with an error. Failed transactions still pay fees for consumed CUs, making optimization economically important.
 
+## Practical optimization loop
+
+Use a repeatable loop:
+1. profile real CU usage,
+2. identify top cost drivers (data layout, CPI count, logging),
+3. optimize one hotspot,
+4. re-measure and keep only proven wins.
+
+This avoids performance folklore and keeps code quality intact.
+
 ## Checklist
 - Understand compute unit consumption categories
 - Use ComputeBudgetProgram for specific limits
@@ -397,14 +407,16 @@ This validates your ability to optimize while maintaining correctness.`,
 const module1: Module = {
   id: "performance-v2-foundations",
   title: "Performance Foundations",
-  description: "Compute model, account layouts, and cost estimation.",
+  description:
+    "Compute model, account/data layout decisions, and deterministic cost estimation for transaction-level performance reasoning.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "performance-v2-optimization",
   title: "Optimization & Analysis",
-  description: "Layout optimization, compute budgets, and performance measurement.",
+  description:
+    "Layout optimization, compute budget tuning, and before/after performance analysis with correctness safeguards.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -413,7 +425,7 @@ export const solanaPerformanceCourse: Course = {
   slug: "solana-performance",
   title: "Solana Performance & Compute Optimization",
   description:
-    "Master Solana performance optimization: compute budgets, account layouts, encoding, and deterministic cost modeling.",
+    "Master Solana performance engineering with measurable optimization workflows: compute budgets, data layouts, encoding efficiency, and deterministic cost modeling.",
   difficulty: "advanced",
   duration: "11 hours",
   totalXP: 405,

@@ -59,7 +59,12 @@ Avoid stringly error contracts where every caller invents custom messages. Those
 
 Invariants should be designed for testability. If an invariant cannot be expressed as a deterministic function over known inputs, it is hard to validate and easy to regress. Start with small ensure helpers that return typed results, then compose them into higher-level guards.
 
-In production, error taxonomies should be reviewed like API changes. Renaming codes or changing severity mapping can break alert rules and client handling. Version these changes and validate with fixture suites.${appendix}`,
+In production, error taxonomies should be reviewed like API changes. Renaming codes or changing severity mapping can break alert rules and client handling. Version these changes and validate with fixture suites.
+
+## Operator mindset
+
+Invariant errors are operational contracts. If code, severity, and context are not stable, monitoring and user recovery flows degrade even when logic is correct.
+${appendix}`,
   blocks: [
     {
       type: "quiz",
@@ -240,14 +245,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "rei-v2-foundations",
   title: "Rust Error and Invariant Foundations",
-  description: "Typed errors, Result patterns, and deterministic invariant design.",
+  description:
+    "Typed error taxonomy, Result/context propagation patterns, and deterministic invariant design fundamentals.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "rei-v2-project-journey",
   title: "Invariant Guard Library Project Journey",
-  description: "Implement guard helpers, evidence chain, and stable audit reporting.",
+  description:
+    "Implement guard helpers, evidence-chain generation, and stable audit reporting for reliability and incident response.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -255,7 +262,8 @@ export const rustErrorsInvariantsCourse: Course = {
   id: "course-rust-errors-invariants",
   slug: "rust-errors-invariants",
   title: "Rust Error Design & Invariants",
-  description: "Build typed invariant guard libraries with deterministic evidence and reporting.",
+  description:
+    "Build typed invariant guard libraries with deterministic evidence artifacts, compatibility-safe error contracts, and audit-ready reporting.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 445,

@@ -37,6 +37,10 @@ Voting power is typically determined by token balance at a specific snapshot blo
 
 Execution safety involves timelocks between approval and execution. This delay (often 1-7 days) allows users to exit if they disagree with the outcome. Emergency powers may exist for critical fixes but should require higher thresholds.
 
+## Governance reliability rule
+
+A proposal system is only credible if outcomes are reproducible from public inputs. That means deterministic vote math, explicit snapshot rules, clear timelock transitions, and auditable execution traces for treasury effects.
+
 ## Checklist
 - Understand the four-stage governance lifecycle
 - Know proposal deposit and spam prevention mechanisms
@@ -403,14 +407,16 @@ This validates your complete governance/multisig implementation.`,
 const module1: Module = {
   id: "governance-v2-governance",
   title: "DAO Governance",
-  description: "Proposal lifecycle, voting mechanics, and timelock safety.",
+  description:
+    "Proposal lifecycle, deterministic voting mechanics, quorum policy, and timelock safety for credible DAO governance.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "governance-v2-multisig",
   title: "Multisig Treasury",
-  description: "Multisig construction, approvals, and secure execution.",
+  description:
+    "Multisig transaction construction, approval controls, replay defenses, and secure treasury execution patterns.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -419,7 +425,7 @@ export const solanaGovernanceMultisigCourse: Course = {
   slug: "solana-governance-multisig",
   title: "Governance & Multisig Treasury Ops",
   description:
-    "Build DAO governance and multisig systems: voting, timelocks, approvals, and secure treasury operations.",
+    "Build production-ready DAO governance and multisig treasury systems with deterministic vote accounting, timelock safety, and secure execution controls.",
   difficulty: "intermediate",
   duration: "11 hours",
   totalXP: 400,

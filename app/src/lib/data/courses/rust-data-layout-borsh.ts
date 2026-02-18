@@ -55,7 +55,12 @@ On Solana, account rent is proportional to byte size, so padding is not only a c
 
 Borsh serialization avoids some ABI ambiguity by defining field order in schema rather than raw struct memory. However, zero-copy patterns and manual slicing still depend on precise offsets. Teams should understand both worlds: in-memory layout rules for zero-copy and schema-based encoding rules for Borsh.
 
-In production engineering, layout decisions should be documented with deterministic outputs: field offsets, per-field padding, struct alignment, and total size. These outputs can be compared in CI to catch accidental drift from refactors. The goal is not theoretical elegance; the goal is stable data contracts over time.${appendix}`,
+In production engineering, layout decisions should be documented with deterministic outputs: field offsets, per-field padding, struct alignment, and total size. These outputs can be compared in CI to catch accidental drift from refactors. The goal is not theoretical elegance; the goal is stable data contracts over time.
+
+## Operator mindset
+
+Schema bytes are production API surface. Treat offset changes, enum ordering, and parser semantics as compatibility events requiring explicit review.
+${appendix}`,
   blocks: [
     {
       type: "quiz",
@@ -238,14 +243,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "rdb-v2-foundations",
   title: "Data Layout Foundations",
-  description: "Alignment, Borsh rules, and practical parsing safety.",
+  description:
+    "Alignment behavior, Borsh encoding rules, and practical parsing safety for stable byte-level contracts.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "rdb-v2-project-journey",
   title: "Account Layout Inspector Project Journey",
-  description: "Implement deterministic layout, encoding, parsing, and reporting helpers.",
+  description:
+    "Implement deterministic layout analysis, encoding/decoding, safe parsing, and compatibility-focused reporting helpers.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -253,7 +260,8 @@ export const rustDataLayoutBorshCourse: Course = {
   id: "course-rust-data-layout-borsh",
   slug: "rust-data-layout-borsh",
   title: "Rust Data Layout & Borsh Mastery",
-  description: "Rust-first Solana data layout engineering with deterministic byte-level tooling.",
+  description:
+    "Rust-first Solana data layout engineering with deterministic byte-level tooling and compatibility-safe schema practices.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 445,

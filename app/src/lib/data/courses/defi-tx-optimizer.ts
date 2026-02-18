@@ -51,6 +51,15 @@ Blockhash expiry is the most insidious failure mode because it produces no error
 
 These three failure modes often interact. A developer might add more instructions to avoid multiple transactions (reducing blockhash expiry risk), but this increases both CU consumption and transaction size. Optimizing for one dimension can worsen another. The art of transaction optimization is finding the right balance: enough CU budget to complete execution, compact enough to fit in 1,232 bytes, and fast enough submission to land before the blockhash expires.
 
+## Production triage rule
+
+Diagnose transaction failures in strict order:
+1. did it fit and simulate,
+2. did it propagate and include,
+3. did it confirm before expiry.
+
+This sequence prevents noisy fixes and reduces false assumptions during incidents.
+
 ## Diagnostic checklist
 - Check transaction logs for \`ComputeBudgetExceeded\` when CU is the issue
 - Check serialized transaction size against the 1,232-byte limit
@@ -527,14 +536,16 @@ This checkpoint validates your complete understanding of transaction optimizatio
 const module1: Module = {
   id: "txopt-v2-fundamentals",
   title: "Transaction Fundamentals",
-  description: "Transaction failure modes, compute budget mechanics, priority fee strategy, and cost estimation.",
+  description:
+    "Transaction failure diagnosis, compute budget mechanics, priority-fee strategy, and fee estimation foundations.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "txopt-v2-optimization",
   title: "Optimization & Strategy",
-  description: "Address Lookup Tables, reliability patterns, error UX, and comprehensive send strategy reporting.",
+  description:
+    "Address Lookup Table planning, reliability/retry patterns, actionable error UX, and full send-strategy reporting.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -543,7 +554,7 @@ export const defiTxOptimizerCourse: Course = {
   slug: "defi-tx-optimizer",
   title: "DeFi Transaction Optimizer",
   description:
-    "Master Solana transaction optimization: compute budgeting, priority fees, Address Lookup Tables, versioned transactions, and deterministic send strategy reporting.",
+    "Master Solana DeFi transaction optimization: compute/fee tuning, ALT strategy, reliability patterns, and deterministic send-strategy planning.",
   difficulty: "advanced",
   duration: "12 hours",
   totalXP: 400,

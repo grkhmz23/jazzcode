@@ -74,10 +74,18 @@ export function getAutocompleteSuggestions({ input, filePaths }: AutocompleteCon
     }
   }
 
+  if (parsed.command === "anchor" && parsed.positional[0] === "idl") {
+    const token = parsed.positional[1] ?? "";
+    return {
+      suggestions: ["build", "fetch"].filter((item) => startsWithToken(item, token)),
+      replacement: token,
+    };
+  }
+
   if (parsed.command === "anchor") {
     const token = parsed.positional[0] ?? "";
     return {
-      suggestions: ["init", "build", "test"].filter((item) => startsWithToken(item, token)),
+      suggestions: ["init", "build", "test", "deploy", "idl"].filter((item) => startsWithToken(item, token)),
       replacement: token,
     };
   }
@@ -105,6 +113,14 @@ export function getAutocompleteSuggestions({ input, filePaths }: AutocompleteCon
       const suggestions = completePath(fragment, filePaths);
       return { suggestions, replacement: fragment };
     }
+  }
+
+  if (parsed.command === "cargo") {
+    const token = parsed.positional[0] ?? "";
+    return {
+      suggestions: ["build", "test"].filter((item) => startsWithToken(item, token)),
+      replacement: token,
+    };
   }
 
   return {

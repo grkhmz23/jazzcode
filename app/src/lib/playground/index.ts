@@ -16,6 +16,7 @@ export * from "@/lib/playground/templates/catalog";
 export * from "@/lib/playground/progress/speedrun";
 export * from "@/lib/playground/progress/achievements";
 export * from "@/lib/playground/progress/events";
+export * from "@/lib/playground/identity";
 export * from "@/lib/playground/snapshot";
 export * from "@/lib/playground/share/codec";
 // GitHub import - server-side version (recommended)

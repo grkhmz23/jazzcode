@@ -34,6 +34,10 @@ export interface QuestProgressRecord {
   updatedAt: number;
 }
 
+function scopedKey(base: string, scopeId: string): string {
+  return `${scopeId}:${base}`;
+}
+
 function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof window.indexedDB !== "undefined";
 }
@@ -88,53 +92,66 @@ async function withStore<T>(
   });
 }
 
-export async function loadWorkspaceFromIndexedDb(): Promise<Workspace | null> {
+export async function loadWorkspaceFromIndexedDb(scopeId = "guest:default"): Promise<Workspace | null> {
   const result = await withStore<WorkspaceRecord>(WORKSPACE_STORE, "readonly", (store) =>
-    store.get(WORKSPACE_KEY)
+    store.get(scopedKey(WORKSPACE_KEY, scopeId))
   );
   return result?.workspace ?? null;
 }
 
-export async function saveWorkspaceToIndexedDb(workspace: Workspace): Promise<void> {
+export async function saveWorkspaceToIndexedDb(workspace: Workspace, scopeId = "guest:default"): Promise<void> {
   await withStore<void>(WORKSPACE_STORE, "readwrite", (store) =>
     store.put({
-      id: WORKSPACE_KEY,
+      id: scopedKey(WORKSPACE_KEY, scopeId),
       workspace,
       updatedAt: Date.now(),
     } as WorkspaceRecord)
   );
 }
 
-export async function clearWorkspaceInIndexedDb(): Promise<void> {
-  await withStore<void>(WORKSPACE_STORE, "readwrite", (store) => store.delete(WORKSPACE_KEY));
+export async function clearWorkspaceInIndexedDb(scopeId = "guest:default"): Promise<void> {
+  await withStore<void>(WORKSPACE_STORE, "readwrite", (store) => store.delete(scopedKey(WORKSPACE_KEY, scopeId)));
 }
 
-export async function loadBurnerWalletFromIndexedDb(): Promise<BurnerWalletRecord | null> {
+export async function loadBurnerWalletFromIndexedDb(scopeId = "guest:default"): Promise<BurnerWalletRecord | null> {
   const result = await withStore<MetaRecord<BurnerWalletRecord>>(META_STORE, "readonly", (store) =>
-    store.get(BURNER_KEY)
+    store.get(scopedKey(BURNER_KEY, scopeId))
   );
   return result?.value ?? null;
 }
 
-export async function saveBurnerWalletToIndexedDb(record: BurnerWalletRecord): Promise<void> {
+export async function saveBurnerWalletToIndexedDb(record: BurnerWalletRecord, scopeId = "guest:default"): Promise<void> {
   await withStore<void>(META_STORE, "readwrite", (store) =>
     store.put({
-      id: BURNER_KEY,
+      id: scopedKey(BURNER_KEY, scopeId),
       value: record,
       updatedAt: Date.now(),
     } as MetaRecord<BurnerWalletRecord>)
   );
 }
 
-export async function clearBurnerWalletInIndexedDb(): Promise<void> {
-  await withStore<void>(META_STORE, "readwrite", (store) => store.delete(BURNER_KEY));
+export async function clearBurnerWalletInIndexedDb(scopeId = "guest:default"): Promise<void> {
+  await withStore<void>(META_STORE, "readwrite", (store) => store.delete(scopedKey(BURNER_KEY, scopeId)));
 }
 
-export async function loadQuestProgressFromIndexedDb(questId: string): Promise<QuestProgressRecord | null> {
-  const result = await withStore<QuestProgressRecord>(PROGRESS_STORE, "readonly", (store) => store.get(questId));
+export async function loadQuestProgressFromIndexedDb(
+  questId: string,
+  scopeId = "guest:default"
+): Promise<QuestProgressRecord | null> {
+  const result = await withStore<QuestProgressRecord>(PROGRESS_STORE, "readonly", (store) =>
+    store.get(scopedKey(questId, scopeId))
+  );
   return result ?? null;
 }
 
-export async function saveQuestProgressToIndexedDb(progress: QuestProgressRecord): Promise<void> {
-  await withStore<void>(PROGRESS_STORE, "readwrite", (store) => store.put(progress));
+export async function saveQuestProgressToIndexedDb(
+  progress: QuestProgressRecord,
+  scopeId = "guest:default"
+): Promise<void> {
+  await withStore<void>(PROGRESS_STORE, "readwrite", (store) =>
+    store.put({
+      ...progress,
+      questId: scopedKey(progress.questId, scopeId),
+    })
+  );
 }

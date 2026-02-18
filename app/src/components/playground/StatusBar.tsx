@@ -19,6 +19,7 @@ interface StatusBarProps {
   onExportZip: () => void;
   onShareSnapshot: () => void;
   onCopyShareLink: () => void;
+  runnerStatus?: "connected" | "disconnected";
 }
 
 export function StatusBar({
@@ -37,6 +38,7 @@ export function StatusBar({
   onExportZip,
   onShareSnapshot,
   onCopyShareLink,
+  runnerStatus = "disconnected",
 }: StatusBarProps) {
   return (
     <div className="flex h-9 items-center justify-between border-t border-[#2f2f2f] bg-[#007acc] px-2 text-xs text-white">
@@ -90,6 +92,9 @@ export function StatusBar({
         </Button>
         <span className="inline-flex items-center rounded bg-[#0d8ae5] px-2 py-1 text-[11px]">
           <Save className="mr-1 h-3 w-3" />{saveState}
+        </span>
+        <span className={`inline-flex items-center rounded px-2 py-1 text-[11px] ${runnerStatus === "connected" ? "bg-emerald-600" : "bg-red-600"}`}>
+          Runner: {runnerStatus}
         </span>
       </div>
     </div>

@@ -53,6 +53,31 @@ export interface TerminalIo {
   setActiveFile: (path: string) => void;
   deleteFile?: (path: string) => void;
   requestGitToken?: () => Promise<string | null>;
+  shouldApplyRunnerArtifacts?: () => boolean;
+  runRunnerJob?: (request: {
+    jobType:
+      | "anchor_deploy"
+      | "anchor_idl_build"
+      | "anchor_idl_fetch"
+      | "cargo_build"
+      | "cargo_test";
+    files: Record<string, string>;
+    args: Record<string, string>;
+    onLog?: (entry: { stream: "stdout" | "stderr" | "system"; line: string }) => void;
+  }) => Promise<{
+    ok: boolean;
+    result?: {
+      exitCode: number;
+      stdout: string;
+      stderr: string;
+      outputFiles?: Record<string, string>;
+      outputFilesList?: string[];
+      durationMs?: number;
+      outputFilesTarGzBase64?: string;
+    };
+    error?: string;
+    streamed?: boolean;
+  }>;
   wallet: {
     mode: "burner" | "external";
     burnerAddress: string | null;
@@ -118,7 +143,13 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
     usage: "solana-keygen <new|pubkey>",
     flags: ["--outfile"],
   },
-  { name: "anchor", description: "Anchor framework commands.", usage: "anchor <init|build|test>", flags: [] },
+  {
+    name: "anchor",
+    description: "Anchor framework commands.",
+    usage: "anchor <init|build|test|deploy|idl>",
+    flags: [],
+  },
+  { name: "cargo", description: "Rust cargo commands.", usage: "cargo <build|test>", flags: [] },
   {
     name: "spl-token",
     description: "SPL token simulation commands.",
@@ -129,7 +160,7 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
   {
     name: "git",
     description: "Git version control commands.",
-    usage: "git <init|status|add|commit|log|branch|checkout|remote|clone|pull|push>",
-    flags: ["-m", "-b", "--oneline"],
+    usage: "git <init|status|add|commit|log|branch|checkout|remote|clone|pull|push [remote] [branch]>",
+    flags: ["-m", "-b", "--oneline", "-u", "--set-upstream", "--with-token"],
   },
 ];

@@ -37,6 +37,15 @@ Key concepts for normalization: instruction program IDs identify which decoder t
 
 Idempotency is critical. Block reorganizations are rare on Solana but possible during forks. Your indexing pipeline should handle replayed transactions without duplicating events. This typically means using transaction signatures as unique keys and implementing upsert semantics in the storage layer.
 
+## Operator mental model
+
+Treat your indexer as a data product with explicit contracts:
+1. ingest contract (what raw inputs are accepted),
+2. normalization contract (stable event schema),
+3. serving contract (what query consumers can rely on).
+
+When these contracts are versioned and documented, protocol upgrades become manageable instead of breaking downstream analytics unexpectedly.
+
 ## Checklist
 - Understand transaction → instructions → logs hierarchy
 - Identify program IDs and account ownership for data layout selection
@@ -413,14 +422,16 @@ This checkpoint validates your complete indexing pipeline from raw data to analy
 const module1: Module = {
   id: "indexing-v2-foundations",
   title: "Indexing Foundations",
-  description: "Events model, token decoding, and transaction parsing fundamentals.",
+  description:
+    "Events model, token decoding, and transaction parsing fundamentals with schema discipline and deterministic normalization.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "indexing-v2-pipeline",
   title: "Indexing Pipeline & Analytics",
-  description: "Building the indexer pipeline with checkpointing and analytics aggregation.",
+  description:
+    "Build end-to-end indexer pipeline behavior: idempotent ingestion, checkpoint recovery, and analytics aggregation at production scale.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -429,7 +440,7 @@ export const solanaIndexingCourse: Course = {
   slug: "solana-indexing",
   title: "Solana Indexing & Analytics",
   description:
-    "Build a production-grade event indexer: token decoding, transaction parsing, checkpointing, and analytics aggregation with deterministic outputs.",
+    "Build a production-grade Solana event indexer with deterministic decoding, resilient ingestion contracts, checkpoint recovery, and analytics outputs teams can trust.",
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 400,

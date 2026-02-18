@@ -386,6 +386,117 @@ function runAnchorBuildSimulation(io: TerminalIo): { success: boolean; lines: st
   };
 }
 
+function toOutputLines(stdout: string, stderr: string): TerminalOutputLine[] {
+  const lines: TerminalOutputLine[] = [];
+  stdout
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .forEach((line) => lines.push({ kind: "output", text: line }));
+  stderr
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .forEach((line) => lines.push({ kind: "error", text: line }));
+  return lines;
+}
+
+function collectWorkspaceFiles(io: TerminalIo): Record<string, string> {
+  const files: Record<string, string> = {};
+  io.listPaths().forEach((path) => {
+    const content = io.readFile(path);
+    if (content !== null) {
+      files[path] = content;
+    }
+  });
+  return files;
+}
+
+async function runAnchorRunnerCommand(
+  state: TerminalState,
+  io: TerminalIo,
+  request: {
+    jobType: "anchor_deploy" | "anchor_idl_build" | "anchor_idl_fetch";
+    args: Record<string, string>;
+    successCommand: string;
+    successKey: string;
+  }
+): Promise<CommandExecutionResult> {
+  if (!io.runRunnerJob) {
+    const error = createTerminalError("UNKNOWN_COMMAND", "Runner integration is not available in this session.");
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  if (state.solanaUrl !== "devnet") {
+    const error = createTerminalError("NETWORK_MISMATCH", "Anchor deploy/IDL commands are restricted to devnet.");
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  const streamedLines: TerminalOutputLine[] = [];
+  const response = await io.runRunnerJob({
+    jobType: request.jobType,
+    files: collectWorkspaceFiles(io),
+    args: {
+      ...request.args,
+      cluster: "devnet",
+      rpcUrl: "https://api.devnet.solana.com",
+    },
+    onLog: (entry) => {
+      streamedLines.push({
+        kind: entry.stream === "stderr" ? "error" : entry.stream === "system" ? "system" : "output",
+        text: entry.line,
+      });
+    },
+  });
+
+  if (!response.ok || !response.result) {
+    const message = response.error ?? "Runner job failed";
+    const error = createTerminalError("UNKNOWN_COMMAND", message);
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  if (io.shouldApplyRunnerArtifacts?.() !== false && response.result.outputFiles) {
+    Object.entries(response.result.outputFiles).forEach(([path, content]) => {
+      io.createOrUpdateFile(path, content);
+    });
+  }
+
+  const nextState: TerminalState = {
+    ...state,
+    commandSuccesses:
+      response.result.exitCode === 0
+        ? [...state.commandSuccesses, request.successKey]
+        : state.commandSuccesses,
+  };
+
+  const baseLines = toOutputLines(response.result.stdout, response.result.stderr);
+  const fallbackKind: TerminalOutputLine["kind"] = response.result.exitCode === 0 ? "output" : "error";
+  const lines = response.streamed
+    ? streamedLines.length > 0
+      ? streamedLines
+      : [
+          {
+            kind: fallbackKind,
+            text: response.result.exitCode === 0 ? "Command completed." : "Command failed.",
+          },
+        ]
+    : baseLines.length > 0
+      ? baseLines
+      : [
+          {
+            kind: fallbackKind,
+            text: response.result.exitCode === 0 ? "Command completed." : "Command failed.",
+          },
+        ];
+
+  return {
+    nextState,
+    lines,
+    metadata:
+      response.result.exitCode === 0
+        ? { commandSucceeded: request.successCommand, realRpcUsed: true }
+        : undefined,
+  };
+}
+
 async function handleSolanaCommand(parsed: ParsedCommand, state: TerminalState, io: TerminalIo): Promise<CommandExecutionResult> {
   const sub = parsed.positional[0];
   if (!sub) {
@@ -747,8 +858,106 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
     };
   }
 
+  if (sub === "deploy") {
+    return runAnchorRunnerCommand(state, io, {
+      jobType: "anchor_deploy",
+      args: {},
+      successCommand: "anchor deploy",
+      successKey: "anchor:deploy",
+    });
+  }
+
+  if (sub === "idl") {
+    const idlSub = parsed.positional[1];
+    if (idlSub === "build") {
+      return runAnchorRunnerCommand(state, io, {
+        jobType: "anchor_idl_build",
+        args: {},
+        successCommand: "anchor idl build",
+        successKey: "anchor:idl:build",
+      });
+    }
+
+    if (idlSub === "fetch") {
+      const programId = parsed.positional[2];
+      if (!programId || !validatePublicKey(programId)) {
+        const error = createTerminalError("INVALID_PUBKEY", "Usage: anchor idl fetch <PROGRAM_ID>");
+        return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+      }
+
+      return runAnchorRunnerCommand(state, io, {
+        jobType: "anchor_idl_fetch",
+        args: { programId },
+        successCommand: "anchor idl fetch",
+        successKey: "anchor:idl:fetch",
+      });
+    }
+
+    const error = createTerminalError("MISSING_ARGUMENT", "Usage: anchor idl <build|fetch>");
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
   const error = createTerminalError("UNKNOWN_COMMAND", `Unknown anchor subcommand: ${sub}`);
   return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+}
+
+async function handleCargo(parsed: ParsedCommand, state: TerminalState, io: TerminalIo): Promise<CommandExecutionResult> {
+  const sub = parsed.positional[0];
+  if (sub !== "build" && sub !== "test") {
+    const error = createTerminalError("MISSING_ARGUMENT", "Usage: cargo <build|test>");
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  if (!io.runRunnerJob) {
+    const error = createTerminalError("UNKNOWN_COMMAND", "Runner integration is not available in this session.");
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  const streamedLines: TerminalOutputLine[] = [];
+  const response = await io.runRunnerJob({
+    jobType: sub === "build" ? "cargo_build" : "cargo_test",
+    files: collectWorkspaceFiles(io),
+    args: {
+      cluster: "devnet",
+      rpcUrl: "https://api.devnet.solana.com",
+    },
+    onLog: (entry) => {
+      streamedLines.push({
+        kind: entry.stream === "stderr" ? "error" : entry.stream === "system" ? "system" : "output",
+        text: entry.line,
+      });
+    },
+  });
+
+  if (!response.ok || !response.result) {
+    const message = response.error ?? "Cargo runner job failed";
+    const error = createTerminalError("UNKNOWN_COMMAND", message);
+    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  const nextState: TerminalState = {
+    ...state,
+    commandSuccesses:
+      response.result.exitCode === 0
+        ? [...state.commandSuccesses, `cargo:${sub}`]
+        : state.commandSuccesses,
+  };
+
+  const fallbackKind: TerminalOutputLine["kind"] = response.result.exitCode === 0 ? "output" : "error";
+  const lines = response.streamed
+    ? streamedLines.length > 0
+      ? streamedLines
+      : [{ kind: fallbackKind, text: response.result.exitCode === 0 ? "Command completed." : "Command failed." }]
+    : toOutputLines(response.result.stdout, response.result.stderr);
+
+  return {
+    nextState,
+    lines,
+    metadata:
+      response.result.exitCode === 0
+        ? { commandSucceeded: `cargo ${sub}` }
+        : undefined,
+  };
 }
 
 async function handleSplToken(parsed: ParsedCommand, state: TerminalState): Promise<CommandExecutionResult> {
@@ -1139,6 +1348,10 @@ export async function executeTerminalCommand(rawCommand: string, state: Terminal
 
   if (parsed.command === "anchor") {
     return handleAnchor(parsed, nextStateWithHistory, io);
+  }
+
+  if (parsed.command === "cargo") {
+    return handleCargo(parsed, nextStateWithHistory, io);
   }
 
   if (parsed.command === "spl-token") {

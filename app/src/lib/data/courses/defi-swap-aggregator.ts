@@ -39,6 +39,15 @@ Routes are the paths a swap takes through liquidity pools. A direct swap (SOL â†
 
 Route optimization considers: pool liquidity depth, fee tiers, price impact per leg, and the total compute cost of including multiple legs in one transaction. More legs means more instructions, more accounts, and higher compute unit consumption â€” there is a practical limit to route complexity within Solana's transaction size and compute budget constraints.
 
+## Execution-quality triangle
+
+Every route decision balances three competing goals:
+1. better output amount,
+2. lower failure risk (slippage + stale quote exposure),
+3. lower execution overhead (accounts + compute + latency).
+
+Strong aggregators make this tradeoff explicit rather than optimizing only a single metric.
+
 ## Checklist
 - Identify input and output mints by their full base58 addresses
 - Ensure ATAs exist for both input and output tokens before swapping
@@ -423,14 +432,16 @@ This checkpoint validates your complete understanding of swap aggregation.`,
 const module1: Module = {
   id: "swap-v2-fundamentals",
   title: "Swap Fundamentals",
-  description: "Token swap mechanics, slippage protection, route visualization, and swap plan construction.",
+  description:
+    "Token swap mechanics, slippage protection, route composition, and deterministic swap plan construction with transparent tradeoffs.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "swap-v2-execution",
   title: "Execution & Reliability",
-  description: "State machine design, transaction anatomy, reliability patterns, and final report generation.",
+  description:
+    "State-machine execution, transaction anatomy, retry/staleness reliability patterns, and high-signal swap run reporting.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -439,7 +450,7 @@ export const defiSwapAggregatorCourse: Course = {
   slug: "defi-swap-aggregator",
   title: "DeFi Swap Aggregation",
   description:
-    "Master swap aggregation mechanics: quote parsing, route optimization, slippage protection, and deterministic swap plan generation for Solana DeFi.",
+    "Master production swap aggregation on Solana: deterministic quote parsing, route optimization tradeoffs, slippage safety, and reliability-aware execution.",
   difficulty: "intermediate",
   duration: "12 hours",
   totalXP: 400,

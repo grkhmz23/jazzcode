@@ -47,6 +47,16 @@ Writable flags matter for two reasons: correctness and attack surface. Over-broa
 
 Finally, threat modeling should include arithmetic constraints. Even if auth is correct, unchecked u64 math can corrupt balances through underflow or overflow and invalidate all higher-level assumptions.
 
+## Auditor workflow per instruction
+
+For each handler, run the same sequence: identify privileged outcome, list required accounts, verify signer/owner/PDA relationships, verify writable scope, then test malformed account lists. Repeating this fixed loop prevents “I think it looks safe” audits.
+
+## What you should be able to do after this lesson
+
+- Turn a vague concern into a concrete validation checklist.
+- Explain why account substitution and PDA spoofing recur in Solana incidents.
+- Build deterministic negative-path scenarios before writing remediation notes.
+
 ## Checklist
 - Map each instruction to a clear privilege model.
 - Verify authority account is required signer for privileged actions.
@@ -480,14 +490,16 @@ This checkpoint mirrors the final course artifact produced by the simulator repo
 const module1: Module = {
   id: "security-v2-threat-model-and-method",
   title: "Threat Model & Audit Method",
-  description: "Account-centric threat modeling and deterministic evidence chains.",
+  description:
+    "Account-centric threat modeling, deterministic exploit reproduction, and evidence discipline for credible audit findings.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "security-v2-vuln-lab",
   title: "Vuln Lab Project Journey",
-  description: "Exploit, patch, verify, and produce an audit artifact.",
+  description:
+    "Exploit, patch, verify, and produce audit-ready artifacts with deterministic traces and invariant-backed conclusions.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -496,7 +508,7 @@ export const solanaSecurityCourse: Course = {
   slug: "solana-security",
   title: "Solana Security & Auditing",
   description:
-    "Production-grade deterministic vuln lab for Solana auditors: exploit reproducibility, patch validation, and audit artifacts.",
+    "Production-grade deterministic vuln lab for Solana auditors who need repeatable exploit evidence, precise remediation guidance, and high-signal audit artifacts.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 2200,

@@ -320,6 +320,21 @@ export async function handleGitCommand(
         return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
       }
       try {
+        let parsedUrl: URL;
+        try {
+          parsedUrl = new URL(url);
+        } catch {
+          return {
+            nextState: state,
+            lines: [{ kind: "error", text: "Error: remote URL must be a valid absolute URL." }],
+          };
+        }
+        if (parsedUrl.username || parsedUrl.password) {
+          return {
+            nextState: state,
+            lines: [{ kind: "error", text: "Error: credential-bearing remote URLs are not allowed." }],
+          };
+        }
         await git.addRemote({ fs, dir, remote: name, url });
         return {
           nextState: { ...state, commandSuccesses: [...state.commandSuccesses, "git:remote:add"] },
@@ -352,7 +367,7 @@ export async function handleGitCommand(
       ];
 
       const onAuth = gitAuth.token
-        ? () => ({ username: gitAuth.token! })
+        ? () => ({ username: "x-access-token", password: gitAuth.token! })
         : undefined;
 
       await git.clone({
@@ -399,7 +414,7 @@ export async function handleGitCommand(
     try {
       const http = await import("isomorphic-git/http/web");
       const onAuth = gitAuth.token
-        ? () => ({ username: gitAuth.token! })
+        ? () => ({ username: "x-access-token", password: gitAuth.token! })
         : undefined;
 
       await git.pull({
@@ -423,7 +438,11 @@ export async function handleGitCommand(
   }
 
   if (sub === "push") {
-    let token = gitAuth.token;
+    const remote = parsed.positional[1];
+    const ref = parsed.positional[2];
+    const forcePrompt = parsed.argv.includes("--with-token");
+
+    let token = forcePrompt ? null : gitAuth.token;
     if (!token) {
       token = await onRequestToken();
       if (!token) {
@@ -442,12 +461,14 @@ export async function handleGitCommand(
         fs,
         http: http.default ?? http,
         dir,
-        onAuth: () => ({ username: token! }),
+        remote,
+        ref,
+        onAuth: () => ({ username: "x-access-token", password: token! }),
       });
 
       return {
         nextState: { ...state, commandSuccesses: [...state.commandSuccesses, "git:push"] },
-        lines: [{ kind: "output", text: "Push complete." }],
+        lines: [{ kind: "output", text: `Push complete${remote ? ` to ${remote}` : ""}${ref ? ` (${ref})` : ""}.` }],
         metadata: { commandSucceeded: "git push" },
       };
     } catch (e) {

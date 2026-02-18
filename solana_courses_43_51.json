@@ -4,7 +4,7 @@
       "id": "course-043",
       "slug": "solana-cross-chain-bridges",
       "title": "Cross-Chain Bridges and Wormhole",
-      "description": "Implement secure cross-chain communication between Solana and other blockchains using Wormhole protocol, message verification, and asset bridging patterns.",
+      "description": "Build safer cross-chain integrations for Solana using Wormhole-style messaging, attestation verification, and deterministic bridge-state controls.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2100,
@@ -20,13 +20,13 @@
         {
           "id": "mod-43-1",
           "title": "Wormhole Messaging Fundamentals",
-          "description": "Understand Wormhole cross-chain messaging architecture.",
+          "description": "Understand cross-chain messaging trust boundaries, guardian attestations, and deterministic verification pipelines.",
           "lessons": [
             {
               "id": "lesson-43-1-1",
               "type": "content",
               "title": "Cross-Chain Messaging Architecture",
-              "content": "Wormhole enables secure cross-chain communication through a network of guardian nodes that observe and attest to messages. Key components: 1) Emitter - contract that emits messages on source chain, 2) Guardian Network - validates and signs messages, 3) VAA (Verified Action Approval) - signed attestation, 4) Core Bridge - receives and verifies VAAs on target chain. Security relies on guardian consensus (2/3+ signatures). Messages are ordered by sequence numbers to prevent replay attacks."
+              "content": "Cross-chain messaging is a trust-boundary problem before it is a transport problem. In Wormhole-style systems, messages are observed, attested, and consumed across different chain environments, each with independent failure modes.\n\nA robust architecture model includes:\n1) emitter semantics (what exactly is being attested),\n2) attestation verification (who signed and under what threshold),\n3) replay prevention (message uniqueness and consumption state),\n4) execution safety (what happens if target-chain state has changed).\n\nVerification must be deterministic and strict. Accepting malformed or weakly validated attestations is a direct safety risk.\n\nCross-chain systems should also expose explicit reason codes for rejects: invalid signatures, stale message, already-consumed message, unsupported payload schema. This improves operator response and audit quality.\n\nMessaging reliability depends on observability. Teams need deterministic logs linking source event IDs to target execution outcomes so they can reconcile partial or delayed flows.\n\nCross-chain engineering succeeds when attestation trust assumptions are transparent and enforced consistently at every consume path."
             },
             {
               "id": "lesson-43-1-2",
@@ -192,13 +192,13 @@
         {
           "id": "mod-43-2",
           "title": "Asset Bridging Patterns",
-          "description": "Implement token bridging and cross-chain asset transfers.",
+          "description": "Implement asset-bridging patterns with strict supply/accounting invariants, replay protection, and reconciliation workflows.",
           "lessons": [
             {
               "id": "lesson-43-2-1",
               "type": "content",
               "title": "Token Bridging Mechanics",
-              "content": "Token bridging allows assets to move between chains through lock-and-mint or burn-and-mint patterns. Lock-and-mint: tokens are locked on source chain, wrapped tokens minted on destination. Burn-and-mint: native tokens burned on source, minted on destination (requires mint authority). Key considerations: 1) Custody - who holds locked tokens, 2) Supply tracking - total wrapped supply, 3) Decimal normalization - different chains may have different decimals, 4) Rate limiting - prevent large withdrawals, 5) Emergency pause - halt bridge during incidents."
+              "content": "Token bridging requires strict supply and state invariants. Lock-and-mint and burn-and-mint models both rely on one central rule: represented supply across chains must remain coherent.\n\nCritical controls include:\n- single-consume message semantics,\n- deterministic mint/unlock accounting,\n- paused-mode handling for incident containment,\n- reconciliation reports between source and target totals.\n\nA bridge flow should define state transitions explicitly: initiated, attested, executed, reconciled. Missing state transitions create operational blind spots.\n\nReplay and duplication are recurring bridge risks. Systems must key transfer intents deterministically and reject repeated execution attempts even under retries or delayed relays.\n\nProduction bridge operations also need runbooks: what to do on attestation delays, threshold signer issues, or target-chain execution failures.\n\nBridging quality is not just throughput; it is verifiable accounting integrity under adverse network conditions."
             },
             {
               "id": "lesson-43-2-2",
@@ -374,7 +374,7 @@
       "id": "course-044",
       "slug": "solana-oracle-pyth",
       "title": "Oracle Integration and Pyth Network",
-      "description": "Integrate price oracles into Solana programs using Pyth Network. Learn price validation, confidence intervals, staleness checks, and multi-oracle aggregation.",
+      "description": "Integrate Solana oracle feeds safely: price validation, confidence/staleness policy, and multi-source aggregation for resilient protocol decisions.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1850,
@@ -390,13 +390,13 @@
         {
           "id": "mod-44-1",
           "title": "Price Feed Fundamentals",
-          "description": "Understand oracle price feeds and confidence mechanics.",
+          "description": "Understand oracle data semantics (price, confidence, staleness) and enforce deterministic validation before business logic.",
           "lessons": [
             {
               "id": "lesson-44-1-1",
               "type": "content",
               "title": "Oracle Price Feeds",
-              "content": "Oracles provide external data to blockchain applications. Pyth Network offers high-frequency, low-latency price feeds for financial markets. Key concepts: 1) Price - current market price with exponent, 2) Confidence - uncertainty interval around price, 3) Status - whether price is valid/trading, 4) Staleness - how old the price is, 5) Exponent - decimal places (e.g., -8 means 8 decimal places). Price validation requires checking confidence ratios, staleness thresholds, and status before using in financial calculations."
+              "content": "Oracle integration is a risk-control problem, not a data-fetch problem. Price feeds must be evaluated for freshness, confidence, and contextual fitness before they drive protocol decisions.\n\nA safe oracle validation pipeline checks:\n1) feed status and availability,\n2) staleness window compliance,\n3) confidence-band reasonableness,\n4) value bounds against protocol policy.\n\nUsing raw price without confidence or staleness checks can trigger invalid liquidations, bad quotes, or incorrect risk assessments.\n\nValidation outputs should be deterministic and structured (accept/reject with reason code). This helps downstream systems choose safe fallback behavior.\n\nProtocols should separate “data exists” from “data is usable.” A feed can be present but still unfit due to stale timestamp or extreme uncertainty.\n\nProduction reliability improves when oracle checks are versioned and fixture-tested across calm and stressed market scenarios."
             },
             {
               "id": "lesson-44-1-2",
@@ -511,7 +511,7 @@
                 {
                   "input": {
                     "period": 10,
-                    "smoothing": 2.0
+                    "smoothing": 2
                   },
                   "expected": {
                     "multiplier": 0.1818
@@ -519,15 +519,15 @@
                 },
                 {
                   "input": {
-                    "update": 100.0
+                    "update": 100
                   },
                   "expected": {
-                    "ema": 100.0
+                    "ema": 100
                   }
                 },
                 {
                   "input": {
-                    "update": 110.0
+                    "update": 110
                   },
                   "expected": {
                     "ema": 101.82
@@ -548,13 +548,13 @@
         {
           "id": "mod-44-2",
           "title": "Multi-Oracle Aggregation",
-          "description": "Aggregate prices from multiple oracles for reliability.",
+          "description": "Design multi-oracle aggregation and consensus policies that reduce single-source failure risk while remaining explainable and testable.",
           "lessons": [
             {
               "id": "lesson-44-2-1",
               "type": "content",
               "title": "Oracle Aggregation Strategies",
-              "content": "Using multiple oracles increases reliability and reduces single points of failure. Aggregation strategies: 1) Median - robust to outliers, 2) Weighted average - by confidence or stake, 3) Trimmed mean - remove extremes, 4) Consensus - require agreement threshold. Considerations: stale price detection, confidence weighting, outlier rejection, and fallback mechanisms. Multi-oracle designs should handle disagreements gracefully and provide clear error signals when consensus cannot be reached."
+              "content": "Multi-oracle aggregation reduces single-point dependency but adds policy complexity. The goal is not to average blindly; it is to produce a robust decision value with clear confidence in adverse conditions.\n\nCommon strategies include median, trimmed mean, and weighted consensus. Strategy choice should reflect threat model: outlier resistance, latency tolerance, and source diversity.\n\nAggregation policies should define:\n- minimum participating sources,\n- max divergence threshold,\n- fallback action when consensus fails.\n\nIf sources diverge beyond policy bounds, the safe action may be to halt sensitive operations rather than force a number.\n\nDeterministic aggregation reports should include contributing sources, excluded outliers, and final consensus rationale. This is essential for audits and incident response.\n\nA good oracle stack is transparent: every accepted value can be explained, replayed, and defended."
             },
             {
               "id": "lesson-44-2-2",
@@ -578,7 +578,7 @@
                     ]
                   },
                   "expected": {
-                    "median": 200.0
+                    "median": 200
                   }
                 },
                 {
@@ -591,7 +591,7 @@
                     ]
                   },
                   "expected": {
-                    "median": 250.0
+                    "median": 250
                   }
                 },
                 {
@@ -749,7 +749,7 @@
       "id": "course-045",
       "slug": "solana-dao-tooling",
       "title": "DAO Tooling and Autonomous Organizations",
-      "description": "Build DAO infrastructure on Solana including proposal systems, voting mechanisms, treasury management, and automated execution.",
+      "description": "Build production-ready DAO systems on Solana: proposal governance, voting integrity, treasury controls, and deterministic execution/reporting workflows.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1900,
@@ -766,13 +766,13 @@
         {
           "id": "mod-45-1",
           "title": "DAO Governance Mechanics",
-          "description": "Implement proposal creation, voting, and execution systems.",
+          "description": "Implement governance mechanics with explicit proposal lifecycle rules, voting-power logic, and deterministic state transitions.",
           "lessons": [
             {
               "id": "lesson-45-1-1",
               "type": "content",
               "title": "DAO Governance Architecture",
-              "content": "Decentralized Autonomous Organizations (DAOs) enable collective decision-making through on-chain governance. Key components: 1) Proposal lifecycle - draft, voting, execution, 2) Voting power - token-weighted, quadratic, or delegated, 3) Quorum - minimum participation for valid vote, 4) Threshold - approval percentage required, 5) Timelock - delay before execution for safety. DAOs use smart contracts to enforce rules automatically, reducing trust requirements and enabling global coordination."
+              "content": "DAO governance architecture is a system of enforceable process rules. Proposal creation, voting, and execution must be deterministic, auditable, and resistant to manipulation.\n\nA robust governance model defines:\n1) proposal lifecycle states and transitions,\n2) voter eligibility and power calculation,\n3) quorum/approval thresholds by action class,\n4) execution preconditions and cancellation paths.\n\nGovernance failures usually come from ambiguity: unclear thresholds, inconsistent snapshot timing, or weak transition validation.\n\nState transitions should be explicit and testable. Invalid transitions (for example executed -> voting) should fail with deterministic errors.\n\nVoting-power logic must also be transparent. Whether delegation, time-weighting, or quadratic models are used, outcomes should be reproducible from public inputs.\n\nDAO tooling quality is measured by predictability under pressure. During contentious proposals, deterministic behavior and clear reason codes are what preserve legitimacy."
             },
             {
               "id": "lesson-45-1-2",
@@ -942,13 +942,13 @@
         {
           "id": "mod-45-2",
           "title": "Treasury and Execution",
-          "description": "Manage DAO treasuries and automated proposal execution.",
+          "description": "Engineer treasury and execution tooling with policy gates, timelock safeguards, and auditable automation outcomes.",
           "lessons": [
             {
               "id": "lesson-45-2-1",
               "type": "content",
               "title": "DAO Treasury Management",
-              "content": "DAO treasuries hold collective assets controlled by governance. Patterns include: 1) Multi-sig requirements - multiple approvals for large transfers, 2) Spending limits - rate limits on withdrawals, 3) Budgets - allocated spending per category, 4) Streaming payments - vesting for contributors, 5) Investment strategies - yield generation with governance oversight. Treasury security requires timelocks, spending caps, and emergency pause mechanisms. Transparent reporting and on-chain accounting maintain trust."
+              "content": "DAO treasury management is where governance intent becomes real financial action. Treasury tooling must therefore combine flexibility with strict policy constraints.\n\nCore controls include:\n- spending limits and role-based authority,\n- timelock windows for sensitive actions,\n- multisig/escalation paths,\n- deterministic execution logs.\n\nAutomated execution should never hide policy checks. Every executed action should reference the proposal, required approvals, and control checks passed.\n\nFailure handling is equally important. If execution fails mid-flow, tooling should expose exact failure stage and safe retry/rollback guidance.\n\nTreasury systems should also produce reconciliation artifacts: proposed vs executed amounts, remaining budget, and exception records.\n\nOperationally mature DAOs treat treasury automation as regulated process infrastructure: explicit controls, reproducible evidence, and clear accountability boundaries."
             },
             {
               "id": "lesson-45-2-2",
@@ -1125,7 +1125,7 @@
       "id": "course-046",
       "slug": "solana-gaming",
       "title": "Gaming and Game State Management",
-      "description": "Build on-chain games on Solana with efficient state management, turn-based mechanics, randomness, and player progression systems.",
+      "description": "Build production-ready on-chain game systems on Solana: efficient state models, turn integrity, fairness controls, and scalable player progression economics.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1850,
@@ -1141,13 +1141,13 @@
         {
           "id": "mod-46-1",
           "title": "Game State Architecture",
-          "description": "Design efficient on-chain game state and turn management.",
+          "description": "Design game state and turn logic with deterministic transitions, storage efficiency, and anti-cheat validation boundaries.",
           "lessons": [
             {
               "id": "lesson-46-1-1",
               "type": "content",
               "title": "On-Chain Game Design",
-              "content": "Solana gaming requires careful state management due to compute and storage costs. Best practices: 1) State compression - pack data tightly, use bitflags, 2) Lazy evaluation - compute derived values on-demand, 3) Batch updates - minimize state writes, 4) Off-chain helpers - verify on-chain, compute off-chain, 5) PDA organization - derive addresses from game/round IDs. Turn-based games need deterministic state transitions and verifiable randomness. Player actions should be validated against game rules with clear error messages."
+              "content": "On-chain game design on Solana is a systems-engineering tradeoff between fairness, responsiveness, and cost. The best designs keep critical rules verifiable while minimizing expensive state writes.\n\nCore architecture decisions:\n1) what state must be on-chain for trust,\n2) what can remain off-chain for speed,\n3) how turn validity is enforced deterministically.\n\nTurn-based mechanics should use explicit state transitions and guard checks (current actor, phase, cooldown, resource limits). If transitions are ambiguous, replay and dispute resolution become difficult.\n\nState compression and compact encoding matter because game loops can generate many updates. Efficient schemas reduce rent and compute pressure while preserving auditability.\n\nA production game model should also define anti-cheat boundaries. Even with deterministic logic, you need clear validation for illegal actions, stale turns, and duplicate submissions.\n\nReliable game infrastructure is measured by predictable outcomes under stress: same input actions, same resulting state, clear reject reasons for invalid actions."
             },
             {
               "id": "lesson-46-1-2",
@@ -1273,7 +1273,7 @@
                 {
                   "input": {
                     "base": 100,
-                    "multiplier": 2.0,
+                    "multiplier": 2,
                     "level": 2
                   },
                   "expected": {
@@ -1283,7 +1283,7 @@
                 {
                   "input": {
                     "base": 100,
-                    "multiplier": 2.0,
+                    "multiplier": 2,
                     "level": 5
                   },
                   "expected": {
@@ -1317,13 +1317,13 @@
         {
           "id": "mod-46-2",
           "title": "Randomness and Fairness",
-          "description": "Implement verifiable randomness for fair gameplay.",
+          "description": "Implement fairness-oriented randomness and integrity controls that keep gameplay auditable and dispute-resistant.",
           "lessons": [
             {
               "id": "lesson-46-2-1",
               "type": "content",
               "title": "On-Chain Randomness",
-              "content": "True randomness is challenging on blockchains due to deterministic execution. Solutions: 1) Commit-reveal - players commit to moves, reveal after deadline, 2) VRF (Verifiable Random Function) - oracle-provided randomness, 3) Blockhash - use future blockhash (less secure), 4) XOR combination - combine multiple sources. For games, consider: predictability risks, front-running, and fairness verification. Randomness should be generated after all player inputs are known to prevent manipulation."
+              "content": "Randomness is one of the hardest fairness problems in blockchain games because execution is deterministic. Robust designs avoid naive pseudo-randomness tied directly to manipulable context.\n\nPractical fairness patterns include commit-reveal, VRF-backed randomness, and delayed-seed schemes. Each has latency/trust tradeoffs:\n- commit-reveal: simple and transparent, but requires multi-step interaction,\n- VRF: stronger unpredictability, but introduces oracle/dependency considerations,\n- delayed-seed methods: lower overhead but weaker guarantees under adversarial pressure.\n\nFairness engineering should specify:\n1) who can influence randomness inputs,\n2) when values become immutable,\n3) how unresolved rounds are handled on timeout.\n\nProduction systems should emit deterministic round evidence (commit hash, reveal value, validation result) so disputes can be resolved quickly.\n\nGame fairness is credible when randomness mechanisms are explicit, verifiable, and resilient to timing manipulation."
             },
             {
               "id": "lesson-46-2-2",
@@ -1503,7 +1503,7 @@
       "id": "course-047",
       "slug": "solana-permanent-storage",
       "title": "Permanent Storage and Arweave",
-      "description": "Integrate permanent decentralized storage with Solana using Arweave. Learn bundling, manifest files, transaction verification, and cost optimization.",
+      "description": "Integrate permanent decentralized storage with Solana using Arweave-style workflows: content addressing, manifest integrity, and verifiable long-term data access.",
       "difficulty": "intermediate",
       "duration": "4 weeks",
       "totalXP": 1700,
@@ -1519,13 +1519,13 @@
         {
           "id": "mod-47-1",
           "title": "Arweave Fundamentals",
-          "description": "Understand Arweave permanent storage and Solana integration.",
+          "description": "Understand permanent-storage architecture and build deterministic linking between Solana state and external immutable content.",
           "lessons": [
             {
               "id": "lesson-47-1-1",
               "type": "content",
               "title": "Permanent Storage Architecture",
-              "content": "Arweave provides permanent, decentralized storage through a sustainable endowment model. Key concepts: 1) Blockweave - linked data structure, 2) Proof of Access - miners prove they store data, 3) Endowment - upfront payment covers ~200 years of storage, 4) Bundling - group transactions for efficiency, 5) Tags - metadata for organization. Solana programs store Arweave transaction IDs (43-byte base64url strings) on-chain, keeping the chain lightweight while data lives permanently off-chain."
+              "content": "Permanent storage integration is a data durability contract. On Solana, storing full content on-chain is often impractical, so systems rely on immutable external storage references anchored by on-chain metadata.\n\nA robust architecture defines:\n1) canonical content identifiers,\n2) integrity verification method,\n3) fallback retrieval behavior,\n4) lifecycle policy for metadata updates.\n\nContent-addressed design is critical. If identifiers are not tied to content hash semantics, integrity guarantees weaken and replayed/wrong assets can be served.\n\nStorage integration should also separate control-plane and data-plane concerns: on-chain records govern ownership/version pointers, while external storage handles large payload persistence.\n\nProduction reliability requires deterministic verification reports (ID format validity, expected hash match, availability checks). This makes failures diagnosable and prevents silent corruption.\n\nPermanent storage systems succeed when users can independently verify that referenced content matches what governance or protocol state claims."
             },
             {
               "id": "lesson-47-1-2",
@@ -1579,7 +1579,7 @@
                 {
                   "input": {
                     "size": 10485760,
-                    "usd_per_ar": 10.0
+                    "usd_per_ar": 10
                   },
                   "expected": {
                     "cost": 0.1
@@ -1645,13 +1645,13 @@
         {
           "id": "mod-47-2",
           "title": "Manifests and Verification",
-          "description": "Work with Arweave manifests and verify stored data.",
+          "description": "Work with manifests, verification pipelines, and cost/performance controls for reliable long-lived data serving.",
           "lessons": [
             {
               "id": "lesson-47-2-1",
               "type": "content",
               "title": "Arweave Manifests",
-              "content": "Manifests enable organizing multiple files under a single transaction ID. They map paths to transaction IDs, allowing websites and applications to be stored permanently. Key features: 1) Path mapping - /index.html -> tx_id, 2) Index file - default resource, 3) Fallback - default for missing paths, 4) Nested paths - directory structures. Manifests are JSON files that Arweave gateways interpret to serve the correct content."
+              "content": "Manifests turn many stored assets into one navigable root, but they introduce their own integrity responsibilities. A manifest is only trustworthy if path mapping and referenced content IDs are validated consistently.\n\nKey safeguards:\n- deterministic path normalization,\n- duplicate/ambiguous key rejection,\n- strict transaction-ID validation,\n- recursive integrity checks for referenced content.\n\nManifest tooling should produce auditable outputs: resolved entries count, missing references, and hash verification status by path.\n\nFrom an operational standpoint, cost optimization should not compromise integrity. Bundling strategies, compression, and metadata minimization are useful only if verification remains straightforward and deterministic.\n\nWell-run permanent-storage pipelines treat manifests as governed artifacts with versioned schema expectations and repeatable validation in CI."
             },
             {
               "id": "lesson-47-2-2",
@@ -1763,7 +1763,7 @@
       "id": "course-048",
       "slug": "solana-staking-economics",
       "title": "Staking and Validator Economics",
-      "description": "Understand Solana native staking, delegation strategies, validator selection, and reward optimization for both stakers and validators.",
+      "description": "Understand Solana staking and validator economics for real-world decision-making: delegation strategy, reward dynamics, commission effects, and operational sustainability.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1800,
@@ -1779,13 +1779,13 @@
         {
           "id": "mod-48-1",
           "title": "Staking Fundamentals",
-          "description": "Learn native staking mechanics and reward calculations.",
+          "description": "Learn native staking mechanics with deterministic reward modeling, validator selection criteria, and delegation risk framing.",
           "lessons": [
             {
               "id": "lesson-48-1-1",
               "type": "content",
               "title": "Solana Staking Architecture",
-              "content": "Solana uses Proof of Stake consensus where validators process transactions and earn rewards. Stakers delegate SOL to validators and share rewards. Key concepts: 1) Stake accounts - separate accounts holding delegated SOL, 2) Warmup/cooldown - periods for stake activation/deactivation, 3) Epochs - ~2.5 day periods for reward distribution, 4) Commission - validator fee on rewards (0-100%), 5) APY - annual percentage yield based on inflation and stake amount. Validator performance affects rewards - downtime reduces earnings."
+              "content": "Solana staking economics is an incentives system connecting delegators, validators, and network security. Good delegation decisions require more than chasing headline APY.\n\nDelegators should evaluate:\n1) validator performance consistency,\n2) commission policy and changes over time,\n3) uptime and vote behavior,\n4) concentration risk across the validator set.\n\nReward modeling should be deterministic and transparent. Calculations must show gross rewards, commission effects, and net delegator outcome under explicit assumptions.\n\nDiversification matters. Concentrating stake purely on top performers can increase ecosystem centralization risk even if short-term yield appears higher.\n\nProduction staking tooling should expose scenario analysis (commission changes, performance drops, epoch variance) so delegators can make resilient choices rather than reactive moves.\n\nStaking quality is measured by sustainable net returns plus contribution to healthy validator distribution."
             },
             {
               "id": "lesson-48-1-2",
@@ -1816,7 +1816,7 @@
                     "reward": 80
                   },
                   "expected": {
-                    "apy": 8.0
+                    "apy": 8
                   }
                 },
                 {
@@ -1846,17 +1846,17 @@
                 {
                   "input": {
                     "commission": 0.1,
-                    "uptime": 99.0,
+                    "uptime": 99,
                     "skip": 0.05
                   },
                   "expected": {
-                    "score": 87.0
+                    "score": 87
                   }
                 },
                 {
                   "input": {
-                    "uptime": 95.0,
-                    "min": 98.0
+                    "uptime": 95,
+                    "min": 98
                   },
                   "expected": {
                     "qualified": false
@@ -1878,7 +1878,7 @@
                       100,
                       100
                     ],
-                    "max": 50.0
+                    "max": 50
                   },
                   "expected": {
                     "diversified": false
@@ -1938,13 +1938,13 @@
         {
           "id": "mod-48-2",
           "title": "Validator Operations",
-          "description": "Understand validator economics and operational considerations.",
+          "description": "Analyze validator-side economics, operational cost pressure, and incentive alignment for long-term network health.",
           "lessons": [
             {
               "id": "lesson-48-2-1",
               "type": "content",
               "title": "Validator Economics",
-              "content": "Validators earn rewards from inflation and transaction fees. Economics: 1) Infrastructure costs - hardware, bandwidth, datacenter, 2) Commission revenue - percentage of delegator rewards, 3) Self-stake - validator's own SOL at risk, 4) Vote costs - transaction fees for voting, 5) MEV opportunities - transaction ordering profits. Break-even analysis considers costs vs expected revenue. Commission rates balance competitiveness with sustainability."
+              "content": "Validator economics balances revenue opportunities against operational costs and reliability obligations. Sustainable validators optimize for long-term trust, not short-term extraction.\n\nRevenue sources include inflation rewards and fee-related earnings; cost structure includes hardware, networking, maintenance, and operational staffing.\n\nKey operational metrics for validator viability:\n- effective uptime and vote success,\n- commission competitiveness,\n- stake retention trend,\n- incident frequency and recovery quality.\n\nCommission strategy should be explicit and predictable. Sudden commission spikes can damage delegator trust and long-term stake stability.\n\nEconomic analysis should include downside modeling: reduced stake, higher incident costs, or prolonged performance degradation.\n\nHealthy validator economics supports network resilience. Tooling should help operators and delegators reason about sustainability, not just peak-period earnings."
             },
             {
               "id": "lesson-48-2-2",
@@ -1974,7 +1974,7 @@
                     "delegated": 100000,
                     "commission": 0.1,
                     "inflation": 0.08,
-                    "price": 20.0
+                    "price": 20
                   },
                   "expected": {
                     "revenue": 13333.33
@@ -2010,7 +2010,7 @@
                     "slot_time": 400
                   },
                   "expected": {
-                    "hours": 48.0
+                    "hours": 48
                   }
                 },
                 {
@@ -2094,7 +2094,7 @@
       "id": "course-049",
       "slug": "solana-account-abstraction",
       "title": "Account Abstraction and Smart Wallets",
-      "description": "Implement smart wallet patterns on Solana including multi-signature, social recovery, session keys, and programmable transaction validation.",
+      "description": "Implement smart-wallet/account-abstraction patterns on Solana with programmable authorization, recovery controls, and policy-driven transaction validation.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2100,
@@ -2110,13 +2110,13 @@
         {
           "id": "mod-49-1",
           "title": "Smart Wallet Fundamentals",
-          "description": "Build programmable wallets with custom validation logic.",
+          "description": "Build smart-wallet fundamentals including multisig and social-recovery designs with clear trust and failure boundaries.",
           "lessons": [
             {
               "id": "lesson-49-1-1",
               "type": "content",
               "title": "Account Abstraction on Solana",
-              "content": "Account abstraction separates account control from key ownership. Smart wallets are programs that hold assets and define custom authorization logic. Patterns: 1) Multi-signature - require M-of-N approvals, 2) Social recovery - trusted contacts can recover access, 3) Session keys - temporary limited permissions, 4) Spending limits - rate-limited transactions, 5) Time locks - delayed execution. Unlike Ethereum's ERC-4337, Solana uses program-derived addresses as smart wallets with CPI for asset control."
+              "content": "Account abstraction on Solana shifts control from a single key to programmable policy. Smart wallets can enforce richer authorization logic, but policy complexity must be managed carefully.\n\nA robust smart-wallet design defines:\n1) authority model (owners/guardians/delegates),\n2) policy scope (what can be approved automatically vs manually),\n3) recovery path (how access is restored safely).\n\nMultisig and social recovery are powerful, but both need deterministic state transitions and explicit quorum rules. Ambiguous transitions create lockout or unauthorized-access risk.\n\nSmart-wallet systems should emit structured authorization evidence for each action: which policy matched, which signers approved, and which constraints passed.\n\nProduction reliability depends on clear emergency controls: pause paths, guardian rotation, and recovery cooldowns.\n\nAccount abstraction is successful when flexibility increases safety and usability together, not when policy logic becomes opaque."
             },
             {
               "id": "lesson-49-1-2",
@@ -2276,13 +2276,13 @@
         {
           "id": "mod-49-2",
           "title": "Programmable Validation",
-          "description": "Implement custom transaction validation rules.",
+          "description": "Implement programmable validation policies (limits, allowlists, time/risk rules) with deterministic enforcement and auditability.",
           "lessons": [
             {
               "id": "lesson-49-2-1",
               "type": "content",
               "title": "Custom Validation Rules",
-              "content": "Smart wallets can enforce custom transaction rules beyond signatures. Common rules: 1) Spending limits - daily/weekly caps, 2) Time restrictions - only during certain hours, 3) Whitelist/blacklist - allowed/blocked destinations, 4) Multi-factor - require multiple proof types, 5) Rate limiting - max transactions per time window. Rules are evaluated during transaction validation and can be combined with AND/OR logic. Failed validation returns clear error codes."
+              "content": "Programmable validation is where smart wallets deliver real value, but it is also where subtle policy bugs appear.\n\nTypical controls include spending limits, destination allowlists, time windows, and risk-score gates. These controls should be deterministic and composable, with explicit precedence rules.\n\nDesign principles:\n- fail closed on ambiguous policy matches,\n- keep policy evaluation order stable,\n- attach machine-readable reason codes to approve/reject outcomes.\n\nValidation systems should also support policy explainability. Users and auditors need to understand why a transaction was blocked or approved.\n\nFor production deployments, policy changes should be versioned and test-fixtured. A new rule must be validated against prior known-good scenarios to avoid accidental lockouts or bypasses.\n\nProgrammable wallets are strongest when validation logic is transparent, testable, and operationally reversible."
             },
             {
               "id": "lesson-49-2-2",
@@ -2459,7 +2459,7 @@
       "id": "course-050",
       "slug": "solana-pda-mastery",
       "title": "Program Derived Address Mastery",
-      "description": "Master advanced PDA patterns including deterministic address generation, seed composition, bump handling, and cross-program PDA interactions.",
+      "description": "Master advanced PDA engineering on Solana: seed schema design, bump handling discipline, and secure cross-program PDA usage at production scale.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2100,
@@ -2475,13 +2475,13 @@
         {
           "id": "mod-50-1",
           "title": "PDA Fundamentals",
-          "description": "Understand PDA generation and seed patterns.",
+          "description": "Build strong PDA foundations with deterministic derivation, canonical seed composition, and collision-resistant namespace strategy.",
           "lessons": [
             {
               "id": "lesson-50-1-1",
               "type": "content",
               "title": "Program Derived Addresses",
-              "content": "PDAs are addresses derived deterministically from seeds and a program ID. Unlike keypairs, PDAs have no private key - only the program can sign for them via CPI. Key properties: 1) Deterministic - same seeds always produce same address, 2) Off-curve - not on Ed25519 curve (no private key), 3) Bump - byte (0-255) that makes address off-curve, 4) Canonical bump - highest valid bump (255 down). PDAs enable programs to own accounts, create deterministic addresses, and sign transactions."
+              "content": "Program Derived Addresses (PDAs) are deterministic authority and state anchors on Solana. Their power comes from predictable derivation; their risk comes from inconsistent seed discipline.\n\nA strong PDA design standard defines:\n1) canonical seed order,\n2) explicit namespace/domain tags,\n3) bump handling rules,\n4) versioning strategy for future evolution.\n\nSeed ambiguity is a common source of bugs. If different handlers derive the same concept with different seed ordering, identity checks become inconsistent and security assumptions break.\n\nPDA validation should always re-derive expected addresses on the trusted side and compare exact keys before mutating state.\n\nProduction teams should document seed recipes as API contracts. Changing recipes without migration planning can orphan state and break clients.\n\nPDA mastery is mostly discipline: deterministic derivation everywhere, no implicit conventions, no trust in client-provided derivation claims."
             },
             {
               "id": "lesson-50-1-2",
@@ -2643,13 +2643,13 @@
         {
           "id": "mod-50-2",
           "title": "Advanced PDA Patterns",
-          "description": "Implement complex PDA patterns for real-world use cases.",
+          "description": "Implement advanced PDA patterns (nested/counter/stateful) while preserving security invariants and migration safety.",
           "lessons": [
             {
               "id": "lesson-50-2-1",
               "type": "content",
               "title": "PDA Design Patterns",
-              "content": "Advanced PDA patterns solve complex program design challenges: 1) Nested PDAs - PDAs derived from other PDA addresses, 2) Counter PDAs - incrementing nonce for unique addresses, 3) Hierarchical seeds - domain-specific prefixes for organization, 4) Associated accounts - PDAs linked to user wallets, 5) Program signers - PDAs that sign CPI calls. Good PDA design ensures uniqueness, determinism, and prevents collisions between different account types."
+              "content": "Advanced PDA patterns solve real scaling and composability needs but increase design complexity.\n\nNested PDAs, counter-based PDAs, and multi-tenant PDA namespaces each require explicit invariants around uniqueness, lifecycle, and authority boundaries.\n\nKey safeguards:\n- monotonic counters with replay protection,\n- collision checks in shared namespaces,\n- explicit ownership checks on all derived-state paths,\n- deterministic migration paths when schema/seed versions evolve.\n\nCross-program PDA interactions must minimize signer scope. invoke_signed should only grant exactly what downstream steps require.\n\nOperationally, advanced PDA systems need deterministic audit artifacts: derivation inputs, expected outputs, and validation results by instruction path.\n\nComplex PDA architecture is safe when derivation logic remains simple to reason about and impossible to interpret ambiguously."
             },
             {
               "id": "lesson-50-2-2",
@@ -2828,7 +2828,7 @@
       "id": "course-051",
       "slug": "solana-economics",
       "title": "Solana Economics and Token Flows",
-      "description": "Understand Solana's economic model including inflation, deflation, fee markets, rent economics, and token flow analysis for sustainable protocol design.",
+      "description": "Analyze Solana economic dynamics in production context: inflation/fee-burn interplay, staking flows, supply movement, and protocol sustainability tradeoffs.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1800,
@@ -2845,13 +2845,13 @@
         {
           "id": "mod-51-1",
           "title": "Solana Economic Model",
-          "description": "Understand Solana's inflation, fees, and burn mechanisms.",
+          "description": "Understand Solana macro token economics (inflation, burn, rewards, fees) with deterministic scenario modeling.",
           "lessons": [
             {
               "id": "lesson-51-1-1",
               "type": "content",
               "title": "Solana Token Economics",
-              "content": "Solana's economic model balances inflation rewards with deflationary burns. Key mechanisms: 1) Inflation - starts at 8%, decreases 15% annually until 1.5% long-term, 2) Staking rewards - inflation distributed to validators and delegators, 3) Transaction fees - paid to validators, 4) Rent - storage fees for accounts, 5) Burn - 50% of each transaction fee burned, 100% of rent burned. This creates a sustainable model where network usage drives deflationary pressure."
+              "content": "Solana economics is the interaction of issuance, burn, staking rewards, and usage demand. Sustainable protocol decisions require understanding these flows as a system, not isolated metrics.\n\nCore mechanisms include:\n1) inflation schedule and long-term emission behavior,\n2) fee burn and validator reward pathways,\n3) staking participation effects on circulating supply.\n\nEconomic analysis should be scenario-driven. Single-point estimates hide risk. Teams should model calm/high-usage/low-usage regimes and compare supply-pressure outcomes.\n\nDeterministic calculators are useful for governance and product planning because they make assumptions explicit: epoch cadence, fee volume, staking ratio, and unlock schedules.\n\nHealthy economic reasoning links network-level flows to protocol-level choices (treasury policy, incentive emissions, fee strategy).\n\nEconomic quality improves when teams publish assumption-driven reports instead of headline narratives."
             },
             {
               "id": "lesson-51-1-2",
@@ -2985,7 +2985,7 @@
                   "input": {
                     "size": 128,
                     "rate": 3480,
-                    "threshold": 2.0
+                    "threshold": 2
                   },
                   "expected": {
                     "exemption": 890880
@@ -3003,7 +3003,7 @@
                 {
                   "input": {
                     "size": 128,
-                    "years": 2.0
+                    "years": 2
                   },
                   "expected": {
                     "due": 890880
@@ -3016,13 +3016,13 @@
         {
           "id": "mod-51-2",
           "title": "Token Flow Analysis",
-          "description": "Analyze token flows and economic sustainability.",
+          "description": "Model token flow dynamics and sustainability signals using supply categories, unlock events, and behavior-driven liquidity effects.",
           "lessons": [
             {
               "id": "lesson-51-2-1",
               "type": "content",
               "title": "Token Flow Dynamics",
-              "content": "Token flow analysis tracks how tokens move through the ecosystem. Key metrics: 1) Circulating supply - tokens actively traded, 2) Staked supply - locked for rewards, 3) Locked supply - vesting, treasuries, 4) Velocity - how quickly tokens change hands, 5) Holder distribution - concentration analysis. Sustainable protocols balance inflation incentives with value accrual mechanisms. Token unlocks can create sell pressure - important to model and communicate."
+              "content": "Token flow analysis turns abstract economics into operational insight. The key is to track where tokens are (staked, circulating, locked, treasury, pending unlock) and how they move over time.\n\nUseful flow metrics include:\n- net circulating change,\n- staking inflow/outflow trend,\n- unlock cliff concentration,\n- treasury spend velocity.\n\nUnlock events should be modeled for market-impact risk. Large clustered unlocks can create short-term supply shock even when long-term tokenomics is sound.\n\nFlow tooling should support deterministic category accounting and conservation checks (total categorized supply consistency).\n\nFor governance, flow analysis is most valuable when tied to policy actions: adjust emissions, change vesting cadence, alter incentive programs.\n\nSustainable token systems are not static designs; they are continuously monitored flow systems with explicit policy feedback loops."
             },
             {
               "id": "lesson-51-2-2",
@@ -3053,7 +3053,7 @@
                     "total": 1000
                   },
                   "expected": {
-                    "ratio": 30.0
+                    "ratio": 30
                   }
                 },
                 {
@@ -3179,7 +3179,7 @@
                     "burn": 500
                   },
                   "expected": {
-                    "ratio": 50.0
+                    "ratio": 50
                   }
                 },
                 {
@@ -3188,7 +3188,7 @@
                     "expenses": 10000
                   },
                   "expected": {
-                    "runway": 10.0
+                    "runway": 10
                   }
                 },
                 {

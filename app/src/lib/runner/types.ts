@@ -4,6 +4,11 @@ import { TerminalSimState } from "@/lib/terminal-sim";
 export const RUNNER_JOB_ALLOWLIST = [
   "anchor_build",
   "anchor_test",
+  "anchor_deploy",
+  "anchor_idl_build",
+  "anchor_idl_fetch",
+  "cargo_build",
+  "cargo_test",
   "solana_config_set",
   "solana_config_get",
   "solana_airdrop",
@@ -31,6 +36,10 @@ export type RunnerArtifact = {
   programId?: string;
   balanceLamports?: string;
   tokenMint?: string;
+  deploySucceeded?: boolean;
+  idlBuilt?: boolean;
+  idlFetched?: boolean;
+  idlAddress?: string;
 };
 
 export type RunnerResult = {
@@ -39,6 +48,7 @@ export type RunnerResult = {
   stdout: string;
   stderr: string;
   artifacts: RunnerArtifact;
+  outputFiles?: Record<string, string>;
   terminalState?: TerminalSimState;
   durationMs: number;
 };

@@ -62,6 +62,10 @@ Operational readiness also requires owning fixture updates as providers change r
 
 This material should be operationalized with deterministic fixtures and explicit release criteria. Teams should preserve a small set of baseline scenarios that represent normal traffic, moderate stress, and severe stress. For each scenario, compare policy outputs before and after changes, and require review notes when confidence labels, warnings, or recommendations move in a meaningful way. This discipline prevents accidental drift, keeps support playbooks aligned with runtime behavior, and makes incident response faster because everyone shares the same deterministic artifact language. In practice, the strongest reliability teams treat these artifacts as release gates, not optional documentation, and they keep fixture ownership explicit so updates remain intentional and auditable.
 
+## Operator mindset
+
+RPC policy is risk routing, not just request routing. Endpoint choice, retry cadence, and cache invalidation directly determine whether users see timely truth or stale confusion.
+
 ## Checklist
 - Treat timeouts, 429s, and stale lag as default conditions.
 - Use multi-provider endpoint selection with health scoring.
@@ -296,14 +300,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "rpc-v2-foundations",
   title: "RPC Reliability Foundations",
-  description: "Real-world RPC failures, endpoint strategy, and retry policy modeling.",
+  description:
+    "Real-world RPC failure behavior, endpoint selection strategy, and deterministic retry policy modeling.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "rpc-v2-project-journey",
   title: "RPC Multi-Provider Client Project Journey",
-  description: "Build deterministic policy, selection, metrics, and health report exports.",
+  description:
+    "Build deterministic policy engines for routing, retries, metrics reduction, and health report exports.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -312,7 +318,7 @@ export const rpcReliabilityLatencyCourse: Course = {
   slug: "rpc-reliability-latency",
   title: "RPC Reliability & Latency Engineering",
   description:
-    "Engineer multi-provider Solana RPC clients with deterministic retry, routing, caching, and observability policies.",
+    "Engineer production multi-provider Solana RPC clients with deterministic retry, routing, caching, and observability policies.",
   difficulty: "advanced",
   duration: "9 hours",
   totalXP: 445,

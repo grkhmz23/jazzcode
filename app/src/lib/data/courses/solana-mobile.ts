@@ -34,7 +34,21 @@ Typical mobile flow:
 
 Mobile UX needs explicit state transitions (authorizing, awaiting wallet, signing, submitted, confirmed). Ambiguity causes user drop-off quickly on small screens.
 
-For Solana teams, mobile is not a “mini web app”; it requires deliberate protocol and UX design choices. SMS and MWA provide a secure baseline so developers can ship on-chain experiences with production-grade signing and session models on handheld devices.`
+For Solana teams, mobile is not a “mini web app”; it requires deliberate protocol and UX design choices. SMS and MWA provide a secure baseline so developers can ship on-chain experiences with production-grade signing and session models on handheld devices.
+
+## Practical architecture split
+
+Treat your mobile stack as three independent systems:
+1. UI app state and navigation.
+2. Wallet transport/session state (MWA lifecycle).
+3. On-chain transaction intent and confirmation state.
+
+If you couple these layers tightly, wallet switch interruptions and app backgrounding can corrupt flow state. If they stay separated, recovery is predictable.
+
+## What users should feel
+
+Good mobile crypto UX is not "fewer steps at all costs." It is clear intent, explicit signing context, and safe recoverability when app switching or network instability happens.
+`
 };
 
 const lesson2: Lesson = {
@@ -251,14 +265,14 @@ Great Solana mobile apps feel predictable under stress. If users always understa
 const module1: Module = {
   id: 'module-mobile-wallet-adapter',
   title: 'Mobile Wallet Adapter',
-  description: 'Core protocol and integration patterns for mobile signing.',
+  description: 'Core MWA protocol, session lifecycle control, and resilient wallet handoff patterns for production mobile apps.',
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: 'module-dapp-store-and-distribution',
   title: 'dApp Store & Distribution',
-  description: 'Publishing and operating mobile Solana apps.',
+  description: 'Publishing, operational readiness, and trust-centered mobile UX practices for Solana app distribution.',
   lessons: [lesson4, lesson5],
 };
 
@@ -267,7 +281,7 @@ export const solanaMobileCourse: Course = {
   slug: 'solana-mobile',
   title: 'Solana Mobile Development',
   description:
-    'Build production-ready mobile Solana dApps with MWA, robust wallet UX, and app distribution best practices.',
+    'Build production-ready mobile Solana dApps with MWA, robust wallet session architecture, explicit signing UX, and disciplined distribution operations.',
   difficulty: 'intermediate',
   duration: '6 hours',
   totalXP: 1200,

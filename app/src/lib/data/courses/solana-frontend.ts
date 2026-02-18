@@ -45,6 +45,16 @@ A production dashboard also needs explicit error classes for parsing and modelin
 
 Finally, wallet state should include confidence metadata. Is this balance from confirmed events? From optimistic local prediction? From replay snapshot N? Confidence-aware UX prevents overclaiming and helps users understand why values may shift.
 
+## Practical mental model map
+
+Keep four layers explicit:
+1. Identity layer (wallet, signer, session metadata).
+2. State layer (system accounts, token accounts, mint metadata).
+3. Event layer (journal entries, corrections, dedupe keys, confidence).
+4. View layer (formatted balances, sorted rows, UX status labels).
+
+When these layers blur together, bugs look random. When they stay separate, you can isolate failures quickly.
+
 ## Pitfall: treating wallet pubkey as the universal balance location
 
 Wallet pubkey identifies a user, but SPL balances live in token accounts. If you collapse the two, transfer builders, explorers, and reconciliation logic diverge.
@@ -424,14 +434,16 @@ Compose deterministic checkpoint output:
 const module1: Module = {
   id: "frontend-v2-module-fundamentals",
   title: "Frontend Fundamentals for Solana",
-  description: "Model wallet/account state, transaction lifecycle UX, and deterministic correctness rules.",
+  description:
+    "Model wallet/account state correctly, design transaction lifecycle UX, and enforce deterministic correctness rules for replayable debugging.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "frontend-v2-module-token-dashboard",
   title: "Token Dashboard Project",
-  description: "Build reducer, replay snapshots, query metrics, and final deterministic dashboard summary.",
+  description:
+    "Build reducer, replay snapshots, query metrics, and deterministic dashboard outputs that remain stable under partial or delayed data.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -440,7 +452,7 @@ export const solanaFrontendCourse: Course = {
   slug: "solana-frontend",
   title: "Solana Frontend Development",
   description:
-    "Project-journey course for building a deterministic Token Dashboard engine with event replay, query modeling, and stable checkpoint summaries.",
+    "Project-journey course for frontend engineers who want production-ready Solana dashboards: deterministic reducers, replayable event pipelines, and trustworthy transaction UX.",
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 335,

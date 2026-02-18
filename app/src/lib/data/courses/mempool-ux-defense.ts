@@ -60,6 +60,10 @@ The goal is not zero failed swaps; the goal is informed, bounded risk with trans
 
 This material should be operationalized with deterministic fixtures and explicit release criteria. Teams should preserve a small set of baseline scenarios that represent normal traffic, moderate stress, and severe stress. For each scenario, compare policy outputs before and after changes, and require review notes when confidence labels, warnings, or recommendations move in a meaningful way. This discipline prevents accidental drift, keeps support playbooks aligned with runtime behavior, and makes incident response faster because everyone shares the same deterministic artifact language. In practice, the strongest reliability teams treat these artifacts as release gates, not optional documentation, and they keep fixture ownership explicit so updates remain intentional and auditable.
 
+## Operator mindset
+
+Protected swap UX is policy UX. Defaults, warnings, and block states should be deterministic, explainable, and versioned so teams can defend decisions during incidents.
+
 ## Checklist
 - Track quote age and apply graded stale-quote policies.
 - Separate price impact education from slippage controls.
@@ -293,14 +297,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "mempoolux-v2-foundations",
   title: "Mempool Reality and UX Defense",
-  description: "Stale quote risk, slippage guardrails, and defensive user education.",
+  description:
+    "Quote-to-execution risk modeling, slippage guardrails, and defensive user education for safer swap decisions.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "mempoolux-v2-project-journey",
   title: "Protected Swap UI Project Journey",
-  description: "Implement policy engines and export deterministic swap protection configuration.",
+  description:
+    "Implement deterministic policy engines, safety messaging, and stable protection-config artifacts for release governance.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -309,7 +315,7 @@ export const mempoolUxDefenseCourse: Course = {
   slug: "mempool-ux-defense",
   title: "Mempool Reality & Anti-Sandwich UX",
   description:
-    "Defensive swap UX engineering with deterministic risk grading, slippage guardrails, and educational safety messaging.",
+    "Defensive swap UX engineering with deterministic risk grading, bounded slippage policies, and incident-ready safety communication.",
   difficulty: "advanced",
   duration: "9 hours",
   totalXP: 445,

@@ -57,6 +57,10 @@ Fallback patterns include: QR code-based WalletConnect sessions (works on both p
 
 The most robust approach is capability detection at runtime: check for MWA support, fall back to deep links, and ultimately offer QR-based connection as a universal fallback. Each path should provide appropriate UX feedback so users understand why the experience differs across devices.
 
+## Shipping principle for mobile signing
+
+Design for interruption by default. Assume app switches, OS suspension, network drops, and wallet restarts are normal events. A resilient signing flow recovers state quickly and keeps users informed at each step.
+
 ## Checklist
 - Detect MWA availability on Android before attempting association
 - Implement deep link fallback for iOS and non-MWA Android
@@ -602,14 +606,16 @@ This checkpoint validates your understanding of session lifecycle, request track
 const module1: Module = {
   id: "mobilesign-v2-fundamentals",
   title: "Mobile Signing Fundamentals",
-  description: "Platform constraints, connection UX, signing timeline, and typed request construction.",
+  description:
+    "Platform constraints, connection UX patterns, signing timeline behavior, and typed request construction across Android/iOS.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "mobilesign-v2-production",
   title: "Production Patterns",
-  description: "Session persistence, transaction review, retry state machines, and session reporting.",
+  description:
+    "Session persistence, transaction-review safety, retry state machines, and deterministic session reporting for production mobile apps.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -618,7 +624,7 @@ export const solanaMobileSigningCourse: Course = {
   slug: "solana-mobile-signing",
   title: "Solana Mobile Signing",
   description:
-    "Master mobile wallet signing: Android MWA sessions, iOS constraints, sign request construction, session persistence, retry state machines, and deterministic session reporting.",
+    "Master production mobile wallet signing on Solana: Android MWA sessions, iOS deep-link constraints, resilient retries, and deterministic session telemetry.",
   difficulty: "intermediate",
   duration: "12 hours",
   totalXP: 400,

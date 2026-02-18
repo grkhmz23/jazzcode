@@ -14,6 +14,53 @@ const intlMiddleware = createIntlMiddleware({
 // Define protected routes that require authentication
 const protectedRoutes = ["/dashboard", "/settings", "/profile"];
 
+function parseOrigin(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+const runnerOrigin = parseOrigin(process.env.RUNNER_URL);
+
+export function buildCsp(pathname: string): string {
+  const isEditorRoute =
+    pathname.includes("/playground") ||
+    pathname.includes("/devlab") ||
+    /\/courses\/[^/]+\/lessons\//.test(pathname);
+
+  const connectSrc = [
+    "'self'",
+    "https://api.devnet.solana.com",
+    ...(runnerOrigin ? [runnerOrigin] : []),
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+  ];
+
+  const scriptSrc = isEditorRoute
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com"
+    : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com";
+  const workerSrc = isEditorRoute ? "worker-src 'self' blob:" : "worker-src 'self'";
+
+  return [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    workerSrc,
+    "img-src 'self' blob: data: https://cdn.sanity.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://www.google-analytics.com",
+    "font-src 'self'",
+    `connect-src ${connectSrc.join(" ")}`,
+    "media-src 'self'",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'none'",
+  ].join("; ");
+}
+
 /**
  * Check if a pathname matches any protected route pattern
  * - /profile is protected (own profile)
@@ -87,10 +134,13 @@ export async function middleware(request: NextRequest) {
         return path;
       }, pathname);
       signInUrl.searchParams.set("callbackUrl", pathWithoutLocale);
-      return NextResponse.redirect(signInUrl);
+      const redirectResponse = NextResponse.redirect(signInUrl);
+      redirectResponse.headers.set("Content-Security-Policy", buildCsp(pathname));
+      return redirectResponse;
     }
   }
 
+  intlResponse.headers.set("Content-Security-Policy", buildCsp(pathname));
   return intlResponse;
 }
 

@@ -59,7 +59,12 @@ The point of this model is not exact runtime cycles. The point is relative press
 
 On-chain thinking reinforces this: compute budgets are finite, and predictable resource usage matters. Even off-chain indexers and simulators benefit from the same discipline because latency tails and CPU burn impact reliability.
 
-Deterministic models are ideal for CI. Given identical operation counts, output should be identical. Reviewers can reason about deltas directly and reject regressions early.${appendix}`,
+Deterministic models are ideal for CI. Given identical operation counts, output should be identical. Reviewers can reason about deltas directly and reject regressions early.
+
+## Operator mindset
+
+Performance guidance should be versioned and budgeted. Without explicit budgets and stable cost categories, optimization work drifts toward anecdote instead of measurable outcomes.
+${appendix}`,
   blocks: [
     {
       type: "quiz",
@@ -235,14 +240,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "rpot-v2-foundations",
   title: "Performance Foundations",
-  description: "Rust performance mental models and deterministic cost reasoning.",
+  description:
+    "Rust performance mental models, data-structure tradeoffs, and deterministic cost reasoning for reliable optimization decisions.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "rpot-v2-project-journey",
   title: "Compute Budget Profiler (Sim)",
-  description: "Build deterministic profilers, suggestion engines, and report outputs.",
+  description:
+    "Build deterministic profilers, recommendation engines, and report outputs aligned to explicit performance budgets.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -250,7 +257,8 @@ export const rustPerfOnchainThinkingCourse: Course = {
   id: "course-rust-perf-onchain-thinking",
   slug: "rust-perf-onchain-thinking",
   title: "Rust Performance for On-chain Thinking",
-  description: "Simulate and optimize compute-cost behavior with deterministic Rust-first tooling.",
+  description:
+    "Simulate and optimize compute-cost behavior with deterministic Rust-first tooling and budget-driven performance governance.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 445,

@@ -55,6 +55,15 @@ On Solana, CLMMs face unique architectural challenges. The account model require
 
 The Solana runtime's 1232-byte transaction size limit and 200,000 compute unit default also constrain CLMM operations. Large swaps that cross multiple tick boundaries may need to be split across multiple transactions, and position management operations must be carefully optimized to fit within these constraints.
 
+## LP decision framework
+
+Before opening any CLMM position, answer three questions:
+1. What price regime am I targeting (mean-reverting vs trending)?
+2. How actively can I rebalance when out-of-range?
+3. What failure budget can I tolerate for fees vs IL vs rebalance costs?
+
+CLMM returns come from strategy discipline, not just math formulas.
+
 ## Checklist
 - Understand that x*y=k spreads liquidity across all prices, wasting capital
 - CLMMs let LPs concentrate capital in specific price ranges
@@ -554,14 +563,16 @@ This checkpoint validates your understanding of tick math, fee accrual, range dy
 const module1: Module = {
   id: "clmm-v2-fundamentals",
   title: "CLMM Fundamentals",
-  description: "Concentrated liquidity concepts, tick math, range positions, and price conversions.",
+  description:
+    "Concentrated liquidity concepts, tick/price math, and range-position behavior needed to reason about CLMM execution.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "clmm-v2-positions",
   title: "Positions & Risk",
-  description: "Fee accrual simulation, range strategies, precision risks, and position reporting.",
+  description:
+    "Fee accrual simulation, range strategy tradeoffs, precision pitfalls, and deterministic position risk reporting.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -570,7 +581,7 @@ export const defiClmmLiquidityCourse: Course = {
   slug: "defi-clmm-liquidity",
   title: "CLMM Liquidity Engineering",
   description:
-    "Master concentrated liquidity: tick math, price ranges, position management, fee accrual, and deterministic LP position reporting for Solana DEXs.",
+    "Master concentrated liquidity engineering on Solana DEXs: tick math, range strategy design, fee/IL dynamics, and deterministic LP position reporting.",
   difficulty: "advanced",
   duration: "14 hours",
   totalXP: 400,

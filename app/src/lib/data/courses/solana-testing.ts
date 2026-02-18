@@ -39,7 +39,16 @@ A frequent anti-pattern is only testing happy paths with one wallet and static i
 
 In CI, separate fast deterministic suites from slower network-dependent suites. Run deterministic tests on every push, and run heavier devnet suites on merge or release.
 
-Effective Solana testing is about confidence under adversarial conditions, not just green checkmarks. If your tests model attacker behavior and account-level edge cases, you will prevent the majority of production incidents before deployment.`
+Effective Solana testing is about confidence under adversarial conditions, not just green checkmarks. If your tests model attacker behavior and account-level edge cases, you will prevent the majority of production incidents before deployment.
+
+## Practical suite design rule
+
+Map every critical instruction to at least one test in each layer:
+- unit test for pure invariant/math logic
+- integration test for account validation and state transitions
+- environment test for wallet/RPC orchestration
+
+If one layer is missing, incidents usually appear in that blind spot first.`
 };
 
 const lesson2: Lesson = {
@@ -306,14 +315,14 @@ A strong CI/CD pipeline is an engineering control, not a convenience. It reduces
 const module1: Module = {
   id: 'module-testing-foundations',
   title: 'Testing Foundations',
-  description: 'Core testing strategy and deterministic integration workflows.',
+  description: 'Core test strategy across unit/integration layers with deterministic workflows and adversarial case coverage.',
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: 'module-advanced-testing',
   title: 'Advanced Testing',
-  description: 'Fuzzing, devnet validation, and release pipelines.',
+  description: 'Fuzzing, devnet validation, and CI/CD release controls for safer protocol changes.',
   lessons: [lesson4, lesson5, lesson6],
 };
 
@@ -322,7 +331,7 @@ export const solanaTestingCourse: Course = {
   slug: 'solana-testing',
   title: 'Testing Solana Programs',
   description:
-    'Build robust test strategy across local, simulated, and network environments for secure Solana program releases.',
+    'Build robust Solana testing systems across local, simulated, and network environments with explicit security invariants and release-quality confidence gates.',
   difficulty: 'intermediate',
   duration: '6 hours',
   totalXP: 1200,

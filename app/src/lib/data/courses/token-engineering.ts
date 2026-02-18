@@ -43,6 +43,15 @@ Token-2022 also changes launch sequencing. You must pre-size mint accounts for c
 
 Finally, extension-aware design is an integration problem, not just a contract problem. Product and support teams need clear messaging for fee behavior, frozen account states, and delegated capabilities. If users cannot predict token behavior from wallet prompts and docs, operational risk rises even when code is formally correct.
 
+## Decision framework for extension selection
+
+For each extension, force three answers before enabling it:
+1. What concrete product requirement does this solve now?
+2. Which authority can abuse this if compromised?
+3. How will users and integrators observe this behavior in UX and docs?
+
+If any answer is vague, extension scope is probably too broad.
+
 ## Pitfall: Extension creep without threat modeling
 
 Adding multiple extensions "for flexibility" often creates overlapping authority powers and unpredictable UX. Enable only the extensions your product can govern, monitor, and explain end-to-end.
@@ -384,14 +393,16 @@ Compose full project output as stable JSON:
 const module1: Module = {
   id: "token-v2-module-fundamentals",
   title: "Token Fundamentals -> Token-2022",
-  description: "Understand token primitives, mint policy anatomy, and extension safety controls.",
+  description:
+    "Understand token primitives, mint policy anatomy, and Token-2022 extension controls with explicit governance and threat-model framing.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "token-v2-module-launch-pack",
   title: "Token Launch Pack Project",
-  description: "Build deterministic validation, planning, simulation, and final launch summary outputs.",
+  description:
+    "Build deterministic validation, planning, and simulation workflows that produce reviewable launch artifacts and clear go/no-go criteria.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -400,7 +411,7 @@ export const tokenEngineeringCourse: Course = {
   slug: "token-engineering",
   title: "Token Engineering on Solana",
   description:
-    "Project-journey course for building a deterministic Token Launch Pack with Token-2022-style extension planning and supply simulation.",
+    "Project-journey course for teams launching real Solana tokens: deterministic Token-2022 planning, authority design, supply simulation, and operational launch discipline.",
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 335,

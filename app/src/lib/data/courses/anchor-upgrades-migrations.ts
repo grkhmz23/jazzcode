@@ -49,6 +49,10 @@ Authority transition rules matter too. Some protocols intentionally revoke upgra
 Release communication is part of security. Users and integrators need predictable language about what changed and whether state migration is required. For example, if you add new account fields but keep backward decoding compatibility, your report should say migration is optional for old accounts and mandatory for new writes after a certain slot range. If compatibility breaks, the report must include exact batch strategy and downtime expectations. Ambiguous language creates support load and increases operational risk.
 
 Finally, design your release pipeline for deterministic dry runs. Simulate migration steps, validation checks, and report generation locally. The goal is to eliminate unforced errors before any transaction is signed. A deterministic runbook is not bureaucracy; it is what keeps urgent releases calm and reviewable.
+
+## Operator mindset
+
+Anchor upgrades are operations work with cryptographic consequences. Authority controls, migration sequencing, and rollback criteria should be treated as release contracts, not informal habits.
 ${opsAppendix}
 ## Checklist
 - Define clear authority ownership and approval flow.
@@ -334,14 +338,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "aum-v2-module-1",
   title: "Upgrade Foundations",
-  description: "Authority, account versioning, and upgrade risk modeling for Anchor releases.",
+  description:
+    "Authority lifecycle, account versioning strategy, and deterministic upgrade risk modeling for Anchor releases.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "aum-v2-module-2",
   title: "Migration Execution",
-  description: "Safety validation, rollback planning, and deterministic readiness artifacts.",
+  description:
+    "Safety validation gates, rollback planning, and deterministic readiness artifacts for controlled migration execution.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -350,7 +356,7 @@ export const anchorUpgradesMigrationsCourse: Course = {
   slug: "anchor-upgrades-migrations",
   title: "Anchor Upgrades & Account Migrations",
   description:
-    "Design safe Anchor release workflows with deterministic migration planning, upgrade gates, rollback playbooks, and readiness reports.",
+    "Design production-safe Anchor release workflows with deterministic migration planning, upgrade gates, rollback playbooks, and readiness evidence.",
   difficulty: "advanced",
   duration: "8 hours",
   totalXP: 440,

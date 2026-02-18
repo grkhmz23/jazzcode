@@ -49,6 +49,15 @@ Every risk metric in a perps risk console depends on getting these fundamentals 
 
 On Solana specifically, oracle latency introduces an additional consideration. Pyth oracle updates propagate with slot-level granularity (~400ms). During volatile periods, the oracle price can lag behind actual market moves by several hundred milliseconds. Protocols handle this by including confidence intervals in their oracle reads and rejecting prices with excessively wide confidence bands. When building risk dashboards, always display the oracle confidence alongside the price and flag stale oracles (timestamps older than a few seconds).
 
+## Console design principle
+
+A useful risk console must separate:
+1. directional performance (PnL),
+2. structural cost (funding + fees),
+3. survival risk (margin ratio + liquidation distance).
+
+Blending these into one number hides the decision signals traders actually need.
+
 ## Checklist
 - Understand that perpetual futures never expire and use funding to track spot
 - Track entry price as a weighted average across all fills
@@ -525,14 +534,16 @@ This checkpoint validates your complete understanding of perpetual futures risk 
 const module1: Module = {
   id: "perps-v2-fundamentals",
   title: "Perps Fundamentals",
-  description: "Perpetual futures mechanics, funding rate accrual, PnL visualization, and core calculation challenges.",
+  description:
+    "Perpetual futures mechanics, funding accrual logic, and PnL modeling foundations for accurate position diagnostics.",
   lessons: [lesson1, lesson2, lesson3, lesson4, lesson5],
 };
 
 const module2: Module = {
   id: "perps-v2-risk",
   title: "Risk & Monitoring",
-  description: "Margin ratio monitoring, liquidation thresholds, common implementation bugs, and full risk console report generation.",
+  description:
+    "Margin and liquidation monitoring, implementation bug traps, and deterministic risk-console outputs for production observability.",
   lessons: [lesson6, lesson7, lesson8],
 };
 
@@ -541,7 +552,7 @@ export const defiPerpsRiskConsoleCourse: Course = {
   slug: "defi-perps-risk-console",
   title: "Perps Risk Console",
   description:
-    "Master perpetual futures mechanics: PnL calculations, funding rate accrual, margin monitoring, liquidation simulation, and deterministic risk console reporting.",
+    "Master perps risk engineering on Solana: precise PnL/funding accounting, margin safety monitoring, liquidation simulation, and deterministic console reporting.",
   difficulty: "advanced",
   duration: "14 hours",
   totalXP: 400,

@@ -60,6 +60,10 @@ To keep this durable, teams should document fixture ownership and rotate review 
 
 This material should be operationalized with deterministic fixtures and explicit release criteria. Teams should preserve a small set of baseline scenarios that represent normal traffic, moderate stress, and severe stress. For each scenario, compare policy outputs before and after changes, and require review notes when confidence labels, warnings, or recommendations move in a meaningful way. This discipline prevents accidental drift, keeps support playbooks aligned with runtime behavior, and makes incident response faster because everyone shares the same deterministic artifact language. In practice, the strongest reliability teams treat these artifacts as release gates, not optional documentation, and they keep fixture ownership explicit so updates remain intentional and auditable.
 
+## Operator mindset
+
+Indexing is a correctness pipeline before it is an analytics pipeline. Fast ingestion with weak dedupe, confirmation, or replay guarantees produces confidently wrong outputs.
+
 ## Checklist
 - Capture complete event identity fields at ingest time.
 - Normalize events from logs and parsed instructions into one schema.
@@ -295,14 +299,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "indexpipe-v2-foundations",
   title: "Indexer Reliability Foundations",
-  description: "Event modeling, confirmation reality, and deterministic pipeline stages.",
+  description:
+    "Event identity modeling, confirmation semantics, and deterministic ingest-to-apply pipeline behavior.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "indexpipe-v2-project-journey",
   title: "Reorg-Safe Indexer Project Journey",
-  description: "Build dedupe, confirmation apply, integrity checks, and stable reporting.",
+  description:
+    "Build dedupe, confirmation-aware apply logic, integrity gates, and stable reporting artifacts for operational triage.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -311,7 +317,7 @@ export const indexingWebhooksPipelinesCourse: Course = {
   slug: "indexing-webhooks-pipelines",
   title: "Indexers, Webhooks & Reorg-Safe Pipelines",
   description:
-    "Build deterministic ingestion pipelines that survive duplicates, reorgs, and confirmation ambiguity.",
+    "Build production-grade deterministic indexing pipelines for duplicate-safe ingestion, reorg handling, and integrity-first reporting.",
   difficulty: "advanced",
   duration: "9 hours",
   totalXP: 445,

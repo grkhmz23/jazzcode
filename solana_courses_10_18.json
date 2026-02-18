@@ -4,7 +4,7 @@
       "id": "course-034",
       "slug": "solana-reliability",
       "title": "Reliability Engineering for Solana",
-      "description": "Build fault-tolerant Solana programs with retry mechanisms, circuit breakers, deadline management, and graceful degradation patterns for production resilience.",
+      "description": "Production-focused reliability engineering for Solana systems: fault tolerance, retries, deadlines, circuit breakers, and graceful degradation with measurable operational outcomes.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2100,
@@ -19,13 +19,13 @@
         {
           "id": "mod-10-1",
           "title": "Fault Tolerance Patterns",
-          "description": "Implement fault tolerance mechanisms for handling failures gracefully in Solana programs.",
+          "description": "Implement fault-tolerance building blocks with clear failure classification, retry boundaries, and deterministic recovery behavior.",
           "lessons": [
             {
               "id": "lesson-10-1-1",
               "type": "content",
               "title": "Understanding Fault Tolerance",
-              "content": "Fault tolerance in Solana programs ensures your application continues operating even when components fail. Key patterns include: 1) Fail-fast - detect and report errors immediately, 2) Fallback - provide alternative execution paths, 3) Redundancy - duplicate critical operations, 4) Graceful degradation - reduce functionality rather than failing completely. Solana's deterministic execution model requires careful error handling since transactions are atomic - they either fully succeed or fully fail."
+              "content": "Fault tolerance in Solana systems is not just about catching errors. It is about deciding which failures are safe to retry, which should fail fast, and how to preserve user trust while doing both.\n\nA practical reliability model starts with failure classes:\n1) transient failures (timeouts, temporary RPC unavailability),\n2) persistent external failures (rate limits, prolonged endpoint degradation),\n3) deterministic business failures (invalid input, invariant violations).\n\nTransient failures may justify bounded retries with backoff. Deterministic business failures should not be retried because retries only add latency and load. Persistent external failures often require fallback endpoints, degraded features, or temporary protection modes.\n\nIn Solana workflows, reliability is tightly coupled to freshness constraints. A request can be logically valid but still fail if supporting state has shifted (for example stale quote windows or expired blockhash contexts in client workflows). Reliable systems therefore combine retry logic with freshness checks and clear abort conditions.\n\nDefensive engineering means defining policies explicitly:\n- maximum retry count,\n- per-attempt timeout,\n- total deadline budget,\n- fallback behavior after budget exhaustion,\n- user-facing messaging for each failure class.\n\nWithout explicit budgets, systems drift into infinite retry loops or fail too early. With explicit budgets, behavior is predictable and testable.\n\nFor production teams, observability is mandatory. Every failed operation should include a deterministic reason code and context fields (attempt number, endpoint, elapsed time, policy branch). This turns reliability from guesswork into measurable behavior.\n\nReliable systems do not promise zero failures. They promise controlled failure behavior: bounded latency, clear outcomes, and safe degradation under stress."
             },
             {
               "id": "lesson-10-1-2",
@@ -194,13 +194,13 @@
         {
           "id": "mod-10-2",
           "title": "Resilience Mechanisms",
-          "description": "Build resilience patterns including circuit breakers, bulkheads, and rate limiters.",
+          "description": "Build resilience mechanisms (circuit breakers, bulkheads, and rate controls) that protect core user flows during provider instability.",
           "lessons": [
             {
               "id": "lesson-10-2-1",
               "type": "content",
               "title": "Resilience Patterns",
-              "content": "Resilience patterns help systems recover from failures and maintain stability under load. Key patterns include: 1) Circuit Breaker - prevent cascading failures by stopping requests to failing services, 2) Bulkhead - isolate failures by partitioning resources, 3) Rate Limiter - control request rates to prevent overload, 4) Timeout - enforce maximum wait times for operations. In Solana, these patterns are crucial for RPC endpoint management, transaction submission, and handling network congestion."
+              "content": "Resilience patterns are controls that prevent localized failures from becoming system-wide incidents. On Solana integrations, they are especially important because provider health can change quickly under bursty network conditions.\n\nCircuit breaker pattern:\n- closed: normal operation,\n- open: block requests after repeated failures,\n- half-open: probe recovery with controlled trial requests.\n\nA good breaker uses deterministic thresholds and cooldowns, not ad hoc toggles. It should expose state transitions for monitoring and post-incident review.\n\nBulkhead pattern isolates resource pools so one failing workflow (for example expensive quote refresh loops) cannot starve unrelated workflows (like portfolio reads).\n\nRate limiting controls outbound pressure to providers. Proper limits reduce 429 storms and improve overall success rate. Token-bucket strategies are useful because they allow short bursts while preserving long-term bounds.\n\nThese patterns should be coordinated, not layered blindly. For example, aggressive retries plus weak rate limiting can bypass the intent of a circuit breaker. Policy composition must be reviewed end-to-end.\n\nA mature resilience stack includes:\n- deterministic policy config,\n- simulation fixtures for calm vs stressed traffic,\n- dashboard visibility for breaker states and reject reasons,\n- explicit user copy for degraded mode.\n\nResilience is successful when users experience predictable service quality under failure, not when systems appear perfect in ideal conditions."
             },
             {
               "id": "lesson-10-2-2",
@@ -365,7 +365,7 @@
       "id": "course-035",
       "slug": "solana-testing-strategies",
       "title": "Testing Strategies for Solana",
-      "description": "Master comprehensive testing approaches for Solana programs including unit tests, integration tests, fuzzing, and property-based testing for robust deployments.",
+      "description": "Comprehensive, production-oriented testing strategy for Solana: deterministic unit tests, realistic integration tests, fuzz/property testing, and release-confidence reporting.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1850,
@@ -380,13 +380,13 @@
         {
           "id": "mod-11-1",
           "title": "Unit and Integration Testing",
-          "description": "Build effective unit and integration tests for Solana programs.",
+          "description": "Build deterministic unit and integration testing layers with clear ownership of invariants, fixtures, and failure diagnostics.",
           "lessons": [
             {
               "id": "lesson-11-1-1",
               "type": "content",
               "title": "Testing Fundamentals",
-              "content": "Testing Solana programs requires understanding both Rust testing patterns and Solana-specific considerations. Unit tests verify individual functions in isolation, while integration tests verify program behavior with actual account state. Key tools include: solana-program-test for integration testing, banks-client for simulating transactions, and mollusk for lightweight testing. A comprehensive test suite should cover happy paths, error cases, edge cases, and boundary conditions."
+              "content": "Testing Solana systems effectively requires layered confidence, not one giant test suite.\n\nUnit tests validate pure logic: math, state transitions, and invariant checks. They should be fast, deterministic, and run on every change.\n\nIntegration tests validate component wiring: account modeling, instruction construction, and cross-module behavior under realistic inputs. They should catch schema drift and boundary errors that unit tests miss.\n\nA practical test pyramid for Solana work:\n1) deterministic unit tests (broadest coverage),\n2) deterministic integration tests (targeted workflow coverage),\n3) environment-dependent checks (smaller set, higher cost).\n\nCommon failure in teams is over-reliance on environment-dependent tests while neglecting deterministic core checks. This creates flaky CI and weak debugging signals.\n\nGood test design principles:\n- explicit fixture ownership,\n- stable expected outputs,\n- structured error assertions (not only success assertions),\n- regression fixtures for previously discovered bugs.\n\nFor production readiness, test outputs should be easy to audit. Summaries should include pass/fail counts by category, failing invariant IDs, and deterministic reproduction inputs.\n\nTesting is not just correctness verification; it is an operational communication tool. Strong test artifacts make release decisions clearer and incident response faster."
             },
             {
               "id": "lesson-11-1-2",
@@ -537,13 +537,13 @@
         {
           "id": "mod-11-2",
           "title": "Advanced Testing Techniques",
-          "description": "Explore fuzzing, property-based testing, and mutation testing for Solana programs.",
+          "description": "Use fuzzing, property-based tests, and mutation-style checks to expose edge-case failures before release.",
           "lessons": [
             {
               "id": "lesson-11-2-1",
               "type": "content",
               "title": "Fuzzing and Property Testing",
-              "content": "Fuzzing involves providing random or malformed inputs to programs to discover edge cases and vulnerabilities. Property-based testing defines properties that should always hold true and generates random inputs to verify them. For Solana programs, fuzzing can discover account validation bugs, arithmetic overflows, and state transition errors. Tools like honggfuzz and cargo-fuzz are commonly used for Rust-based Solana programs."
+              "content": "Advanced testing techniques uncover failures that example-based tests rarely find.\n\nFuzzing explores broad random input space to trigger parser edge cases, boundary overflows, and unexpected state combinations. It is especially useful for serialization, decoding, and input validation layers.\n\nProperty-based testing defines invariants that must hold across many generated inputs. Instead of asserting one output, you assert a rule (for example: balances never become negative, or decoded-then-encoded payload remains stable).\n\nMutation-style thinking strengthens this further: intentionally alter assumptions and verify tests fail as expected. If tests still pass after a harmful change, coverage is weaker than it appears.\n\nTo keep advanced testing practical:\n- use deterministic seeds in CI for reproducibility,\n- store failing cases as permanent regression fixtures,\n- separate heavy campaigns from per-commit fast checks.\n\nAdvanced tests are most valuable when tied to explicit risk categories. Map each category (serialization safety, invariant consistency, edge-case arithmetic) to at least one dedicated property or fuzz campaign.\n\nTeams that treat fuzz/property failures as first-class release blockers catch subtle defects earlier and reduce high-severity production incidents."
             },
             {
               "id": "lesson-11-2-2",
@@ -696,7 +696,7 @@
       "id": "course-036",
       "slug": "solana-program-optimization",
       "title": "Solana Program Optimization",
-      "description": "Optimize Solana programs for compute units, account data, and transaction size. Learn profiling techniques and optimization strategies for production-grade programs.",
+      "description": "Engineer production-grade Solana performance: compute budgeting, account layout efficiency, memory/rent tradeoffs, and deterministic optimization workflows.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1800,
@@ -711,13 +711,13 @@
         {
           "id": "mod-12-1",
           "title": "Compute Unit Optimization",
-          "description": "Optimize programs to minimize compute unit consumption.",
+          "description": "Optimize compute-heavy paths with explicit CU budgets, operation-level profiling, and predictable performance tradeoffs.",
           "lessons": [
             {
               "id": "lesson-12-1-1",
               "type": "content",
               "title": "Understanding Compute Units",
-              "content": "Compute Units (CUs) are Solana's measure of computational work. Each transaction has a limit (default 200,000 CUs for individual instructions, 1.4M per block). Optimizing CUs involves: 1) Minimizing unnecessary computations, 2) Using efficient data structures, 3) Reducing account deserialization overhead, 4) Avoiding redundant operations. Profile with solana-program-runtime tools and use msg! macros strategically to track CU consumption during development."
+              "content": "Compute units are the hard resource budget that shapes what your Solana program can do in a single transaction. Performance optimization starts by treating CU usage as a contract, not an afterthought.\n\nA reliable optimization loop is:\n1) measure baseline CU by operation type,\n2) identify dominant cost buckets (deserialization, hashing, loops, CPI fan-out),\n3) optimize one hotspot at a time,\n4) re-measure and keep only changes with clear gains.\n\nCommon anti-patterns include optimizing cold paths, adding complexity without measurement, and ignoring account-size side effects. In Solana systems, compute and account design are coupled: a larger account can increase deserialization cost, which raises CU pressure.\n\nFor production teams, deterministic cost fixtures are crucial. They let you compare before/after behavior in CI and stop regressions early. Performance work is most useful when every claim is backed by reproducible evidence, not intuition."
             },
             {
               "id": "lesson-12-1-2",
@@ -874,13 +874,13 @@
         {
           "id": "mod-12-2",
           "title": "Memory and Storage Optimization",
-          "description": "Optimize account data layout and memory usage for efficiency.",
+          "description": "Design memory/storage-efficient account layouts with rent-aware sizing, serialization discipline, and safe migration planning.",
           "lessons": [
             {
               "id": "lesson-12-2-1",
               "type": "content",
               "title": "Account Data Optimization",
-              "content": "Account data optimization reduces storage costs and improves deserialization performance. Techniques include: 1) Use fixed-size arrays instead of Vec when possible, 2) Pack data tightly - order fields by size (largest to smallest), 3) Use u8/u16 instead of u32/u64 for small values, 4) Consider zero-copy deserialization with bytemuck, 5) Use bitflags for boolean collections. Account rent exemption requires minimum balances - optimize data size to reduce rent costs."
+              "content": "Account data optimization is both a cost and correctness discipline. Poor layouts increase rent, slow parsing, and make migrations fragile.\n\nDesign principles:\n- Keep hot fields compact and easy to parse.\n- Use fixed-size representations where possible.\n- Reserve growth strategy explicitly instead of ad hoc field expansion.\n- Separate frequently-mutated data from rarely-changed metadata when practical.\n\nLayout decisions should be documented with deterministic artifacts: field offsets, total bytes, and expected rent class. If a schema change increases account size, reviewers should see the exact delta and migration implications.\n\nProduction optimization is not “smallest possible struct at any cost.” It is stable, readable, and migration-safe storage that keeps compute and rent budgets predictable over time."
             },
             {
               "id": "lesson-12-2-2",
@@ -898,7 +898,7 @@
                 {
                   "input": {
                     "operation": "pack_u64",
-                    "value": 72623859790382856,
+                    "value": 72623859790382850,
                     "offset": 0
                   },
                   "expected": {
@@ -930,7 +930,7 @@
                     "offset": 0
                   },
                   "expected": {
-                    "value": 72623859790382856
+                    "value": 72623859790382850
                   }
                 },
                 {
@@ -961,7 +961,7 @@
                   "input": {
                     "data_size": 128,
                     "lamports_per_byte_year": 3480,
-                    "exemption_threshold_years": 2.0
+                    "exemption_threshold_years": 2
                   },
                   "expected": {
                     "annual_rent": 445440,
@@ -1015,7 +1015,7 @@
                     "operation": "read_u64"
                   },
                   "expected": {
-                    "value": 72623859790382856,
+                    "value": 72623859790382850,
                     "remaining": 0
                   }
                 },
@@ -1064,7 +1064,7 @@
       "id": "course-037",
       "slug": "solana-tokenomics-design",
       "title": "Tokenomics Design for Solana",
-      "description": "Design and implement token economic systems on Solana including vesting schedules, staking mechanisms, governance tokens, and incentive structures.",
+      "description": "Design robust Solana token economies with distribution discipline, vesting safety, staking incentives, and governance mechanics that remain operationally defensible.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1900,
@@ -1080,13 +1080,13 @@
         {
           "id": "mod-13-1",
           "title": "Token Distribution and Vesting",
-          "description": "Implement token distribution mechanisms and vesting schedules.",
+          "description": "Model token allocation and vesting systems with explicit fairness, unlock predictability, and deterministic accounting rules.",
           "lessons": [
             {
               "id": "lesson-13-1-1",
               "type": "content",
               "title": "Token Distribution Fundamentals",
-              "content": "Token distribution involves allocating tokens to stakeholders including team, investors, community, and treasury. Vesting schedules ensure long-term alignment by releasing tokens over time. Common patterns include: 1) Linear vesting - equal releases over time, 2) Cliff vesting - initial delay then releases begin, 3) Graded vesting - increasing release amounts, 4) Milestone-based - releases tied to achievements. Proper tokenomics balances incentives, prevents dumps, and aligns stakeholder interests with protocol success."
+              "content": "Token distribution is a security and credibility decision, not just a spreadsheet exercise. Allocation and vesting rules shape long-term trust in the protocol.\n\nA strong distribution model answers:\n- who receives tokens and why,\n- when they unlock,\n- how unlock schedules affect circulating supply,\n- what controls prevent accidental over-distribution.\n\nVesting design should be deterministic and auditable. Cliff and linear phases must produce reproducible release amounts for any timestamp. Ambiguous rounding rules create disputes and operational risk.\n\nProduction teams should maintain allocation invariants in tests (for example: total distributed <= total supply, per-bucket caps respected, no negative vesting balances). Tokenomics quality improves when economics and implementation are validated together."
             },
             {
               "id": "lesson-13-1-2",
@@ -1267,13 +1267,13 @@
         {
           "id": "mod-13-2",
           "title": "Staking and Governance",
-          "description": "Implement staking mechanisms and governance token systems.",
+          "description": "Design staking and governance mechanics with clear incentive alignment, anti-manipulation constraints, and measurable participation health.",
           "lessons": [
             {
               "id": "lesson-13-2-1",
               "type": "content",
               "title": "Staking and Governance Design",
-              "content": "Staking mechanisms incentivize token holders to lock tokens, reducing circulating supply and aligning interests. Governance tokens enable decentralized decision-making through voting. Key concepts include: 1) Staking rewards - inflationary or fee-based yield, 2) Lockup periods - time commitments for staking, 3) Voting power - often proportional to staked amount, 4) Delegation - allowing others to vote on your behalf, 5) Proposal mechanisms - thresholds for creating and passing proposals. Well-designed systems balance participation incentives with protocol security."
+              "content": "Staking and governance systems must balance participation incentives with manipulation resistance. Rewarding lock behavior is useful, but poorly tuned models can over-concentrate influence.\n\nCore design questions:\n1) How is staking reward rate set and adjusted?\n2) How is voting power calculated (raw balance, delegated balance, time-weighted)?\n3) What prevents short-term governance capture?\n\nGovernance math should be transparent and deterministic so users can verify voting outcomes independently. If power calculations are opaque or inconsistent, governance trust collapses quickly.\n\nOperationally, track governance health metrics: voter participation, delegation concentration, proposal pass patterns, and inactive stake ratios. Tokenomics is successful only when on-chain incentive behavior matches intended governance outcomes."
             },
             {
               "id": "lesson-13-2-2",
@@ -1447,7 +1447,7 @@
       "id": "course-038",
       "slug": "solana-defi-primitives",
       "title": "DeFi Primitives on Solana",
-      "description": "Build core DeFi primitives including AMMs, lending protocols, yield farming, and flash loans using Solana's high-performance architecture.",
+      "description": "Build practical Solana DeFi foundations: AMM mechanics, liquidity accounting, lending primitives, and flash-loan-safe composition patterns.",
       "difficulty": "intermediate",
       "duration": "6 weeks",
       "totalXP": 2000,
@@ -1463,13 +1463,13 @@
         {
           "id": "mod-14-1",
           "title": "AMM and Liquidity",
-          "description": "Implement automated market maker mechanics and liquidity management.",
+          "description": "Implement AMM and liquidity primitives with deterministic math, slippage-aware outputs, and LP accounting correctness.",
           "lessons": [
             {
               "id": "lesson-14-1-1",
               "type": "content",
               "title": "AMM Fundamentals",
-              "content": "Automated Market Makers (AMMs) enable decentralized trading without order books. Constant Product AMMs (like Uniswap) use the formula x * y = k, where x and y are token reserves and k is constant. Key concepts: 1) Liquidity pools - paired token reserves, 2) LP tokens - represent pool share, 3) Swap fees - incentivize liquidity provision, 4) Slippage - price impact based on trade size, 5) Impermanent loss - potential loss from price divergence. Solana's low fees enable high-frequency AMM operations."
+              "content": "AMM fundamentals are simple in formula but subtle in implementation quality. The invariant math must be deterministic, fee handling explicit, and rounding behavior consistent across paths.\n\nFor constant-product pools, route quality is determined by output-at-size, not headline spot price. Larger trades move further on the curve and experience stronger impact, so quote logic must be size-aware.\n\nLiquidity accounting must also be exact: LP shares, fee accrual, and pool reserve updates should remain internally consistent under repeated swaps and edge-case sizes.\n\nProduction DeFi teams treat AMM math as critical infrastructure. They use fixed fixtures for swap-in/swap-out cases, boundary amounts, and fee tiers so regressions are caught before deployment."
             },
             {
               "id": "lesson-14-1-2",
@@ -1511,7 +1511,7 @@
                     "a_to_b": true
                   },
                   "expected": {
-                    "price": 2.0
+                    "price": 2
                   }
                 }
               ]
@@ -1642,13 +1642,13 @@
         {
           "id": "mod-14-2",
           "title": "Lending and Flash Loans",
-          "description": "Implement lending protocol mechanics and flash loan functionality.",
+          "description": "Model lending and flash-loan flows with collateral safety, utilization-aware pricing, and strict repayment invariants.",
           "lessons": [
             {
               "id": "lesson-14-2-1",
               "type": "content",
               "title": "Lending Protocol Mechanics",
-              "content": "Lending protocols enable permissionless borrowing and lending of assets. Key components: 1) Collateral - assets deposited to secure loans, 2) Loan-to-Value (LTV) ratio - maximum borrow amount relative to collateral, 3) Liquidation threshold - when positions become eligible for liquidation, 4) Interest rates - algorithmic based on utilization, 5) Flash loans - uncollateralized loans repaid in same transaction. Solana's parallel execution enables efficient lending operations with instant liquidations."
+              "content": "Lending primitives and flash-loan logic are powerful but unforgiving. Safety depends on strict collateral valuation, clear LTV/threshold rules, and deterministic repayment checks.\n\nA practical lending model should define:\n- collateral valuation source and freshness policy,\n- borrow limits and liquidation thresholds,\n- utilization-based rate behavior,\n- liquidation and bad-debt handling paths.\n\nFlash loans add atomic constraints: borrowed amount plus fee must be repaid in the same transaction context. Any relaxation of this invariant introduces severe risk.\n\nComposable DeFi design works when every primitive preserves local safety contracts while exposing clear interfaces for higher-level orchestration."
             },
             {
               "id": "lesson-14-2-2",
@@ -1794,7 +1794,7 @@
       "id": "course-039",
       "slug": "solana-nft-standards",
       "title": "NFT Standards on Solana",
-      "description": "Master NFT implementation on Solana using Metaplex standards including Token Metadata, Candy Machine, and advanced NFT features like soulbound tokens and programmable NFTs.",
+      "description": "Implement Solana NFTs with production-ready standards: metadata integrity, collection discipline, and advanced programmable/non-transferable behaviors.",
       "difficulty": "intermediate",
       "duration": "5 weeks",
       "totalXP": 1850,
@@ -1810,13 +1810,13 @@
         {
           "id": "mod-15-1",
           "title": "NFT Fundamentals",
-          "description": "Understand and implement core NFT functionality on Solana.",
+          "description": "Build core NFT functionality with standards-compliant metadata, collection verification, and deterministic asset-state handling.",
           "lessons": [
             {
               "id": "lesson-15-1-1",
               "type": "content",
               "title": "NFT Architecture on Solana",
-              "content": "Solana NFTs use the SPL Token program with decimals=0 and supply=1, combined with Metaplex Token Metadata for rich attributes. Key components: 1) Mint account - represents the unique token, 2) Token account - holds NFT balance (0 or 1), 3) Metadata account - stores name, symbol, URI, creators, royalties, 4) Master Edition - for original NFTs with print capabilities. Unlike Ethereum, Solana stores metadata off-chain (typically Arweave/IPFS) with URI pointing to JSON. This enables larger metadata without storage costs."
+              "content": "NFT architecture on Solana combines token mechanics with metadata and collection semantics. A correct implementation requires more than minting a token with supply one.\n\nCore components include:\n- mint/state ownership correctness,\n- metadata integrity and schema consistency,\n- collection linkage and verification status,\n- transfer and authority policy clarity.\n\nProduction NFT systems should treat metadata as a contract. If fields drift or verification flags are inconsistent, marketplaces and wallets may interpret assets differently.\n\nReliable implementations include deterministic validation for metadata structure, creator share totals, collection references, and authority expectations. Standards compliance is what preserves interoperability."
             },
             {
               "id": "lesson-15-1-2",
@@ -1902,7 +1902,7 @@
                     "current": 7500
                   },
                   "expected": {
-                    "percentage": 75.0
+                    "percentage": 75
                   }
                 },
                 {
@@ -1945,8 +1945,8 @@
                     "total": 10000
                   },
                   "expected": {
-                    "rarity": 1.0,
-                    "score": 100.0
+                    "rarity": 1,
+                    "score": 100
                   }
                 },
                 {
@@ -1959,7 +1959,7 @@
                     "total": 10000
                   },
                   "expected": {
-                    "score": 350.0
+                    "score": 350
                   }
                 },
                 {
@@ -1967,15 +1967,15 @@
                     "nfts": [
                       [
                         "A",
-                        150.0
+                        150
                       ],
                       [
                         "B",
-                        200.0
+                        200
                       ],
                       [
                         "C",
-                        100.0
+                        100
                       ]
                     ]
                   },
@@ -2003,13 +2003,13 @@
         {
           "id": "mod-15-2",
           "title": "Advanced NFT Features",
-          "description": "Implement advanced NFT features like soulbound tokens and programmable NFTs.",
+          "description": "Implement advanced NFT behaviors (soulbound and programmable flows) with explicit policy controls and safe update semantics.",
           "lessons": [
             {
               "id": "lesson-15-2-1",
               "type": "content",
               "title": "Soulbound and Programmable NFTs",
-              "content": "Advanced NFT types extend basic functionality. Soulbound Tokens (SBTs) are non-transferable NFTs representing identity, credentials, or achievements - implemented by rejecting transfer instructions. Programmable NFTs (pNFTs) add custom rules through Token Metadata rulesets, enabling features like: forced royalties, transfer restrictions, dynamic attributes, and composability. pNFTs use delegate accounts to enforce rules during transfers, allowing creators to maintain control over secondary markets."
+              "content": "Advanced NFT features introduce policy complexity that must be explicit. Soulbound behavior, programmable restrictions, and dynamic metadata updates all expand failure surface.\n\nFor soulbound models, non-transferability must be enforced by clear rule paths, not UI assumptions. For programmable NFTs, update permissions and transition rules should be deterministic and auditable.\n\nDynamic NFT updates should include strong validation and event clarity so indexers and clients can track state changes correctly.\n\nAdvanced NFT engineering succeeds when flexibility is paired with strict policy boundaries and transparent update behavior."
             },
             {
               "id": "lesson-15-2-2",
@@ -2171,7 +2171,7 @@
       "id": "course-040",
       "slug": "solana-cpi-patterns",
       "title": "Cross-Program Invocation Patterns",
-      "description": "Master advanced CPI techniques for composing Solana programs including PDA signing, instruction routing, and complex multi-program interactions.",
+      "description": "Master CPI composition on Solana with safe account validation, PDA signer discipline, and deterministic multi-program orchestration patterns.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2100,
@@ -2186,13 +2186,13 @@
         {
           "id": "mod-16-1",
           "title": "CPI Fundamentals",
-          "description": "Understand and implement basic and advanced CPI patterns.",
+          "description": "Build CPI fundamentals with strict account/signer checks, ownership validation, and safe PDA signing boundaries.",
           "lessons": [
             {
               "id": "lesson-16-1-1",
               "type": "content",
               "title": "Cross-Program Invocation Architecture",
-              "content": "Cross-Program Invocation (CPI) allows Solana programs to call other programs, enabling composability. Key concepts: 1) invoke() vs invoke_signed() - use invoke_signed when PDA must sign, 2) AccountInfo passing - all accounts must be passed explicitly, 3) Signer seeds - PDA seeds must be provided for signing, 4) CPI depth limit - maximum 4 levels of nested calls, 5) Privilege extension - signers in parent extend to child. CPI enables building complex DeFi protocols by composing primitive operations like token transfers, swaps, and lending."
+              "content": "Cross-Program Invocation (CPI) is where Solana composability becomes practical and where many security failures appear. The caller controls account lists, so every CPI boundary must be treated as untrusted input.\n\nSafe CPI design requires:\n- explicit account identity and owner validation,\n- signer and writable scope minimization,\n- deterministic PDA derivation and signer-seed handling,\n- bounded assumptions about downstream program behavior.\n\ninvoke and invoke_signed are not interchangeable conveniences. invoke_signed should only be used when signer proof is truly required and seed recipes are canonical.\n\nProduction CPI reliability comes from repeatable guard patterns. If constraints vary handler to handler, reviewers cannot reason about security consistently."
             },
             {
               "id": "lesson-16-1-2",
@@ -2359,13 +2359,13 @@
         {
           "id": "mod-16-2",
           "title": "Advanced CPI Patterns",
-          "description": "Implement complex multi-program interactions and state management.",
+          "description": "Compose advanced multi-program flows with atomicity awareness, consistency checks, and deterministic failure handling.",
           "lessons": [
             {
               "id": "lesson-16-2-1",
               "type": "content",
               "title": "Multi-Program Composition",
-              "content": "Complex DeFi operations require composing multiple program calls. Patterns include: 1) Flash loans - borrow, execute, repay in single transaction, 2) Atomic swaps - exchange assets across programs atomically, 3) Composable vaults - deposit to one program, receive LP tokens, stake in another, 4) Permissioned invocations - restrict which programs can call yours. State consistency across CPIs requires careful account validation and error handling. Use temporary accounts to store intermediate state when needed."
+              "content": "Multi-program composition introduces sequencing and consistency risk. Even when each CPI call is correct in isolation, combined flows can violate business invariants if ordering or rollback assumptions are weak.\n\nRobust composition patterns include:\n1) explicit stage boundaries,\n2) invariant checks between CPI steps,\n3) deterministic error classes for partial-failure diagnosis,\n4) idempotent recovery paths where possible.\n\nFor complex operations (atomic swaps, flash-loan sequences), model expected preconditions and postconditions per stage. This keeps orchestration testable and prevents hidden state drift.\n\nCPI mastery is less about calling many programs and more about preserving correctness across program boundaries under adverse inputs."
             },
             {
               "id": "lesson-16-2-2",
@@ -2588,7 +2588,7 @@
       "id": "course-041",
       "slug": "solana-mev-strategies",
       "title": "MEV and Transaction Ordering",
-      "description": "Understand and implement MEV extraction strategies on Solana including arbitrage, liquidation, and sandwich attacks with Jito bundles and priority fees.",
+      "description": "Production-focused transaction-ordering engineering on Solana: MEV-aware routing, bundle strategy, liquidation/arbitrage modeling, and user-protective execution controls.",
       "difficulty": "advanced",
       "duration": "6 weeks",
       "totalXP": 2200,
@@ -2605,13 +2605,13 @@
         {
           "id": "mod-17-1",
           "title": "MEV Fundamentals",
-          "description": "Understand MEV extraction mechanisms and transaction ordering.",
+          "description": "Understand MEV mechanics and transaction ordering realities, then model opportunities and risks with deterministic safety-aware policies.",
           "lessons": [
             {
               "id": "lesson-17-1-1",
               "type": "content",
               "title": "MEV on Solana",
-              "content": "Maximal Extractable Value (MEV) refers to profit validators/searchers can extract by ordering transactions. Solana MEV differs from Ethereum: 1) No public mempool - transactions sent directly to leaders, 2) Jito bundles - atomic transaction bundles with tips, 3) Priority fees - micro-lamport fees for ordering, 4) Parallel execution - multiple non-conflicting transactions execute simultaneously, 5) Leader schedule - known in advance, enabling strategic timing. Common MEV types: arbitrage (DEX price differences), liquidations (undercollateralized loans), and sandwich attacks (frontrun + backrun)."
+              "content": "Maximal Extractable Value (MEV) on Solana is fundamentally about transaction ordering under limited blockspace. Whether you are building trading tools, liquidation infrastructure, or user-facing apps, you need a realistic model of how ordering pressure changes outcomes.\n\nKey Solana-specific context:\n- ordering can be influenced by priority fees and relay/bundle paths,\n- opportunities are short-lived and highly competitive,\n- failed or delayed execution can convert expected profit into loss.\n\nA mature MEV approach begins with classification:\n1) opportunity class (arbitrage, liquidation, backrun-style sequencing),\n2) dependency class (single-hop vs multi-hop, oracle-sensitive vs pool-state-sensitive),\n3) risk class (staleness, fill failure, adverse movement, execution contention).\n\nFor production systems, raw opportunity detection is not enough. You need deterministic filters that reject fragile setups: stale quotes, weak depth, or excessive path complexity relative to expected edge.\n\nMost operational failures come from execution assumptions, not math. Teams should model inclusion probability, fallback paths, and cancellation thresholds explicitly.\n\nUser-protective design matters even for advanced orderflow systems. Clear policy around slippage limits, quote freshness, and failure reporting prevents silent value leakage and reduces support incidents."
             },
             {
               "id": "lesson-17-1-2",
@@ -2631,39 +2631,39 @@
                     "prices": [
                       {
                         "dex": "A",
-                        "price": 100.0
+                        "price": 100
                       },
                       {
                         "dex": "B",
-                        "price": 105.0
+                        "price": 105
                       }
                     ]
                   },
                   "expected": {
                     "opportunities": 1,
-                    "profit": 5.0
+                    "profit": 5
                   }
                 },
                 {
                   "input": {
-                    "buy": 100.0,
-                    "sell": 110.0
+                    "buy": 100,
+                    "sell": 110
                   },
                   "expected": {
-                    "profit": 10.0
+                    "profit": 10
                   }
                 },
                 {
                   "input": {
                     "opportunities": [
                       {
-                        "profit": 1.0
+                        "profit": 1
                       },
                       {
-                        "profit": 5.0
+                        "profit": 5
                       }
                     ],
-                    "min": 3.0
+                    "min": 3
                   },
                   "expected": {
                     "filtered": 1
@@ -2673,15 +2673,15 @@
                   "input": {
                     "opportunities": [
                       {
-                        "profit": 3.0
+                        "profit": 3
                       },
                       {
-                        "profit": 7.0
+                        "profit": 7
                       }
                     ]
                   },
                   "expected": {
-                    "best_profit": 7.0
+                    "best_profit": 7
                   }
                 }
               ]
@@ -2747,7 +2747,7 @@
                 {
                   "input": {
                     "base": 10000,
-                    "multiplier": 2.0,
+                    "multiplier": 2,
                     "urgency": 50,
                     "max": 50000
                   },
@@ -2785,13 +2785,13 @@
         {
           "id": "mod-17-2",
           "title": "Advanced MEV Strategies",
-          "description": "Implement sophisticated MEV extraction strategies.",
+          "description": "Design advanced ordering/bundle strategies with explicit risk controls, failure handling, and user-impact guardrails.",
           "lessons": [
             {
               "id": "lesson-17-2-1",
               "type": "content",
               "title": "Advanced MEV Techniques",
-              "content": "Sophisticated MEV strategies maximize extraction while managing risks: 1) Bundle composition - atomic transactions ensuring all-or-nothing execution, 2) Backrunning - placing transactions immediately after profitable operations, 3) Jito bundles - MEV auction system where searchers bid for inclusion, 4) Statistical arbitrage - multi-hop paths across multiple DEXes, 5) Cross-domain MEV - arbitraging between Solana and other chains. Risk management includes simulating transactions, estimating gas costs, and handling failed executions gracefully."
+              "content": "Advanced transaction-ordering strategies require disciplined orchestration, not just faster opportunity scans.\n\nBundle-oriented execution is valuable because it can express dependency sets and all-or-nothing intent, but bundle design must include:\n- strict preconditions,\n- deterministic abort rules,\n- replay-safe identifiers,\n- post-execution reconciliation.\n\nWhen strategy complexity increases (multi-hop paths, conditional liquidations), failure modes multiply: partial fills, stale assumptions, and contention spikes. A robust system ranks candidates by expected net value after execution risk, not gross theoretical edge.\n\nOperational controls should include:\n1) bounded retries with fresh-state checks,\n2) confidence scoring for each candidate,\n3) kill-switch thresholds for abnormal failure streaks,\n4) deterministic run reports for incident replay.\n\nAdvanced MEV tooling is successful when it is both profitable and controllable. Deterministic artifacts (decision inputs, chosen path, reason codes) are what make that control real in production."
             },
             {
               "id": "lesson-17-2-2",
@@ -2816,7 +2816,7 @@
                         "profit": 2000
                       }
                     ],
-                    "tip": 10.0
+                    "tip": 10
                   },
                   "expected": {
                     "tip": 300
@@ -2930,8 +2930,8 @@
               "testCases": [
                 {
                   "input": {
-                    "buy": 100.0,
-                    "sell": 105.0,
+                    "buy": 100,
+                    "sell": 105,
                     "amount": 1000,
                     "slippage": 0.01,
                     "gas": 5000
@@ -2973,7 +2973,7 @@
       "id": "course-042",
       "slug": "solana-deployment-cicd",
       "title": "Program Deployment and CI/CD",
-      "description": "Learn professional deployment practices for Solana programs including Devnet testing, Mainnet deployment strategies, CI/CD pipelines, and program upgrade management.",
+      "description": "Production deployment engineering for Solana programs: environment strategy, release gating, CI/CD quality controls, and upgrade-safe operational workflows.",
       "difficulty": "beginner",
       "duration": "4 weeks",
       "totalXP": 1500,
@@ -2990,13 +2990,13 @@
         {
           "id": "mod-18-1",
           "title": "Deployment Fundamentals",
-          "description": "Understand Solana program deployment across different environments.",
+          "description": "Model environment-specific deployment behavior with deterministic configs, artifact checks, and release preflight validation.",
           "lessons": [
             {
               "id": "lesson-18-1-1",
               "type": "content",
               "title": "Solana Deployment Environments",
-              "content": "Solana offers multiple environments for program development: 1) Localnet - local validator for rapid development, 2) Devnet - public testnet with faucet SOL, 3) Testnet - performance testing environment, 4) Mainnet-beta - production environment with real value. Deployment workflow: build -> test on localnet -> deploy to devnet -> integration testing -> mainnet deployment. Each environment has different RPC endpoints, commitment levels, and considerations. Program upgrades are supported through the upgrade authority mechanism."
+              "content": "Solana deployment is not one command; it is a release system with environment-specific risk. Localnet, devnet, and mainnet each serve different validation goals, and production quality depends on using them intentionally.\n\nA reliable deployment workflow defines:\n1) environment purpose and promotion criteria,\n2) deterministic config sources,\n3) artifact identity checks,\n4) rollback triggers.\n\nCommon failure patterns include mismatched program IDs, inconsistent config between environments, and unverified artifact drift between build and deploy. These are process issues that tooling should prevent.\n\nPreflight checks should be mandatory:\n- expected network and signer identity,\n- build artifact hash,\n- program size and upgrade constraints,\n- required account/address assumptions.\n\nEnvironment promotion should be evidence-driven. Passing local tests alone is not enough for mainnet readiness; devnet/staging behavior must confirm operational assumptions under realistic RPC and timing conditions.\n\nDeployment maturity is measured by reproducibility. If another engineer cannot replay the release inputs and get the same artifact and checklist outcome, the pipeline is too fragile."
             },
             {
               "id": "lesson-18-1-2",
@@ -3091,7 +3091,7 @@
                     "compressed": 600
                   },
                   "expected": {
-                    "ratio": 40.0
+                    "ratio": 40
                   }
                 }
               ]
@@ -3154,13 +3154,13 @@
         {
           "id": "mod-18-2",
           "title": "CI/CD Pipelines",
-          "description": "Build automated CI/CD pipelines for Solana program development.",
+          "description": "Build CI/CD pipelines that enforce build/test/security gates, compatibility checks, and controlled rollout/rollback evidence.",
           "lessons": [
             {
               "id": "lesson-18-2-1",
               "type": "content",
               "title": "CI/CD for Solana Programs",
-              "content": "Continuous Integration/Deployment automates testing and deployment. Solana CI/CD pipeline stages: 1) Build - compile program with cargo build-sbf, 2) Test - run unit and integration tests, 3) Lint - clippy and fmt checks, 4) Security - audit dependencies, 5) Deploy - automated devnet deployment on merge, 6) Verify - program hash verification. Tools: GitHub Actions, Anchor CLI, Solana Verify CLI. Best practices: deterministic builds, version pinning, secret management for deploy keys, and multi-sig for mainnet deployments."
+              "content": "CI/CD for Solana should enforce release quality, not just automate command execution.\n\nA practical pipeline includes staged gates:\n1) static quality gate (lint/type/security checks),\n2) deterministic unit/integration tests,\n3) build reproducibility and artifact hashing,\n4) deployment preflight validation,\n5) controlled rollout with observability checks.\n\nEach gate should produce machine-readable evidence. Release decisions become faster and safer when teams can inspect deterministic artifacts instead of scanning raw logs.\n\nVersion compatibility checks are critical in Solana ecosystems where CLI/toolchain mismatches can break builds or runtime expectations. Pipelines should fail fast on incompatible matrices.\n\nRollout strategy should also be explicit: canary/degraded mode, monitoring window, and rollback conditions. “Deploy and hope” is not a strategy.\n\nThe best CI/CD systems reduce human toil while increasing decision clarity. Automation should encode operational policy, not bypass it."
             },
             {
               "id": "lesson-18-2-2",

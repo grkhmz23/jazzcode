@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, KeyboardEvent, Ref, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, ReactNode, Ref, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AutocompleteResult, TerminalEntry } from "@/lib/playground";
@@ -12,6 +12,7 @@ interface TerminalPaneProps {
   onAutocomplete: (input: string) => AutocompleteResult;
   onApplySuggestion: (input: string, replacement: string, suggestion: string) => string;
   inputRef?: Ref<HTMLInputElement>;
+  topPanel?: ReactNode;
 }
 
 export function TerminalPane({
@@ -21,6 +22,7 @@ export function TerminalPane({
   onAutocomplete,
   onApplySuggestion,
   inputRef,
+  topPanel,
 }: TerminalPaneProps) {
   const [command, setCommand] = useState("");
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -99,6 +101,7 @@ export function TerminalPane({
   return (
     <section className="flex h-full min-h-0 flex-col bg-[#181818] text-[#d4d4d4]" aria-label="Terminal panel">
       <div className="border-b border-[#313131] px-3 py-2 text-xs uppercase tracking-wide text-[#9d9d9d]">Terminal</div>
+      {topPanel ? <div className="border-b border-[#313131] bg-[#1b1b1b] p-3">{topPanel}</div> : null}
       <div className="min-h-0 flex-1 space-y-1 overflow-auto p-3 font-mono text-xs" role="log" aria-live="polite">
         {entries.map((entry) => (
           <p

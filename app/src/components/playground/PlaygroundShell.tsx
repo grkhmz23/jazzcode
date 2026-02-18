@@ -3,6 +3,7 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditorPane } from "@/components/playground/EditorPane";
@@ -28,6 +29,7 @@ import {
   applySuggestion,
   clearBurnerWalletInIndexedDb,
   clearWorkspaceInIndexedDb,
+  buildWorkspaceScope,
   createFile,
   createInitialTerminalState,
   createWorkspaceFromTemplate,
@@ -73,6 +75,19 @@ interface PlaygroundShellProps {
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 type ConfirmAction = "reset" | "template" | null;
+type RunnerJobStatus = "idle" | "running" | "completed" | "failed";
+
+interface RunnerJobViewState {
+  status: RunnerJobStatus;
+  jobId: string | null;
+  jobType: string | null;
+  startedAt: number | null;
+  durationMs: number | null;
+  exitCode: number | null;
+  outputFiles: string[];
+  outputFilesTarGzBase64: string | null;
+  error: string | null;
+}
 
 function makeTerminalEntry(kind: "input" | "output" | "system" | "error", text: string) {
   return {
@@ -86,6 +101,37 @@ function makeTerminalEntry(kind: "input" | "output" | "system" | "error", text: 
 const DEFAULT_TERMINAL_ENTRIES = [
   makeTerminalEntry("system", "Playground terminal v2 ready. Run `help` to list commands."),
 ];
+
+function createInitialRunnerJobViewState(): RunnerJobViewState {
+  return {
+    status: "idle",
+    jobId: null,
+    jobType: null,
+    startedAt: null,
+    durationMs: null,
+    exitCode: null,
+    outputFiles: [],
+    outputFilesTarGzBase64: null,
+    error: null,
+  };
+}
+
+function redactTerminalSecrets(value: string): string {
+  return value
+    .replace(/gh[pousr]_[A-Za-z0-9_]{20,}/g, "[REDACTED_GITHUB_TOKEN]")
+    .replace(/(https?:\/\/)([^/\s:@]+):([^@\s/]+)@/g, "$1[REDACTED]@");
+}
+
+function downloadTarGzFromBase64(base64: string, filename: string): void {
+  const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+  const blob = new Blob([bytes], { type: "application/gzip" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [workspace, dispatch] = useReducer(
@@ -112,7 +158,14 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [gitTokenDialogOpen, setGitTokenDialogOpen] = useState(false);
   const [gitTokenInput, setGitTokenInput] = useState("");
+  const [gitPushDialogOpen, setGitPushDialogOpen] = useState(false);
+  const [gitPushRemoteUrl, setGitPushRemoteUrl] = useState("");
+  const [gitPushBranch, setGitPushBranch] = useState("main");
+  const [gitPushToken, setGitPushToken] = useState("");
+  const [applyRunnerArtifacts, setApplyRunnerArtifacts] = useState(true);
+  const [runnerJobView, setRunnerJobView] = useState<RunnerJobViewState>(createInitialRunnerJobViewState);
   const gitTokenResolveRef = useRef<((token: string | null) => void) | null>(null);
+  const queuedGitTokenRef = useRef<string | null>(null);
   const [walletMode, setWalletMode] = useState<"burner" | "external">("burner");
   const [burnerWallet, setBurnerWallet] = useState<{ publicKey: string; secretKey: number[] } | null>(null);
   const [balanceLabel, setBalanceLabel] = useState("Balance: --");
@@ -128,6 +181,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [bestTimeMs, setBestTimeMs] = useState<number | null>(null);
   const [, setCheckpointSnapshots] = useState<Record<string, string>>({});
   const [quickOpenOpen, setQuickOpenOpen] = useState(false);
+  const [runnerStatus, setRunnerStatus] = useState<"connected" | "disconnected">("disconnected");
 
   const emittedQuestRef = useRef(false);
   const checkpointRef = useRef<string[]>([]);
@@ -139,6 +193,11 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const { connection } = useConnection();
   const { publicKey, connected, disconnect, sendTransaction } = useWallet();
   const { setVisible } = useWalletModal();
+  const { data: session } = useSession();
+  const persistenceScope = useMemo(
+    () => buildWorkspaceScope(session?.user?.id ?? null),
+    [session?.user?.id]
+  );
 
   const activeQuest = mode.type === "mission" ? mode.quest : null;
   const hasTasks = mode.type === "mission";
@@ -224,6 +283,36 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   }, [speedrunState.running]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const checkRunner = async () => {
+      try {
+        const response = await fetch("/api/runner/health", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!cancelled) {
+          setRunnerStatus(response.ok ? "connected" : "disconnected");
+        }
+      } catch {
+        if (!cancelled) {
+          setRunnerStatus("disconnected");
+        }
+      }
+    };
+
+    void checkRunner();
+    const interval = setInterval(() => {
+      void checkRunner();
+    }, 20_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
     const previous = new Set(checkpointRef.current);
     const additions = checkpoints.filter((id) => !previous.has(id));
     if (additions.length === 0) {
@@ -264,7 +353,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
               template: descriptor.template,
             });
             // Load mission template as default unless saved workspace exists
-            const saved = await loadWorkspaceFromIndexedDb();
+            const saved = await loadWorkspaceFromIndexedDb(persistenceScope);
             if (saved && mounted) {
               dispatch({ type: "load", workspace: saved });
               setTerminalEntries((previous) => [
@@ -280,7 +369,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
             }
 
             // Load quest progress
-            const progress = await loadQuestProgressFromIndexedDb(descriptor.questId);
+            const progress = await loadQuestProgressFromIndexedDb(descriptor.questId, persistenceScope);
             if (mounted && progress) {
               setPersistedAchievements(progress.achievements);
               setBestTimeMs(progress.speedrunBestMs);
@@ -307,6 +396,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
               content: file.content,
               language: file.language as WorkspaceFile["language"],
               updatedAt: Date.now(),
+              readOnly: true,
             };
           });
 
@@ -333,6 +423,7 @@ export default function Demo() {
 }`,
               language: "typescript",
               updatedAt: Date.now(),
+              readOnly: true,
             };
           }
 
@@ -363,7 +454,7 @@ export default function Demo() {
             ]);
           }
         } else {
-          const saved = await loadWorkspaceFromIndexedDb();
+          const saved = await loadWorkspaceFromIndexedDb(persistenceScope);
           if (saved && mounted) {
             dispatch({ type: "load", workspace: saved });
             setTerminalEntries((previous) => [
@@ -376,7 +467,7 @@ export default function Demo() {
           }
         }
 
-        const burner = await loadBurnerWalletFromIndexedDb();
+        const burner = await loadBurnerWalletFromIndexedDb(persistenceScope);
         if (mounted && burner) {
           setBurnerWallet({
             publicKey: burner.publicKey,
@@ -400,7 +491,7 @@ export default function Demo() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [persistenceScope]);
 
   useEffect(() => {
     if (!ready) {
@@ -408,13 +499,13 @@ export default function Demo() {
     }
     setSaveState("saving");
     const timer = setTimeout(() => {
-      void saveWorkspaceToIndexedDb(workspace)
+      void saveWorkspaceToIndexedDb(workspace, persistenceScope)
         .then(() => setSaveState("saved"))
         .catch(() => setSaveState("error"));
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [workspace, ready]);
+  }, [workspace, ready, persistenceScope]);
 
   useEffect(() => {
     if (!activeQuest) return;
@@ -447,14 +538,17 @@ export default function Demo() {
       setBestTimeMs(nextBest);
     }
 
-    void saveQuestProgressToIndexedDb({
-      questId: activeQuest.id,
-      speedrunBestMs: nextBest,
-      achievements: achievements.map((entry) => entry.id),
-      completions: 1,
-      updatedAt: Date.now(),
-    });
-  }, [taskResults, speedrunState, workspaceRef, achievements, onQuestComplete, bestTimeMs, activeQuest]);
+    void saveQuestProgressToIndexedDb(
+      {
+        questId: activeQuest.id,
+        speedrunBestMs: nextBest,
+        achievements: achievements.map((entry) => entry.id),
+        completions: 1,
+        updatedAt: Date.now(),
+      },
+      persistenceScope
+    );
+  }, [taskResults, speedrunState, workspaceRef, achievements, onQuestComplete, bestTimeMs, activeQuest, persistenceScope]);
 
   const createOrUpdateFileInWorkspace = (current: Workspace, path: string, content: string): Workspace => {
     if (current.files[path]) {
@@ -503,11 +597,216 @@ export default function Demo() {
           };
         }
       },
-      requestGitToken: () =>
-        new Promise<string | null>((resolve) => {
+      requestGitToken: () => {
+        if (queuedGitTokenRef.current) {
+          const token = queuedGitTokenRef.current;
+          queuedGitTokenRef.current = null;
+          return Promise.resolve(token);
+        }
+        return new Promise<string | null>((resolve) => {
           gitTokenResolveRef.current = resolve;
           setGitTokenDialogOpen(true);
-        }),
+        });
+      },
+      shouldApplyRunnerArtifacts: () => applyRunnerArtifacts,
+      runRunnerJob: async ({
+        jobType,
+        files,
+        args,
+        onLog,
+      }: {
+        jobType:
+          | "anchor_deploy"
+          | "anchor_idl_build"
+          | "anchor_idl_fetch"
+          | "cargo_build"
+          | "cargo_test";
+        files: Record<string, string>;
+        args: Record<string, string>;
+        onLog?: (entry: { stream: "stdout" | "stderr" | "system"; line: string }) => void;
+      }) => {
+        try {
+          const response = await fetch("/api/runner/job", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: "playground-user",
+              courseId: workspaceRef.current.templateId || "playground",
+              jobType,
+              files,
+              args,
+              stream: true,
+            }),
+          });
+
+          const payload = (await response.json()) as
+            | {
+                jobId?: string;
+                result?: {
+                  exitCode: number;
+                  stdout: string;
+                  stderr: string;
+                  outputFiles?: Record<string, string>;
+                  durationMs?: number;
+                };
+                error?: string;
+              }
+            | undefined;
+
+          if (!response.ok || (!payload?.result && !payload?.jobId)) {
+            return {
+              ok: false,
+              error: payload?.error ?? `Runner request failed (${response.status})`,
+            };
+          }
+
+          if (payload?.result) {
+            setRunnerJobView({
+              status: payload.result.exitCode === 0 ? "completed" : "failed",
+              jobId: null,
+              jobType,
+              startedAt: Date.now(),
+              durationMs: payload.result.durationMs ?? null,
+              exitCode: payload.result.exitCode,
+              outputFiles: Object.keys(payload.result.outputFiles ?? {}),
+              outputFilesTarGzBase64: null,
+              error: null,
+            });
+            return {
+              ok: true,
+              streamed: false,
+              result: payload.result,
+            };
+          }
+
+          const jobId = payload?.jobId;
+          if (!jobId) {
+            return {
+              ok: false,
+              error: "Runner did not return a job ID",
+            };
+          }
+
+          const startedAt = Date.now();
+          setRunnerJobView({
+            status: "running",
+            jobId,
+            jobType,
+            startedAt,
+            durationMs: null,
+            exitCode: null,
+            outputFiles: [],
+            outputFilesTarGzBase64: null,
+            error: null,
+          });
+
+          const donePromise = new Promise<void>((resolve, reject) => {
+            const source = new EventSource(`/api/runner/job/${jobId}/stream`);
+
+            source.addEventListener("log", (event) => {
+              try {
+                const data = JSON.parse((event as MessageEvent).data) as {
+                  stream: "stdout" | "stderr" | "system";
+                  line: string;
+                };
+                onLog?.(data);
+              } catch {
+                // Ignore malformed stream entries.
+              }
+            });
+
+            source.addEventListener("done", () => {
+              source.close();
+              resolve();
+            });
+
+            source.onerror = () => {
+              source.close();
+              reject(new Error("Runner log stream disconnected"));
+            };
+          });
+
+          await donePromise;
+
+          const resultResponse = await fetch(`/api/runner/job/${jobId}/result`, {
+            method: "GET",
+            cache: "no-store",
+          });
+
+          const resultPayload = (await resultResponse.json()) as
+            | {
+                result?: {
+                  exitCode: number;
+                  stdoutTail: string;
+                  stderrTail: string;
+                  outputFiles?: Record<string, string>;
+                  outputFilesTarGzBase64?: string;
+                  artifactsMeta?: {
+                    outputFiles: string[];
+                    durationMs: number;
+                  };
+                };
+                error?: string;
+              }
+            | undefined;
+
+          if (!resultResponse.ok || !resultPayload?.result) {
+            setRunnerJobView((previous) => ({
+              ...previous,
+              status: "failed",
+              durationMs: previous.startedAt ? Date.now() - previous.startedAt : null,
+              error: resultPayload?.error ?? "Runner result missing",
+            }));
+            return {
+              ok: false,
+              error: resultPayload?.error ?? "Runner result missing",
+            };
+          }
+
+          const durationMs =
+            resultPayload.result.artifactsMeta?.durationMs ??
+            (startedAt ? Date.now() - startedAt : 0);
+          const outputFiles = resultPayload.result.artifactsMeta?.outputFiles ?? [];
+          setRunnerJobView({
+            status: resultPayload.result.exitCode === 0 ? "completed" : "failed",
+            jobId,
+            jobType,
+            startedAt,
+            durationMs,
+            exitCode: resultPayload.result.exitCode,
+            outputFiles,
+            outputFilesTarGzBase64: resultPayload.result.outputFilesTarGzBase64 ?? null,
+            error: null,
+          });
+
+          return {
+            ok: true,
+            streamed: true,
+            result: {
+              exitCode: resultPayload.result.exitCode,
+              stdout: resultPayload.result.stdoutTail,
+              stderr: resultPayload.result.stderrTail,
+              outputFiles: resultPayload.result.outputFiles,
+              outputFilesList: outputFiles,
+              durationMs,
+              outputFilesTarGzBase64: resultPayload.result.outputFilesTarGzBase64,
+            },
+          };
+        } catch (error) {
+          setRunnerJobView((previous) => ({
+            ...previous,
+            status: "failed",
+            durationMs: previous.startedAt ? Date.now() - previous.startedAt : null,
+            error: error instanceof Error ? error.message : "Runner request failed",
+          }));
+          return {
+            ok: false,
+            error: error instanceof Error ? error.message : "Runner request failed",
+          };
+        }
+      },
       wallet: {
         mode: walletMode,
         burnerAddress: burnerWallet?.publicKey ?? null,
@@ -537,7 +836,7 @@ export default function Demo() {
       },
     };
 
-    setTerminalEntries((previous) => [...previous, makeTerminalEntry("input", `$ ${command}`)]);
+    setTerminalEntries((previous) => [...previous, makeTerminalEntry("input", `$ ${redactTerminalSecrets(command)}`)]);
 
     try {
       const result = await executeTerminalCommand(command, terminalRef.current, io);
@@ -602,11 +901,14 @@ export default function Demo() {
     };
     setBurnerWallet(record);
     setWalletMode("burner");
-    void saveBurnerWalletToIndexedDb({
-      publicKey: record.publicKey,
-      secretKey: record.secretKey,
-      createdAt: Date.now(),
-    });
+    void saveBurnerWalletToIndexedDb(
+      {
+        publicKey: record.publicKey,
+        secretKey: record.secretKey,
+        createdAt: Date.now(),
+      },
+      persistenceScope
+    );
 
     setTerminalEntries((previous) => [
       ...previous,
@@ -629,7 +931,7 @@ export default function Demo() {
 
   const handleResetBurner = () => {
     setBurnerWallet(null);
-    void clearBurnerWalletInIndexedDb();
+    void clearBurnerWalletInIndexedDb(persistenceScope);
   };
 
   const handleShareSnapshot = async () => {
@@ -677,7 +979,7 @@ export default function Demo() {
     setRevealedHintsByTask({});
     emittedQuestRef.current = false;
     setRealRpcUsed(false);
-    void clearWorkspaceInIndexedDb();
+    void clearWorkspaceInIndexedDb(persistenceScope);
   };
 
   const handleImportGithub = async () => {
@@ -725,17 +1027,114 @@ export default function Demo() {
     }
   };
 
+  const handleGitPushWithPat = async () => {
+    const token = gitPushToken.trim();
+    if (!token) {
+      toast.error("GitHub token is required");
+      return;
+    }
+
+    const remoteUrl = gitPushRemoteUrl.trim();
+    if (remoteUrl) {
+      try {
+        const parsed = new URL(remoteUrl);
+        if (parsed.protocol !== "https:" || parsed.hostname !== "github.com" || parsed.username || parsed.password) {
+          throw new Error("Only https://github.com remotes are allowed");
+        }
+      } catch {
+        toast.error("Invalid GitHub remote URL");
+        return;
+      }
+    }
+
+    queuedGitTokenRef.current = token;
+    try {
+      if (remoteUrl) {
+        await runCommand(`git remote add origin ${remoteUrl}`);
+      }
+
+      const branch = gitPushBranch.trim();
+      await runCommand(branch ? `git push --with-token origin ${branch}` : "git push --with-token");
+
+      setGitPushDialogOpen(false);
+    } finally {
+      queuedGitTokenRef.current = null;
+      setGitPushToken("");
+    }
+  };
+
+  const runnerPanel = (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <label className="flex items-center gap-2 text-xs text-[#bdbdbd]">
+          <input
+            type="checkbox"
+            checked={applyRunnerArtifacts}
+            onChange={(event) => setApplyRunnerArtifacts(event.target.checked)}
+            className="h-3.5 w-3.5"
+          />
+          Apply artifacts to workspace
+        </label>
+        <div className="flex items-center gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={() => setGitPushDialogOpen(true)}>
+            GitHub Push (PAT)
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              queuedGitTokenRef.current = null;
+              setGitPushToken("");
+              setTerminalState((previous) => ({
+                ...previous,
+                gitAuth: { token: null },
+              }));
+              toast.success("Cleared cached PAT from session");
+            }}
+          >
+            Clear Cached PAT
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!runnerJobView.outputFilesTarGzBase64}
+            onClick={() => {
+              if (!runnerJobView.outputFilesTarGzBase64 || !runnerJobView.jobId) return;
+              downloadTarGzFromBase64(runnerJobView.outputFilesTarGzBase64, `runner-artifacts-${runnerJobView.jobId}.tar.gz`);
+            }}
+          >
+            Download Artifacts
+          </Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-[#c8c8c8] xl:grid-cols-4">
+        <div>Status: {runnerJobView.status}</div>
+        <div>Job: {runnerJobView.jobType ?? "--"}</div>
+        <div>Exit: {runnerJobView.exitCode ?? "--"}</div>
+        <div>Duration: {runnerJobView.durationMs !== null ? `${runnerJobView.durationMs}ms` : "--"}</div>
+      </div>
+      <div className="max-h-20 overflow-auto rounded border border-[#333] bg-[#171717] p-2 font-mono text-[11px] text-[#a7a7a7]">
+        {runnerJobView.outputFiles.length > 0
+          ? runnerJobView.outputFiles.map((path) => <p key={path}>{path}</p>)
+          : "No output files from last runner job."}
+      </div>
+      {runnerJobView.error ? <p className="text-xs text-[#f48771]">{runnerJobView.error}</p> : null}
+    </div>
+  );
+
   const dismissWelcome = () => {
     setShowWelcome(false);
   };
 
   const shortcutHandlers = useMemo(
     () => ({
-      save: () => void saveWorkspaceToIndexedDb(workspaceRef.current),
+      save: () => void saveWorkspaceToIndexedDb(workspaceRef.current, persistenceScope),
       quickOpen: () => setQuickOpenOpen((p) => !p),
       focusTerminal: () => terminalInputRef.current?.focus(),
     }),
-    []
+    [persistenceScope]
   );
   useKeyboardShortcuts(shortcutHandlers);
 
@@ -956,6 +1355,7 @@ export default function Demo() {
               onAutocomplete={(input) => getAutocompleteSuggestions({ input, filePaths: Object.keys(workspace.files) })}
               onApplySuggestion={applySuggestion}
               inputRef={terminalInputRef}
+              topPanel={runnerPanel}
             />
           </div>
         ) : null}
@@ -977,6 +1377,7 @@ export default function Demo() {
             onExportZip={handleExportZip}
             onShareSnapshot={() => void handleShareSnapshot()}
             onCopyShareLink={() => void handleCopyShareLink()}
+            runnerStatus={runnerStatus}
           />
         </div>
       </div>
@@ -997,6 +1398,7 @@ export default function Demo() {
             onRunCommand={(command) => void runCommand(command)}
             onAutocomplete={(input) => getAutocompleteSuggestions({ input, filePaths: Object.keys(workspace.files) })}
             onApplySuggestion={applySuggestion}
+            topPanel={runnerPanel}
           />
         </div>
         {hasTasks && (
@@ -1131,6 +1533,54 @@ export default function Demo() {
             </Button>
             <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
               {importBusy ? "Importing..." : "Import"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={gitPushDialogOpen} onOpenChange={setGitPushDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>GitHub Push (PAT)</DialogTitle>
+            <DialogDescription>
+              Push via HTTPS using a personal access token. The token is used in memory for this push only.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              value={gitPushRemoteUrl}
+              onChange={(event) => setGitPushRemoteUrl(event.target.value)}
+              placeholder="https://github.com/owner/repo.git"
+              aria-label="GitHub remote URL"
+            />
+            <Input
+              value={gitPushBranch}
+              onChange={(event) => setGitPushBranch(event.target.value)}
+              placeholder="main"
+              aria-label="Git branch"
+            />
+            <Input
+              type="password"
+              value={gitPushToken}
+              onChange={(event) => setGitPushToken(event.target.value)}
+              placeholder="github_pat_xxx or ghp_xxx"
+              aria-label="GitHub personal access token"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                queuedGitTokenRef.current = null;
+                setGitPushDialogOpen(false);
+                setGitPushToken("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="button" onClick={() => void handleGitPushWithPat()} disabled={!gitPushToken.trim()}>
+              Push
             </Button>
           </DialogFooter>
         </DialogContent>

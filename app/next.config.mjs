@@ -39,58 +39,60 @@ const securityHeaders = [
   },
 ];
 
+function parseOrigin(value) {
+  if (!value) return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Content Security Policy
- * Configured to work with:
- * - Next.js (inline scripts for hydration)
- * - next/image (image optimization)
- * - next-intl (localization)
- * - Monaco Editor (code editing)
- * - Solana wallet adapters
- * - Google Analytics (gtag.js)
+ * Why these directives exist:
+ * - default-src 'self': deny all third-party origins unless explicitly needed.
+ * - script-src includes unsafe-eval/unsafe-inline only because Monaco + Next hydration require them.
+ * - style-src unsafe-inline is required by styled-jsx/Tailwind runtime styles.
+ * - connect-src is restricted to app origin + devnet RPC + optional runner + telemetry.
+ * - worker-src blob: is required for Monaco workers.
+ * - frame-ancestors none and X-Frame-Options DENY block clickjacking.
+ * - base-uri none and form-action self reduce injection/phishing pivots.
+ *
+ * Removing Monaco-related exceptions ('unsafe-eval', blob worker-src) breaks editor syntax workers.
+ * Removing 'unsafe-inline' for scripts/styles breaks Next.js hydration and styled-jsx behavior.
  */
 const getCspHeader = () => {
   const isDev = process.env.NODE_ENV === "development";
-  
-  // Monaco editor requires worker-src blob: and script-src unsafe-eval
-  // Web Workers need blob: for dynamic worker creation
-  // unsafe-eval is required for Monaco's syntax highlighting workers
-  // Google Analytics requires connect-src to google-analytics.com
-  const scriptSrc = "'self' 'unsafe-eval' 'unsafe-inline' blob:";
-  
+  const runnerOrigin = parseOrigin(process.env.RUNNER_URL);
+  const telemetryConnect = [
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+  ];
+  const connectSrc = [
+    "'self'",
+    "https://api.devnet.solana.com",
+    ...(runnerOrigin ? [runnerOrigin] : []),
+    ...telemetryConnect,
+  ];
+
   const csp = [
-    // Default fallback
     "default-src 'self'",
-    // Scripts - Next.js requires unsafe-inline for hydration
-    // Monaco editor requires 'unsafe-eval' and blob: for web workers
-    `script-src ${scriptSrc} https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com`,
-    // Styles - Next.js requires unsafe-inline for styled-jsx
-    // Monaco injects styles dynamically
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
     "style-src 'self' 'unsafe-inline'",
-    // Workers - Monaco creates web workers from blob URLs
-    "worker-src 'self' blob:",
-    // Images - allow data URIs and configured remote hosts
+    "worker-src 'self'",
     "img-src 'self' blob: data: https://cdn.sanity.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://www.google-analytics.com",
-    // Fonts
     "font-src 'self'",
-    // Connect (API calls, WebSockets, Google Analytics)
-    "connect-src 'self' https://cdn.jsdelivr.net https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://api.mainnet-beta.solana.com wss://api.devnet.solana.com https://www.google-analytics.com",
-    // Media
+    `connect-src ${connectSrc.join(" ")}`,
     "media-src 'self'",
-    // Object (Flash, etc)
     "object-src 'none'",
-    // Frame (iframes)
-    "frame-src 'self'",
-    // Frame ancestors (prevent embedding)
+    "frame-src 'none'",
     "frame-ancestors 'none'",
-    // Form actions
     "form-action 'self'",
-    // Base URI
-    "base-uri 'self'",
-    // Upgrade insecure requests in production
+    "base-uri 'none'",
     ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
-  
+
   return csp;
 };
 
@@ -108,6 +110,14 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: getCspHeader(),
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
           },
         ],
       },

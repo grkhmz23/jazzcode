@@ -8,6 +8,8 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   {
     key: "Permissions-Policy",
     value: [
@@ -24,23 +26,20 @@ const securityHeaders = [
 ];
 
 function getCspHeader(isDev: boolean): string {
-  // Monaco editor requires worker-src blob: and script-src unsafe-eval
-  const scriptSrc = "'self' 'unsafe-eval' 'unsafe-inline' blob:";
-  
   const csp = [
     "default-src 'self'",
-    `script-src ${scriptSrc}`,
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
     "style-src 'self' 'unsafe-inline'",
-    "worker-src 'self' blob:",
+    "worker-src 'self'",
     "img-src 'self' blob: data: https://cdn.sanity.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
     "font-src 'self'",
-    "connect-src 'self' https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://api.mainnet-beta.solana.com wss://api.devnet.solana.com",
+    "connect-src 'self' https://api.devnet.solana.com https://www.google-analytics.com https://www.googletagmanager.com",
     "media-src 'self'",
     "object-src 'none'",
-    "frame-src 'self'",
+    "frame-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    "base-uri 'self'",
+    "base-uri 'none'",
     ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
   
@@ -58,6 +57,8 @@ describe("Security Headers", () => {
     expect(headerKeys).toContain("X-Frame-Options");
     expect(headerKeys).toContain("Referrer-Policy");
     expect(headerKeys).toContain("Permissions-Policy");
+    expect(headerKeys).toContain("Cross-Origin-Opener-Policy");
+    expect(headerKeys).toContain("Cross-Origin-Resource-Policy");
   });
 
   it("should have correct X-Content-Type-Options value", () => {
@@ -94,14 +95,14 @@ describe("Security Headers", () => {
       expect(csp).toContain("object-src 'none'");
     });
 
-    it("should allow unsafe-eval for Monaco editor", () => {
+    it("should not allow unsafe-eval in global CSP", () => {
       const csp = getCspHeader(true);
-      expect(csp).toContain("'unsafe-eval'");
+      expect(csp).not.toContain("'unsafe-eval'");
     });
 
-    it("should allow worker-src blob: for Monaco web workers", () => {
+    it("should keep global worker-src strict", () => {
       const csp = getCspHeader(true);
-      expect(csp).toContain("worker-src 'self' blob:");
+      expect(csp).toContain("worker-src 'self'");
     });
 
     it("should include upgrade-insecure-requests in production", () => {
@@ -123,8 +124,8 @@ describe("Security Headers", () => {
 
     it("should allow Solana RPC connections", () => {
       const csp = getCspHeader(true);
-      expect(csp).toContain("https://api.mainnet-beta.solana.com");
       expect(csp).toContain("https://api.devnet.solana.com");
+      expect(csp).not.toContain("mainnet-beta");
     });
   });
 });

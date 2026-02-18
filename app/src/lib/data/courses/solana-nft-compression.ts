@@ -37,6 +37,14 @@ Solana's cNFT implementation uses concurrent Merkle trees with 16-bit depth (max
 
 Key properties of Merkle trees: any leaf change affects the root, inclusion proofs require only log2(n) hashes, and the root serves as a cryptographic commitment to all data. These properties enable state compression while maintaining verifiability.
 
+## Practical cNFT architecture rule
+
+Treat compressed NFT systems as two synchronized layers:
+1. on-chain commitment layer (tree root + update rules),
+2. off-chain data layer (metadata + indexing + proof serving).
+
+If either layer is weakly validated, ownership and metadata trust can diverge.
+
 ## Checklist
 - Understand binary hash tree construction
 - Know how leaf changes propagate to the root
@@ -395,14 +403,16 @@ This validates your complete Merkle tree implementation for compressed NFTs.`,
 const module1: Module = {
   id: "cnft-v2-merkle-foundations",
   title: "Merkle Foundations",
-  description: "Tree construction, leaf hashing, and insertion mechanics.",
+  description:
+    "Tree construction, leaf hashing, insertion mechanics, and the on-chain/off-chain commitment model behind compressed assets.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "cnft-v2-proof-system",
   title: "Proof System & Security",
-  description: "Proof generation, verification, collections, and attack mitigations.",
+  description:
+    "Proof generation, verification, collection integrity, and security hardening against replay and metadata spoofing.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -411,7 +421,7 @@ export const solanaNftCompressionCourse: Course = {
   slug: "solana-nft-compression",
   title: "NFTs & Compressed NFTs Fundamentals",
   description:
-    "Master compressed NFTs through Merkle trees: construction, proofs, collections, and security considerations.",
+    "Master compressed NFT engineering on Solana: Merkle commitments, proof systems, collection modeling, and production security checks.",
   difficulty: "advanced",
   duration: "12 hours",
   totalXP: 425,

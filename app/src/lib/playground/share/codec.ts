@@ -4,7 +4,7 @@
  */
 
 import { Workspace } from "@/lib/playground/types";
-import { checkShareLimits } from "@/lib/playground/security/limits";
+import { checkShareLimits, sanitizePath } from "@/lib/playground/security/limits";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -71,20 +71,34 @@ function restorePayload(minimal: unknown): SharePayload | null {
     const fileArray = (m.w as Record<string, unknown>).f as Array<[string, string] | [string, string, string]>;
 
     for (const entry of fileArray) {
+      const sanitizedPath = sanitizePath(entry[0]);
+      if (!sanitizedPath) {
+        return null;
+      }
       if (entry.length === 3) {
-        files[entry[0]] = { content: entry[1], language: entry[2] };
+        files[sanitizedPath] = { content: entry[1], language: entry[2] };
       } else {
-        files[entry[0]] = { content: entry[1] };
+        files[sanitizedPath] = { content: entry[1] };
       }
     }
+
+    const safeOpenFiles = (((m.w as Record<string, unknown>).o as string[]) ?? [])
+      .map((path) => sanitizePath(path))
+      .filter((path): path is string => Boolean(path && files[path]));
+    const safeActiveFileRaw = sanitizePath(((m.w as Record<string, unknown>).a as string) ?? "");
+    const safeActiveFile =
+      (safeActiveFileRaw && files[safeActiveFileRaw] ? safeActiveFileRaw : undefined) ??
+      safeOpenFiles[0] ??
+      Object.keys(files)[0] ??
+      "main.ts";
 
     return {
       version: 2,
       workspace: {
         templateId: ((m.w as Record<string, unknown>).t as string) ?? "shared",
         files,
-        openFiles: ((m.w as Record<string, unknown>).o as string[]) ?? Object.keys(files).slice(0, 1),
-        activeFile: ((m.w as Record<string, unknown>).a as string) ?? Object.keys(files)[0],
+        openFiles: safeOpenFiles.length > 0 ? safeOpenFiles : Object.keys(files).slice(0, 1),
+        activeFile: safeActiveFile,
       },
       terminalSeed: (m.s as string) ?? undefined,
       meta: {
@@ -234,7 +248,7 @@ export async function decodeWorkspaceShare(
             content: file.content,
             language: (file.language as Workspace["files"][string]["language"]) ?? "typescript",
             updatedAt: now,
-            readOnly: false,
+            readOnly: true,
           },
         ])
       ),

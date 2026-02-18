@@ -2,6 +2,7 @@ import { createInitialTerminalState, runTerminalCommand, TerminalSimState } from
 import { executeCommandWithLimits } from "@/lib/runner/executor";
 import { createIsolatedWorkdir, cleanupWorkdir } from "@/lib/runner/workdir";
 import { RunnerJobRequest, RunnerResult } from "@/lib/runner/types";
+import { readFile } from "node:fs/promises";
 
 const MAX_OUTPUT_BYTES = 512_000;
 
@@ -56,6 +57,185 @@ async function runAnchorJob(
   }
 }
 
+async function runCargoJob(
+  request: RunnerJobRequest,
+  subcommand: "build" | "test",
+  startedAt: number
+): Promise<RunnerResult> {
+  const workdir = await createIsolatedWorkdir(request.files);
+  try {
+    const result = await executeCommandWithLimits({
+      cwd: workdir,
+      command: "cargo",
+      args: [subcommand],
+      timeoutMs: subcommand === "build" ? 20_000 : 25_000,
+      maxOutputBytes: MAX_OUTPUT_BYTES,
+    });
+
+    return makeResult(request, startedAt, {
+      exitCode: result.exitCode,
+      stdout: result.stdout,
+      stderr: result.timedOut ? `${result.stderr}\nTimed out` : result.stderr,
+      artifacts: {},
+    });
+  } finally {
+    await cleanupWorkdir(workdir);
+  }
+}
+
+async function readOutputFile(workdir: string, relativePath: string): Promise<string | null> {
+  try {
+    return await readFile(`${workdir}/${relativePath}`, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function parseProgramIdFromOutput(stdout: string): string | undefined {
+  const match =
+    stdout.match(/Program Id:\s*([1-9A-HJ-NP-Za-km-z]+)/i) ??
+    stdout.match(/Program Id\s*:\s*([1-9A-HJ-NP-Za-km-z]+)/i) ??
+    stdout.match(/Deploy success[\s\S]*?([1-9A-HJ-NP-Za-km-z]{32,44})/i);
+  return match?.[1];
+}
+
+async function runAnchorDeployJob(
+  request: RunnerJobRequest,
+  startedAt: number
+): Promise<RunnerResult> {
+  const workdir = await createIsolatedWorkdir(request.files);
+  try {
+    const rpcUrl = request.args.rpcUrl || "https://api.devnet.solana.com";
+    const result = await executeCommandWithLimits({
+      cwd: workdir,
+      command: "anchor",
+      args: ["deploy", "--provider.cluster", rpcUrl],
+      timeoutMs: 25_000,
+      maxOutputBytes: MAX_OUTPUT_BYTES,
+      env: {
+        ANCHOR_PROVIDER_URL: rpcUrl,
+      },
+    });
+
+    const outputFiles: Record<string, string> = {};
+    const deployJson = await readOutputFile(workdir, "target/deploy/deploy.json");
+    if (deployJson !== null) {
+      outputFiles["target/deploy/deploy.json"] = deployJson;
+    }
+
+    const idlJson = await readOutputFile(workdir, "target/idl/idl.json");
+    if (idlJson !== null) {
+      outputFiles["target/idl/idl.json"] = idlJson;
+    }
+
+    const programId = parseProgramIdFromOutput(result.stdout);
+
+    return {
+      ...makeResult(request, startedAt, {
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.timedOut ? `${result.stderr}\nTimed out` : result.stderr,
+        artifacts: {
+          deploySucceeded: result.exitCode === 0,
+          programId,
+        },
+      }),
+      outputFiles: Object.keys(outputFiles).length > 0 ? outputFiles : undefined,
+    };
+  } finally {
+    await cleanupWorkdir(workdir);
+  }
+}
+
+async function runAnchorIdlBuildJob(
+  request: RunnerJobRequest,
+  startedAt: number
+): Promise<RunnerResult> {
+  const workdir = await createIsolatedWorkdir(request.files);
+  try {
+    const result = await executeCommandWithLimits({
+      cwd: workdir,
+      command: "anchor",
+      args: ["idl", "build"],
+      timeoutMs: 25_000,
+      maxOutputBytes: MAX_OUTPUT_BYTES,
+      env: {
+        ANCHOR_PROVIDER_URL: request.args.rpcUrl || "https://api.devnet.solana.com",
+      },
+    });
+
+    const outputFiles: Record<string, string> = {};
+    const idlJson = await readOutputFile(workdir, "target/idl/idl.json");
+    if (idlJson !== null) {
+      outputFiles["target/idl/idl.json"] = idlJson;
+    }
+
+    return {
+      ...makeResult(request, startedAt, {
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.timedOut ? `${result.stderr}\nTimed out` : result.stderr,
+        artifacts: {
+          idlBuilt: result.exitCode === 0,
+        },
+      }),
+      outputFiles: Object.keys(outputFiles).length > 0 ? outputFiles : undefined,
+    };
+  } finally {
+    await cleanupWorkdir(workdir);
+  }
+}
+
+async function runAnchorIdlFetchJob(
+  request: RunnerJobRequest,
+  startedAt: number
+): Promise<RunnerResult> {
+  const programId = request.args.programId;
+  if (!programId) {
+    return makeResult(request, startedAt, {
+      exitCode: 1,
+      stdout: "",
+      stderr: "anchor idl fetch requires args.programId",
+      artifacts: {},
+    });
+  }
+
+  const workdir = await createIsolatedWorkdir(request.files);
+  try {
+    const rpcUrl = request.args.rpcUrl || "https://api.devnet.solana.com";
+    const result = await executeCommandWithLimits({
+      cwd: workdir,
+      command: "anchor",
+      args: ["idl", "fetch", programId, "--provider.cluster", rpcUrl],
+      timeoutMs: 25_000,
+      maxOutputBytes: MAX_OUTPUT_BYTES,
+      env: {
+        ANCHOR_PROVIDER_URL: rpcUrl,
+      },
+    });
+
+    const outputFiles: Record<string, string> = {};
+    if (result.exitCode === 0 && result.stdout.trim().startsWith("{")) {
+      outputFiles[`target/idl/${programId}.json`] = result.stdout;
+    }
+
+    return {
+      ...makeResult(request, startedAt, {
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.timedOut ? `${result.stderr}\nTimed out` : result.stderr,
+        artifacts: {
+          idlFetched: result.exitCode === 0,
+          idlAddress: programId,
+        },
+      }),
+      outputFiles: Object.keys(outputFiles).length > 0 ? outputFiles : undefined,
+    };
+  } finally {
+    await cleanupWorkdir(workdir);
+  }
+}
+
 function runTerminalJob(
   request: RunnerJobRequest,
   command: string,
@@ -98,6 +278,26 @@ export async function executeRunnerJob(request: RunnerJobRequest): Promise<Runne
 
   if (request.jobType === "anchor_test") {
     return runAnchorJob(request, "test", startedAt);
+  }
+
+  if (request.jobType === "anchor_deploy") {
+    return runAnchorDeployJob(request, startedAt);
+  }
+
+  if (request.jobType === "anchor_idl_build") {
+    return runAnchorIdlBuildJob(request, startedAt);
+  }
+
+  if (request.jobType === "anchor_idl_fetch") {
+    return runAnchorIdlFetchJob(request, startedAt);
+  }
+
+  if (request.jobType === "cargo_build") {
+    return runCargoJob(request, "build", startedAt);
+  }
+
+  if (request.jobType === "cargo_test") {
+    return runCargoJob(request, "test", startedAt);
   }
 
   if (request.jobType === "solana_config_set") {

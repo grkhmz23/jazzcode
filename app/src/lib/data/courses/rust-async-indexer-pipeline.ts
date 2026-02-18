@@ -59,7 +59,12 @@ A common failure mode is unbounded task spawning. It may look fine in local test
 
 Channels are powerful but can hide overload when used without capacity limits. Bounded channels make pressure visible: producers block or shed work when consumers lag. In deterministic simulations, this behavior can be modeled by explicit queues and tick-based progression.
 
-The key mindset is reproducibility. If pipeline behavior cannot be replayed deterministically, debugging and regression testing become guesswork. Simulated executors solve this by removing wall-clock dependence.${appendix}`,
+The key mindset is reproducibility. If pipeline behavior cannot be replayed deterministically, debugging and regression testing become guesswork. Simulated executors solve this by removing wall-clock dependence.
+
+## Operator mindset
+
+Async pipelines are reliability systems, not just throughput systems. Concurrency limits, retry behavior, and reducer determinism must stay auditable under stress.
+${appendix}`,
   blocks: [
     {
       type: "quiz",
@@ -236,14 +241,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "raip-v2-foundations",
   title: "Async Pipeline Foundations",
-  description: "Async/concurrency fundamentals for deterministic indexer design.",
+  description:
+    "Async/concurrency fundamentals, backpressure behavior, and deterministic execution modeling for indexer reliability.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "raip-v2-project-journey",
   title: "Reorg-safe Async Pipeline Project Journey",
-  description: "Implement deterministic scheduling, retries, reducers, and report exports.",
+  description:
+    "Implement deterministic scheduling, retries, dedupe/reducer stages, and report exports for reorg-safe pipeline operations.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -251,7 +258,8 @@ export const rustAsyncIndexerPipelineCourse: Course = {
   id: "course-rust-async-indexer-pipeline",
   slug: "rust-async-indexer-pipeline",
   title: "Concurrency & Async for Indexers (Rust)",
-  description: "Rust-first async pipeline simulation with bounded concurrency and reorg-safe reducers.",
+  description:
+    "Rust-first async pipeline engineering with bounded concurrency, replay-safe reducers, and deterministic operational reporting.",
   difficulty: "advanced",
   duration: "10 hours",
   totalXP: 445,

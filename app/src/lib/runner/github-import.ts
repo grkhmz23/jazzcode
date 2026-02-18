@@ -24,8 +24,11 @@ const MAX_BYTES = 8 * 1024 * 1024;
 
 export function parseGitHubRepoRef(url: string): RepoRef {
   const parsed = new URL(url);
-  if (parsed.hostname !== "github.com") {
+  if (parsed.protocol !== "https:" || parsed.hostname !== "github.com") {
     throw new Error("Only github.com URLs are allowed");
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error("Credential-bearing repository URLs are not allowed");
   }
 
   const parts = parsed.pathname.replace(/^\/+/, "").split("/").filter(Boolean);

@@ -41,6 +41,16 @@ URL encoding correctness is critical. A malformed URL will be rejected by compli
 
 The reference key mechanism is what makes Solana Pay practical for commerce. By generating a unique keypair per transaction and including its public key as a reference, the merchant can poll \`getSignaturesForAddress(reference)\` to detect when the payment arrives. This eliminates the need for webhooks or push notifications — the merchant simply polls until the reference appears in a confirmed transaction, then verifies the transfer details match the expected payment.
 
+## Commerce operator rule
+
+Think in terms of order-state guarantees, not just payment detection:
+1. request created,
+2. payment observed,
+3. payment validated,
+4. fulfillment released.
+
+Each step needs explicit checks so fulfillment never races ahead of verification.
+
 ## Checklist
 - Use \`solana:\` scheme (no double slashes)
 - Place the recipient base58 address directly after the colon
@@ -448,14 +458,16 @@ This checkpoint validates your complete understanding of Solana Pay commerce int
 const module1: Module = {
   id: "solanapay-v2-foundations",
   title: "Solana Pay Foundations",
-  description: "Solana Pay specification, URL encoding rules, transfer request anatomy, URL building, and transfer request encoding.",
+  description:
+    "Solana Pay specification, URL encoding rigor, transfer request anatomy, and deterministic builder/encoder patterns.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "solanapay-v2-implementation",
   title: "Tracking & Commerce",
-  description: "Reference tracking, confirmation UX, error handling, and deterministic POS receipt generation.",
+  description:
+    "Reference tracking state machines, confirmation UX, failure handling, and deterministic POS receipt generation.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -464,7 +476,7 @@ export const solanaPayCommerceCourse: Course = {
   slug: "solana-pay-commerce",
   title: "Solana Pay Commerce",
   description:
-    "Master Solana Pay: transfer request URL encoding, QR generation, reference tracking, confirmation UX, and deterministic POS receipt generation.",
+    "Master Solana Pay commerce integration: robust URL encoding, QR/payment tracking workflows, confirmation UX, and deterministic POS reconciliation artifacts.",
   difficulty: "intermediate",
   duration: "12 hours",
   totalXP: 400,

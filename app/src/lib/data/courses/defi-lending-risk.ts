@@ -45,6 +45,16 @@ Pool accounting must be exact. Solana lending protocols typically use a shares-b
 
 On Solana specifically, lending pools are represented as program-derived accounts. The reserve account holds the token balance, a reserve config account stores parameters (LTV, liquidation threshold, reserve factor, interest rate model), and individual obligation accounts track each user's deposits and borrows. Programs like Solend use the spl-token program for token custody and Pyth or Switchboard oracles for price feeds.
 
+## Risk-operator mindset
+
+Treat every pool as a control system, not just a yield product:
+1. utilization controls liquidity stress,
+2. rate model controls borrower behavior,
+3. oracle quality controls collateral truth,
+4. liquidation speed controls solvency recovery.
+
+When one control weakens, the others must compensate.
+
 ## Checklist
 - Understand the relationship between supply, borrow, and utilization
 - Know that utilization = totalBorrowed / totalSupply
@@ -465,14 +475,16 @@ This checkpoint validates your complete understanding of lending risk analysis.`
 const module1: Module = {
   id: "lending-v2-fundamentals",
   title: "Lending Fundamentals",
-  description: "Lending pool mechanics, interest rate models, health factor monitoring, and rate computation.",
+  description:
+    "Lending pool mechanics, utilization-driven rate models, and health-factor foundations required for defensible risk analysis.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "lending-v2-risk-management",
   title: "Risk Management",
-  description: "Health factor computation, liquidation mechanics, oracle risk, and multi-scenario risk reporting.",
+  description:
+    "Health-factor computation, liquidation mechanics, oracle failure handling, and multi-scenario risk reporting for stressed markets.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -481,7 +493,7 @@ export const defiLendingRiskCourse: Course = {
   slug: "defi-lending-risk",
   title: "Lending & Liquidation Risk",
   description:
-    "Master lending protocol mechanics: utilization-based interest rates, health factor monitoring, liquidation thresholds, and deterministic risk scenario reporting.",
+    "Master Solana lending risk engineering: utilization and rate mechanics, liquidation path analysis, oracle safety, and deterministic scenario reporting.",
   difficulty: "advanced",
   duration: "14 hours",
   totalXP: 400,

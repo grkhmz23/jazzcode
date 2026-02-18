@@ -61,6 +61,10 @@ The nonce mechanism is particularly important. The server stores issued nonces (
 
 SIWS aligns Solana's authentication story with Ethereum's Sign-In With Ethereum (SIWE / EIP-4361) and other chain-specific standards. Cross-chain dApps can implement a unified authentication flow with chain-specific signing backends. The wallet-side rendering, nonce management, and verification logic are consistent patterns regardless of the underlying blockchain.
 
+## Operator mindset
+
+Treat SIWS as a protocol contract, not a UI prompt. If nonce lifecycle, domain checks, and time bounds are not enforced as strict invariants, authentication becomes signature theater.
+
 ## Checklist
 - Understand why raw signMessage is insufficient for authentication
 - Know the core SIWS fields: domain, address, nonce, issuedAt, expirationTime, statement
@@ -597,14 +601,16 @@ This checkpoint validates your complete understanding of SIWS authentication and
 const module1: Module = {
   id: "siws-v2-fundamentals",
   title: "SIWS Fundamentals",
-  description: "SIWS rationale, input field specifications, message rendering, and sign-in input construction.",
+  description:
+    "SIWS rationale, strict input-field semantics, wallet rendering behavior, and deterministic sign-in input construction.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "siws-v2-verification",
   title: "Verification & Security",
-  description: "Server-side verification, session management, replay protection, and auth audit reporting.",
+  description:
+    "Server-side verification invariants, nonce replay defenses, session management, and deterministic auth audit reporting.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -613,7 +619,7 @@ export const signInWithSolanaCourse: Course = {
   slug: "sign-in-with-solana",
   title: "Sign-In With Solana",
   description:
-    "Master SIWS authentication: standardized sign-in inputs, server-side verification, nonce replay protection, session management, and deterministic auth audit reporting.",
+    "Master production SIWS authentication on Solana: standardized inputs, strict verification invariants, replay-resistant nonce lifecycle, and audit-ready reporting.",
   difficulty: "intermediate",
   duration: "12 hours",
   totalXP: 400,

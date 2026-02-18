@@ -58,6 +58,10 @@ Ultimately, atomicity is a contract between engineering and user expectations. P
 
 This material should be operationalized with deterministic fixtures and explicit release criteria. Teams should preserve a small set of baseline scenarios that represent normal traffic, moderate stress, and severe stress. For each scenario, compare policy outputs before and after changes, and require review notes when confidence labels, warnings, or recommendations move in a meaningful way. This discipline prevents accidental drift, keeps support playbooks aligned with runtime behavior, and makes incident response faster because everyone shares the same deterministic artifact language. In practice, the strongest reliability teams treat these artifacts as release gates, not optional documentation, and they keep fixture ownership explicit so updates remain intentional and auditable.
 
+## Operator mindset
+
+Atomicity is a user-trust contract. If strict all-or-nothing is unavailable, compensation guarantees and residual risks must be explicit, testable, and observable in reports.
+
 ## Checklist
 - Model flows by intent, not only by transaction count.
 - Annotate each step with dependencies and idempotency.
@@ -290,14 +294,16 @@ const lesson8: Challenge = {
 const module1: Module = {
   id: "bundles-v2-atomicity-foundations",
   title: "Atomicity Foundations",
-  description: "User expectations, flow decomposition, and risk graph modeling.",
+  description:
+    "User-intent expectations, flow decomposition, and deterministic risk-graph modeling for multi-step reliability.",
   lessons: [lesson1, lesson2, lesson3],
 };
 
 const module2: Module = {
   id: "bundles-v2-project-journey",
   title: "Atomic Swap Flow Simulator",
-  description: "Build, validate, and report deterministic atomic flow safety.",
+  description:
+    "Build, validate, and report deterministic flow safety with compensation checks, idempotency handling, and bundle artifacts.",
   lessons: [lesson4, lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -306,7 +312,7 @@ export const bundlesAtomicityCourse: Course = {
   slug: "bundles-atomicity",
   title: "Bundles & Transaction Atomicity",
   description:
-    "Design defensive multi-transaction flows with deterministic atomicity validation and safety reporting.",
+    "Design defensive multi-transaction Solana flows with deterministic atomicity validation, compensation modeling, and audit-ready safety reporting.",
   difficulty: "advanced",
   duration: "9 hours",
   totalXP: 445,

@@ -172,6 +172,16 @@ Instruction ordering is deterministic and significant. If instruction B depends 
 For CLI workflow, a healthy baseline is: inspect config, target the right cluster, verify active wallet, and check balance before sending anything. That sequence reduces avoidable errors and improves team reproducibility. In local scripts, log your derived addresses and transaction summaries so teammates can reason about intent and outcomes.
 
 You do not need RPC calls to understand this model, but you do need rigor in message construction: explicit accounts, explicit ordering, explicit signatures, and explicit freshness.
+
+## Why this matters in real apps
+
+When production incidents happen, teams usually debug transaction construction first: wrong signer, wrong writable flag, stale blockhash, or wrong instruction ordering. Engineers who model transactions as explicit data structures can diagnose these failures quickly. Engineers who treat transactions like opaque wallet blobs usually need trial-and-error.
+
+## What you should be able to do after this lesson
+
+- Explain the difference between instruction-level validation and transaction-level validation.
+- Predict when two transactions can execute in parallel and when they will conflict.
+- Build a deterministic pre-send checklist for local scripts and frontend clients.
 `,
   blocks: [
     {
@@ -632,14 +642,16 @@ function run(input: { argv: string[]; from: string }): string {
 const module1: Module = {
   id: 'module-getting-started',
   title: 'Getting Started',
-  description: 'Core Solana execution and account model foundations.',
+  description:
+    'Core execution model, account semantics, and transaction construction patterns you need before writing programs or complex clients.',
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: 'module-programs-and-pdas',
   title: 'Programs & PDAs',
-  description: 'Program composition, deterministic addresses, and token fundamentals.',
+  description:
+    'Program behavior, deterministic PDA design, and SPL token mental models with practical safety checks.',
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -648,7 +660,7 @@ export const solanaFundamentalsCourse: Course = {
   slug: 'solana-fundamentals',
   title: 'Solana Fundamentals',
   description:
-    'Production-grade introduction to Solana accounts, transactions, programs, PDAs, SPL token concepts, and deterministic wallet-manager workflows.',
+    'Production-grade introduction for beginners who want clear Solana mental models, stronger transaction debugging skills, and deterministic wallet-manager workflows.',
   difficulty: 'beginner',
   duration: '8 hours',
   totalXP: 305,

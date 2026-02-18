@@ -1,5 +1,5 @@
 /**
- * Challenge Runner - Executes user code in a sandboxed Web Worker
+ * Challenge Runner - Executes user code via server-side VM sandbox
  */
 
 export interface TestCase {
@@ -28,7 +28,7 @@ export interface RunResult {
 const DEFAULT_TIMEOUT_MS = 5000;
 
 /**
- * Run challenge tests in a sandboxed Web Worker
+ * Run challenge tests in the sandbox API
  * @param code - User's code to execute
  * @param testCases - Array of test cases to run
  * @param timeoutMs - Maximum execution time per test (default: 5000ms)
@@ -39,104 +39,52 @@ export async function runChallengeTests(
   testCases: TestCase[],
   timeoutMs: number = DEFAULT_TIMEOUT_MS
 ): Promise<RunResult> {
-  return new Promise((resolve) => {
-    let worker: Worker | null = null;
-    const startTime = Date.now();
+  const validation = validateCode(code);
+  if (!validation.valid) {
+    return {
+      testResults: testCases.map((tc) => ({
+        name: tc.name,
+        passed: false,
+        actualOutput: "",
+        expectedOutput: tc.expectedOutput,
+        logs: [],
+        executionTime: 0,
+        error: validation.error ?? "Blocked by sandbox policy",
+      })),
+      allPassed: false,
+      totalTime: 0,
+      error: validation.error ?? "Blocked by sandbox policy",
+    };
+  }
 
-    // Create timeout handler
-    const timeoutId = setTimeout(() => {
-      if (worker) {
-        worker.terminate();
-        worker = null;
-      }
-
-      resolve({
-        testResults: testCases.map((tc) => ({
-          name: tc.name,
-          passed: false,
-          actualOutput: "",
-          expectedOutput: tc.expectedOutput,
-          logs: [],
-          executionTime: timeoutMs,
-          error: `Execution timed out (${timeoutMs / 1000}s limit)`,
-        })),
-        allPassed: false,
-        totalTime: timeoutMs,
-        error: `Execution timed out after ${timeoutMs / 1000} seconds`,
-      });
-    }, timeoutMs);
-
-    try {
-      // Create the worker
-      worker = new Worker("/challenge-worker.js");
-
-      worker.onmessage = (e: MessageEvent<{ type: string; results?: TestResult[]; error?: string }>) => {
-        clearTimeout(timeoutId);
-
-        if (worker) {
-          worker.terminate();
-          worker = null;
-        }
-
-        if (e.data.type === "error") {
-          resolve({
-            testResults: [],
-            allPassed: false,
-            totalTime: Date.now() - startTime,
-            error: e.data.error || "Worker error",
-          });
-          return;
-        }
-
-        const results = e.data.results || [];
-        const error =
-          results.length === 0 ? "Runner returned no test results. Check challenge entrypoint configuration." : null;
-        resolve({
-          testResults: results,
-          allPassed: results.every((r) => r.passed),
-          totalTime: Date.now() - startTime,
-          error,
-        });
-      };
-
-      worker.onerror = (e: ErrorEvent) => {
-        clearTimeout(timeoutId);
-
-        if (worker) {
-          worker.terminate();
-          worker = null;
-        }
-
-        resolve({
-          testResults: [],
-          allPassed: false,
-          totalTime: Date.now() - startTime,
-          error: e.message || "Worker error",
-        });
-      };
-
-      // Send the code and test cases to the worker
-      worker.postMessage({
-        code,
-        testCases,
-        timeoutMs,
-      });
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (worker) {
-        worker.terminate();
-        worker = null;
-      }
-
-      resolve({
-        testResults: [],
-        allPassed: false,
-        totalTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : "Failed to create worker",
-      });
-    }
+  const response = await fetch("/api/challenge/run", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      code,
+      testCases,
+      timeoutMs,
+    }),
   });
+
+  const payload = (await response.json()) as
+    | RunResult
+    | {
+        error?: string;
+      };
+
+  if (!response.ok) {
+    return {
+      testResults: [],
+      allPassed: false,
+      totalTime: 0,
+      error: "error" in payload && payload.error ? payload.error : "Challenge run failed",
+    };
+  }
+
+  return payload as RunResult;
 }
 
 /**
@@ -156,6 +104,8 @@ export function validateCode(code: string): { valid: boolean; error?: string } {
     { pattern: /fetch\s*\(/, message: "fetch() is not allowed" },
     { pattern: /XMLHttpRequest/, message: "XMLHttpRequest is not allowed" },
     { pattern: /WebSocket\s*\(/, message: "WebSocket is not allowed" },
+    { pattern: /\.\s*constructor\s*\(/, message: "Constructor escape patterns are not allowed" },
+    { pattern: /\[\s*["']constructor["']\s*\]\s*\(/, message: "Constructor escape patterns are not allowed" },
     { pattern: /localStorage/, message: "localStorage access is not allowed" },
     { pattern: /sessionStorage/, message: "sessionStorage access is not allowed" },
     { pattern: /indexedDB/, message: "indexedDB access is not allowed" },

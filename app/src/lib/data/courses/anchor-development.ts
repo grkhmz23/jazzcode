@@ -36,6 +36,16 @@ IDL is the bridge that makes the developer experience consistent across Rust and
 Provider and wallet concepts complete the flow. The provider wraps an RPC connection plus signer abstraction and commitment preferences. It does not replace wallet security, but it centralizes transaction send/confirm behavior and test setup. In practice, production reliability comes from understanding this boundary: Anchor helps with ergonomics and consistency, but you still own protocol invariants, account design, and threat modeling.
 
 For this course, treat Anchor as a typed instruction framework on top of Solana’s explicit account runtime. That framing lets you reason clearly about what is generated, what remains your responsibility, and how to test deterministic pieces without needing devnet in CI.
+
+## What Anchor gives you vs what it does not
+
+Anchor gives you: typed account contexts, standardized serialization, structured errors, and IDL-driven client ergonomics. Anchor does not give you: automatic business safety, correct authority design, or threat modeling. Those are still protocol engineering decisions.
+
+## By the end of this lesson
+
+- You can explain the Rust handler -> IDL -> client flow without hand-waving.
+- You can identify which checks belong in account constraints versus handler logic.
+- You can debug IDL drift issues (wrong account order, stale args, stale client bindings).
 `,
   blocks: [
     {
@@ -387,14 +397,16 @@ No network calls. All checks are strict string matches.
 const module1: Module = {
   id: "anchor-v2-module-basics",
   title: "Anchor Basics",
-  description: "Mental model, constraints, and PDA foundations for project-oriented Anchor development.",
+  description:
+    "Anchor architecture, account constraints, and PDA foundations with explicit ownership of security-critical decisions.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "anchor-v2-module-pdas-accounts-testing",
   title: "PDAs, Accounts, and Testing",
-  description: "Deterministic instruction builders, state emulation, testing strategy, and final checkpoint.",
+  description:
+    "Deterministic instruction builders, stable state emulation, and testing strategy that separates pure logic from network integration.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -403,7 +415,7 @@ export const anchorDevelopmentCourse: Course = {
   slug: "anchor-development",
   title: "Anchor Development",
   description:
-    "Project-journey course: build a deterministic Counter dApp workflow with Anchor-style account modeling, instruction builders, and reliable tests.",
+    "Project-journey course for developers moving from basics to real Anchor engineering: deterministic account modeling, instruction builders, testing discipline, and reliable client UX.",
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 310,

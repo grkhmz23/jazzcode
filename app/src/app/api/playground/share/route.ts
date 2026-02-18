@@ -3,10 +3,13 @@
  * Create a new playground share
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { validateBundle } from "@/lib/component-hub/schema";
 import { storeBundle } from "@/lib/playground/share-store";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { resolveRequestActorId } from "@/lib/security/request-identity";
+import { redactRunnerLogs } from "@/lib/runner/redaction";
 
 const requestSchema = z.object({
   id: z.string().min(1).max(100),
@@ -52,8 +55,29 @@ const requestSchema = z.object({
   notes: z.string().optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const actorId = await resolveRequestActorId(request);
+    const limit = await checkRateLimit(`playground-share:${actorId}`, {
+      limit: 20,
+      windowSeconds: 60,
+    });
+    if (!limit.success) {
+      const retryAfter = Math.max(1, limit.reset - Math.floor(Date.now() / 1000));
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Try again shortly." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(limit.limit),
+            "X-RateLimit-Remaining": String(limit.remaining),
+            "X-RateLimit-Reset": String(limit.reset),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate request shape
@@ -85,15 +109,24 @@ export async function POST(request: Request) {
     // Store the bundle
     const { id, expiresAt } = await storeBundle(bundleResult.data);
 
-    return NextResponse.json({
-      shareId: id,
-      expiresAt: expiresAt.toISOString(),
-      url: `/playground?share=${id}`,
-    });
-  } catch (error) {
-    console.error("Failed to create share:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        shareId: id,
+        expiresAt: expiresAt.toISOString(),
+        url: `/playground?share=${id}`,
+      },
+      {
+        headers: {
+          "X-RateLimit-Limit": String(limit.limit),
+          "X-RateLimit-Remaining": String(limit.remaining),
+          "X-RateLimit-Reset": String(limit.reset),
+        },
+      }
+    );
+  } catch (error) {
+    const message = redactRunnerLogs(error instanceof Error ? error.message : "Internal server error");
+    return NextResponse.json(
+      { error: message || "Internal server error" },
       { status: 500 }
     );
   }

@@ -69,6 +69,10 @@ When the user switches wallets (disconnects one, connects another), all cached d
 - Remember the user's preferred wallet adapter between sessions
 - Disable transaction buttons during connecting and error states
 - Log connection errors to analytics for monitoring adapter reliability
+
+## Reliability principle
+
+Wallet UX is reliability UX. Users judge trust by whether connect, reconnect, and recovery behave predictably under stress, not by visual polish alone.
 `,
   blocks: [
     {
@@ -578,14 +582,16 @@ This checkpoint validates your complete understanding of wallet UX engineering.`
 const module1: Module = {
   id: "walletux-v2-fundamentals",
   title: "Connection Fundamentals",
-  description: "Wallet connection design, network gating, state machine architecture, and connection state implementation.",
+  description:
+    "Wallet connection design, network gating, and deterministic state-machine architecture for predictable onboarding and reconnect paths.",
   lessons: [lesson1, lesson2, lesson3, lesson4],
 };
 
 const module2: Module = {
   id: "walletux-v2-production",
   title: "Production Patterns",
-  description: "Cache invalidation, RPC caching strategies, health monitoring, and wallet UX quality reporting.",
+  description:
+    "Cache invalidation, RPC resilience and health monitoring, and measurable wallet UX quality reporting for production operations.",
   lessons: [lesson5, lesson6, lesson7, lesson8],
 };
 
@@ -594,7 +600,7 @@ export const walletUxEngineeringCourse: Course = {
   slug: "wallet-ux-engineering",
   title: "Wallet UX Engineering",
   description:
-    "Master wallet connection UX: state machines, network gating, account switching, RPC health monitoring, caching strategies, and reusable wallet UX component patterns.",
+    "Master production wallet UX engineering on Solana: deterministic connection state, network safety, RPC resilience, and measurable reliability patterns.",
   difficulty: "intermediate",
   duration: "12 hours",
   totalXP: 400,
