@@ -30,6 +30,7 @@ import { rustErrorsInvariantsCourse } from './rust-errors-invariants';
 import { rustPerfOnchainThinkingCourse } from './rust-perf-onchain-thinking';
 import { rustAsyncIndexerPipelineCourse } from './rust-async-indexer-pipeline';
 import { rustProcMacrosCodegenSafetyCourse } from './rust-proc-macros-codegen-safety';
+import { anchorUpgradesMigrationsCourse } from './anchor-upgrades-migrations';
 import type { Course } from '@/types/content';
 
 /**
@@ -69,10 +70,11 @@ export const courses: Course[] = [
   rustPerfOnchainThinkingCourse,
   rustAsyncIndexerPipelineCourse,
   rustProcMacrosCodegenSafetyCourse,
+  anchorUpgradesMigrationsCourse,
 ];
 
-if (courses.length !== 32) {
-  throw new Error(`Expected 32 courses, received ${courses.length}`);
+if (courses.length !== 33) {
+  throw new Error(`Expected 33 courses, received ${courses.length}`);
 }
 
 /**
@@ -111,4 +113,5 @@ export {
   rustPerfOnchainThinkingCourse,
   rustAsyncIndexerPipelineCourse,
   rustProcMacrosCodegenSafetyCourse,
+  anchorUpgradesMigrationsCourse,
 };

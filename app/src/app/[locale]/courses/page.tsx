@@ -11,6 +11,83 @@ import { Progress } from "@/components/ui/progress";
 import { Search, Clock, BookOpen, Zap, Filter, Loader2 } from "lucide-react";
 import type { Course, CourseDifficulty } from "@/types/content";
 
+type CatalogCategory =
+  | "solana"
+  | "anchor"
+  | "defi"
+  | "security"
+  | "rust"
+  | "infra"
+  | "wallet"
+  | "mobile"
+  | "payments"
+  | "frontend";
+
+function inferCourseCategory(course: Course): CatalogCategory {
+  const tags = new Set(course.tags.map((tag) => tag.toLowerCase()));
+  const slug = course.slug.toLowerCase();
+
+  if (tags.has("rust")) {
+    return "rust";
+  }
+  if (tags.has("anchor") || slug.includes("anchor")) {
+    return "anchor";
+  }
+  if (tags.has("defi") || slug.includes("defi")) {
+    return "defi";
+  }
+  if (tags.has("security") || tags.has("audit") || slug.includes("security")) {
+    return "security";
+  }
+  if (
+    tags.has("rpc") ||
+    tags.has("indexing") ||
+    tags.has("reliability") ||
+    tags.has("mempool") ||
+    tags.has("fees")
+  ) {
+    return "infra";
+  }
+  if (tags.has("wallet") || tags.has("siws") || slug.includes("wallet")) {
+    return "wallet";
+  }
+  if (tags.has("mobile")) {
+    return "mobile";
+  }
+  if (tags.has("payments") || tags.has("solana-pay") || tags.has("commerce")) {
+    return "payments";
+  }
+  if (tags.has("frontend")) {
+    return "frontend";
+  }
+  return "solana";
+}
+
+function categoryLabel(category: CatalogCategory): string {
+  switch (category) {
+    case "solana":
+      return "Solana Core";
+    case "anchor":
+      return "Anchor";
+    case "defi":
+      return "DeFi";
+    case "security":
+      return "Security";
+    case "rust":
+      return "Rust";
+    case "infra":
+      return "Infra";
+    case "wallet":
+      return "Wallet";
+    case "mobile":
+      return "Mobile";
+    case "payments":
+      return "Payments";
+    case "frontend":
+      return "Frontend";
+  }
+}
+
 export default function CourseCatalogPage() {
   const t = useTranslations("courses");
   const tc = useTranslations("common");
@@ -19,6 +96,7 @@ export default function CourseCatalogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
 
   useEffect(() => {
     async function fetchCourses() {
@@ -42,17 +120,21 @@ export default function CourseCatalogPage() {
     if (difficulty !== "all") {
       result = result.filter((c) => c.difficulty === difficulty);
     }
+    if (category !== "all") {
+      result = result.filter((c) => inferCourseCategory(c) === category);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
         (c) =>
           c.title.toLowerCase().includes(q) ||
           c.description.toLowerCase().includes(q) ||
-          c.tags.some((tag) => tag.includes(q))
+          c.tags.some((tag) => tag.toLowerCase().includes(q)) ||
+          categoryLabel(inferCourseCategory(c)).toLowerCase().includes(q)
       );
     }
     return result;
-  }, [courses, search, difficulty]);
+  }, [courses, search, difficulty, category]);
 
   const difficultyFilters = [
     { value: "all", label: t("filterAll") },
@@ -60,6 +142,28 @@ export default function CourseCatalogPage() {
     { value: "intermediate", label: t("filterIntermediate") },
     { value: "advanced", label: t("filterAdvanced") },
   ];
+
+  const categoryFilters = useMemo(() => {
+    const ordered: CatalogCategory[] = [
+      "solana",
+      "anchor",
+      "defi",
+      "security",
+      "rust",
+      "infra",
+      "wallet",
+      "mobile",
+      "payments",
+      "frontend",
+    ];
+    const present = new Set(courses.map((course) => inferCourseCategory(course)));
+    return [
+      { value: "all", label: "All categories" },
+      ...ordered
+        .filter((entry) => present.has(entry))
+        .map((entry) => ({ value: entry, label: categoryLabel(entry) })),
+    ];
+  }, [courses]);
 
   const totalLessons = (c: Course) => c.modules.reduce((sum, m) => sum + m.lessons.length, 0);
 
@@ -89,7 +193,7 @@ export default function CourseCatalogPage() {
         <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="mb-8 flex flex-col gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -99,13 +203,25 @@ export default function CourseCatalogPage() {
             className="pl-10"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {difficultyFilters.map((f) => (
             <Button
               key={f.value}
               variant={difficulty === f.value ? "default" : "outline"}
               size="sm"
               onClick={() => setDifficulty(f.value)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {categoryFilters.map((f) => (
+            <Button
+              key={f.value}
+              variant={category === f.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCategory(f.value)}
             >
               {f.label}
             </Button>
@@ -130,6 +246,9 @@ export default function CourseCatalogPage() {
                   <div className="flex items-center gap-2">
                     <Badge className={`text-xs ${difficultyColor(course.difficulty)}`}>
                       {tc(course.difficulty)}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {categoryLabel(inferCourseCategory(course))}
                     </Badge>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
