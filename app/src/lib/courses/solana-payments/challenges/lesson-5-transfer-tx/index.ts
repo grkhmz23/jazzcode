@@ -151,7 +151,7 @@ export const lesson5TestCases: TestCase[] = [
       feePayer: "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
       recentBlockhash: "BHASH789",
     }),
-    expectedOutput: '{"feePayer":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","recentBlockhash":"BHASH789","instructions":[{"programId":"11111111111111111111111111111111","keys":[{"pubkey":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","isSigner":true,"isWritable":true},{"pubkey":"8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo","isSigner":false,"isWritable":true}],"dataBase64":"AgAAAID0DQAAAAA="}]}',
+    expectedOutput: '{"feePayer":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","recentBlockhash":"BHASH789","instructions":[{"programId":"11111111111111111111111111111111","keys":[{"pubkey":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","isSigner":true,"isWritable":true},{"pubkey":"8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo","isSigner":false,"isWritable":true}],"dataBase64":"AgAAAABlzR0AAAAA"}]}',
   },
   {
     name: "builds SPL transfer instruction bundle",
@@ -166,7 +166,7 @@ export const lesson5TestCases: TestCase[] = [
       feePayer: "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
       recentBlockhash: "BHASH789",
     }),
-    expectedOutput: '{"feePayer":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","recentBlockhash":"BHASH789","instructions":[{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","keys":[{"pubkey":"8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo","isSigner":false,"isWritable":true},{"pubkey":"Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx","isSigner":false,"isWritable":false},{"pubkey":"FnAaYH2xfUhJFFj7W2JML4D8XbQWfN2swf3zspu8i7M1","isSigner":false,"isWritable":true},{"pubkey":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","isSigner":true,"isWritable":false}],"dataBase64":"DOAEAAAAAAAABg=="}]}',
+    expectedOutput: '{"feePayer":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","recentBlockhash":"BHASH789","instructions":[{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","keys":[{"pubkey":"8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo","isSigner":false,"isWritable":true},{"pubkey":"Es9vMFrzaCERmJfrF4H2FYD8hX5F4f1mUQ4v8mBfgsYx","isSigner":false,"isWritable":false},{"pubkey":"FnAaYH2xfUhJFFj7W2JML4D8XbQWfN2swf3zspu8i7M1","isSigner":false,"isWritable":true},{"pubkey":"7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY","isSigner":true,"isWritable":false}],"dataBase64":"DOgDAAAAAAAABg=="}]}',
   },
   {
     name: "rejects invalid amount",

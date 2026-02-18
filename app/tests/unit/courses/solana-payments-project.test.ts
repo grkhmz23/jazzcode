@@ -23,6 +23,39 @@ import {
   normalizePaymentIntent,
 } from "@/lib/courses/solana-payments/local-state";
 
+function executeWithRunnerDeterminism(code: string, rawInput: string): string {
+  const input = JSON.parse(rawInput);
+  const deterministicNow =
+    input && typeof input === "object" && "timestamp" in input ? 1700000000000 : 1234567890;
+  const deterministicRandom = Number.parseInt("abc123", 36) / Math.pow(36, 6);
+
+  const execute = new Function(
+    "input",
+    "__deterministicNow",
+    "__deterministicRandom",
+    `
+const __previousDateNow = Date.now;
+const __previousRandom = Math.random;
+Date.now = () => __deterministicNow;
+Math.random = () => __deterministicRandom;
+try {
+${code}
+return run(input);
+} finally {
+Date.now = __previousDateNow;
+Math.random = __previousRandom;
+}
+`,
+  ) as (input: unknown, now: number, random: number) => unknown;
+
+  try {
+    const value = execute(input, deterministicNow, deterministicRandom);
+    return typeof value === "string" ? value : JSON.stringify(value);
+  } catch (error) {
+    return `Error: ${error instanceof Error ? error.message : String(error)}`;
+  }
+}
+
 describe("solana payments project helpers", () => {
   describe("payment intent validation challenge (lesson 3)", () => {
     it("has valid test cases for payment intent validation", () => {
@@ -79,6 +112,13 @@ describe("solana payments project helpers", () => {
     it("has hints for transaction building", () => {
       expect(lesson5Hints.length).toBeGreaterThan(0);
     });
+
+    it("solution output matches deterministic expected outputs", () => {
+      for (const testCase of lesson5TestCases) {
+        const actual = executeWithRunnerDeterminism(lesson5SolutionCode, testCase.input);
+        expect(actual).toBe(testCase.expectedOutput);
+      }
+    });
   });
 
   describe("webhook verification challenge (lesson 8)", () => {
@@ -108,6 +148,13 @@ describe("solana payments project helpers", () => {
     it("has hints for HMAC verification", () => {
       expect(lesson8Hints.length).toBeGreaterThan(0);
       expect(lesson8Hints.some((h) => h.includes("HMAC") || h.includes("SHA256"))).toBe(true);
+    });
+
+    it("solution output matches deterministic expected outputs", () => {
+      for (const testCase of lesson8TestCases) {
+        const actual = executeWithRunnerDeterminism(lesson8SolutionCode, testCase.input);
+        expect(actual).toBe(testCase.expectedOutput);
+      }
     });
   });
 

@@ -102,7 +102,7 @@ function verifyWebhookAndGenerateReceipt(input) {
   const timestampValid = Math.abs(now - timestampNum) <= 300;
   
   // Generate receipt ID
-  const receiptId = "rcpt_" + timestamp + "_" + payload.paymentId.slice(-8);
+  const receiptId = "rcpt_" + timestamp + "_" + payload.paymentId.slice(-7);
   
   return {
     verified: signatureValid && timestampValid,
@@ -266,7 +266,7 @@ export const lesson8TestCases: TestCase[] = [
         sender: "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
         timestamp: "1700000000",
       },
-      signature: "5b5f8c7d3e2a1b4c6d8e9f0a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+      signature: "52ff98631d268ecfdad3aad3e8651f0e58b4024309250fd8ef936413c4c183f1",
       secret: "webhook_secret_key_12345",
       timestamp: "1700000000",
     }),
@@ -300,7 +300,7 @@ export const lesson8TestCases: TestCase[] = [
         sender: "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
         timestamp: "1600000000",
       },
-      signature: "valid_signature",
+      signature: "d946a515c0598704685b96c87410382ca3a0f2914682e0d77f87ecbff13eab82",
       secret: "webhook_secret_key_12345",
       timestamp: "1600000000",
     }),

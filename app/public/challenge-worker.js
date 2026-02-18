@@ -6,6 +6,7 @@ self.XMLHttpRequest = undefined;
 self.importScripts = undefined;
 
 const DEFAULT_TIMEOUT_MS = 5000;
+const FIXED_REFERENCE_NOW_MS = 1700000000000;
 
 function createMockConsole() {
   const logs = [];
@@ -50,20 +51,10 @@ function deterministicNowMsForInput(input) {
     return 1234567890;
   }
 
-  const timestamp = input.timestamp;
-  if (typeof timestamp === "string" && /^\d+$/.test(timestamp)) {
-    const numeric = Number(timestamp);
-    if (Number.isFinite(numeric)) {
-      // 10-digit timestamps are usually unix seconds.
-      if (timestamp.length === 10) {
-        return numeric * 1000;
-      }
-      return numeric;
-    }
-  }
-
-  if (typeof timestamp === "number" && Number.isFinite(timestamp)) {
-    return timestamp > 10_000_000_000 ? timestamp : timestamp * 1000;
+  // Keep "current time" deterministic but independent from user input so
+  // stale timestamp checks can still fail predictably in challenge tests.
+  if ("timestamp" in input) {
+    return FIXED_REFERENCE_NOW_MS;
   }
 
   return 1234567890;
@@ -104,6 +95,10 @@ Date.now = () => __deterministicNow;
 Math.random = () => __deterministicRandom;
 try {
 ${safeCode}
+const __namedExportFns =
+  module.exports && typeof module.exports === "object"
+    ? Object.entries(module.exports).filter((entry) => typeof entry[1] === "function")
+    : [];
 const __challengeFn =
   typeof run === "function"
     ? run
@@ -113,11 +108,22 @@ const __challengeFn =
         ? module.exports
         : typeof module.exports.run === "function"
           ? module.exports.run
-          : typeof exports.run === "function"
-            ? exports.run
-            : null;
+          : typeof module.exports.default === "function"
+            ? module.exports.default
+            : typeof exports.run === "function"
+              ? exports.run
+              : typeof exports.default === "function"
+                ? exports.default
+                : __namedExportFns.length === 1
+                  ? __namedExportFns[0][1]
+                  : null;
 if (typeof __challengeFn !== "function") {
-  throw new Error("Runner misconfigured: entry function run(input) not found.");
+  const __exportNames = __namedExportFns.map((entry) => entry[0]).join(", ");
+  throw new Error(
+    __exportNames.length > 0
+      ? "Runner misconfigured: no callable entrypoint found. Available exports: " + __exportNames
+      : "Runner misconfigured: entry function run(input) not found."
+  );
 }
 const __result = Array.isArray(input) ? __challengeFn(...input) : __challengeFn(input);
 return __result;

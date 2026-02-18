@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Challenge, Lesson, Module } from "@/types/content";
 import { getContentService } from "@/lib/services/content-factory";
+import { getLessonHints } from "@/components/lessons/challenge-utils";
 import LessonPageClient, {
   type LessonApiResponse,
 } from "@/components/lessons/LessonPageClient";
@@ -29,9 +30,7 @@ function toChallenge(lesson: Lesson): Challenge | undefined {
     return undefined;
   }
 
-  const hints = Array.isArray(challengeLesson.hints)
-    ? challengeLesson.hints.filter((entry): entry is string => typeof entry === "string")
-    : [];
+  const hints = getLessonHints(challengeLesson);
 
   return {
     ...lesson,
