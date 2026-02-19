@@ -168,7 +168,20 @@
     "courseContent": "Conteúdo do Curso",
     "completeLesson": "Marcar como Concluída",
     "dayStreak": "Dias em Sequência",
-    "signInToTrack": "Entre para acompanhar seu progresso"
+    "signInToTrack": "Entre para acompanhar seu progresso",
+    "categories": {
+      "all": "Todas as categorias",
+      "solana": "Núcleo Solana",
+      "anchor": "Anchor",
+      "defi": "DeFi",
+      "security": "Segurança",
+      "rust": "Rust",
+      "infra": "Infraestrutura",
+      "wallet": "Carteira",
+      "mobile": "Mobile",
+      "payments": "Pagamentos",
+      "frontend": "Frontend"
+    }
   },
   "lesson": {
     "content": "Conteúdo",
@@ -484,8 +497,8 @@
   },
   "errors": {
     "404": "Página não encontrada",
-    "404Desc": "A página que você procura não existe.",
     "500": "Erro interno do servidor",
+    "404Desc": "A página que você procura não existe.",
     "500Desc": "Algo deu errado do nosso lado. Por favor, tente novamente mais tarde.",
     "unauthorized": "Não autorizado",
     "unauthorizedDesc": "Você precisa entrar para acessar esta página.",

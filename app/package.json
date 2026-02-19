@@ -21,6 +21,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "sanity:import": "tsx scripts/sanity-import.ts",
+    "i18n:course-template": "tsx scripts/generate-course-translation-template.ts",
+    "i18n:generate-course-pack": "node --import tsx scripts/generate-course-pack.ts",
+    "i18n:generate-es-courses": "node --import tsx scripts/generate-course-pack.ts es",
     "postinstall": "prisma generate"
   },
   "dependencies": {

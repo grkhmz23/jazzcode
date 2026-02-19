@@ -63,28 +63,31 @@ function inferCourseCategory(course: Course): CatalogCategory {
   return "solana";
 }
 
-function categoryLabel(category: CatalogCategory): string {
+function categoryLabel(
+  category: CatalogCategory,
+  t: ReturnType<typeof useTranslations>
+): string {
   switch (category) {
     case "solana":
-      return "Solana Core";
+      return t("categories.solana");
     case "anchor":
-      return "Anchor";
+      return t("categories.anchor");
     case "defi":
-      return "DeFi";
+      return t("categories.defi");
     case "security":
-      return "Security";
+      return t("categories.security");
     case "rust":
-      return "Rust";
+      return t("categories.rust");
     case "infra":
-      return "Infra";
+      return t("categories.infra");
     case "wallet":
-      return "Wallet";
+      return t("categories.wallet");
     case "mobile":
-      return "Mobile";
+      return t("categories.mobile");
     case "payments":
-      return "Payments";
+      return t("categories.payments");
     case "frontend":
-      return "Frontend";
+      return t("categories.frontend");
   }
 }
 
@@ -131,11 +134,11 @@ export default function CourseCatalogPage() {
           c.title.toLowerCase().includes(q) ||
           c.description.toLowerCase().includes(q) ||
           c.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-          categoryLabel(inferCourseCategory(c)).toLowerCase().includes(q)
+          categoryLabel(inferCourseCategory(c), t).toLowerCase().includes(q)
       );
     }
     return result;
-  }, [courses, search, difficulty, category]);
+  }, [courses, search, difficulty, category, t]);
 
   const difficultyFilters = [
     { value: "all", label: t("filterAll") },
@@ -159,12 +162,12 @@ export default function CourseCatalogPage() {
     ];
     const present = new Set(courses.map((course) => inferCourseCategory(course)));
     return [
-      { value: "all", label: "All categories" },
+      { value: "all", label: t("categories.all") },
       ...ordered
         .filter((entry) => present.has(entry))
-        .map((entry) => ({ value: entry, label: categoryLabel(entry) })),
+        .map((entry) => ({ value: entry, label: categoryLabel(entry, t) })),
     ];
-  }, [courses]);
+  }, [courses, t]);
 
   const totalLessons = (c: Course) => c.modules.reduce((sum, m) => sum + m.lessons.length, 0);
 
@@ -249,7 +252,7 @@ export default function CourseCatalogPage() {
                       {tc(course.difficulty)}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
-                      {categoryLabel(inferCourseCategory(course))}
+                      {categoryLabel(inferCourseCategory(course), t)}
                     </Badge>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />

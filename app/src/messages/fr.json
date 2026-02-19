@@ -168,7 +168,20 @@
     "courseContent": "Course Content",
     "completeLesson": "Mark as Complete",
     "dayStreak": "Day Streak",
-    "signInToTrack": "Sign in to track progress"
+    "signInToTrack": "Sign in to track progress",
+    "categories": {
+      "all": "Toutes les catégories",
+      "solana": "Noyau Solana",
+      "anchor": "Anchor",
+      "defi": "DeFi",
+      "security": "Sécurité",
+      "rust": "Rust",
+      "infra": "Infra",
+      "wallet": "Portefeuille",
+      "mobile": "Mobile",
+      "payments": "Paiements",
+      "frontend": "Frontend"
+    }
   },
   "lesson": {
     "content": "Content",
@@ -484,8 +497,8 @@
   },
   "errors": {
     "404": "Page not found",
-    "404Desc": "The page you're looking for doesn't exist.",
     "500": "Internal server error",
+    "404Desc": "The page you're looking for doesn't exist.",
     "500Desc": "Something went wrong on our end. Please try again later.",
     "unauthorized": "Unauthorized",
     "unauthorizedDesc": "You need to sign in to access this page.",

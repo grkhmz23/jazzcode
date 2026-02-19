@@ -1,39 +1,11 @@
 import type { Course, Lesson, Module } from "@/types/content";
 import type { Locale } from "@/lib/i18n/routing";
-
-interface LessonTranslation {
-  title?: string;
-  content?: string;
-  duration?: string;
-}
-
-interface ModuleTranslation {
-  title?: string;
-  description?: string;
-  lessons?: Record<string, LessonTranslation>;
-}
-
-interface CourseTranslation {
-  title?: string;
-  description?: string;
-  duration?: string;
-  tags?: string[];
-  modules?: Record<string, ModuleTranslation>;
-}
-
-type CourseTranslationCatalog = Partial<Record<Locale, Record<string, CourseTranslation>>>;
-
-// Translation packs can be incrementally filled by course slug and module/lesson ids.
-const courseTranslations: CourseTranslationCatalog = {
-  en: {},
-  es: {},
-  "pt-BR": {},
-  fr: {},
-  it: {},
-  de: {},
-  "zh-CN": {},
-  ar: {},
-};
+import { courseTranslationsByLocale } from "@/lib/i18n/course-translations";
+import type {
+  CourseTranslation,
+  LessonTranslation,
+  ModuleTranslation,
+} from "@/lib/i18n/course-translations/types";
 
 function applyLessonTranslation(lesson: Lesson, translation?: LessonTranslation): Lesson {
   if (!translation) {
@@ -58,17 +30,15 @@ function applyModuleTranslation(moduleItem: Module, translation?: ModuleTranslat
     title: translation.title ?? moduleItem.title,
     description: translation.description ?? moduleItem.description,
     lessons: moduleItem.lessons.map((lesson) =>
-      applyLessonTranslation(lesson, translation.lessons?.[lesson.id] ?? translation.lessons?.[lesson.slug])
+      applyLessonTranslation(
+        lesson,
+        translation.lessons?.[lesson.id] ?? translation.lessons?.[lesson.slug]
+      )
     ),
   };
 }
 
-export function localizeCourse(course: Course, locale: Locale): Course {
-  if (locale === "en") {
-    return course;
-  }
-
-  const translation = courseTranslations[locale]?.[course.slug];
+function applyCourseTranslation(course: Course, translation?: CourseTranslation): Course {
   if (!translation) {
     return course;
   }
@@ -80,10 +50,16 @@ export function localizeCourse(course: Course, locale: Locale): Course {
     duration: translation.duration ?? course.duration,
     tags: translation.tags ?? course.tags,
     modules: course.modules.map((moduleItem) =>
-      applyModuleTranslation(
-        moduleItem,
-        translation.modules?.[moduleItem.id]
-      )
+      applyModuleTranslation(moduleItem, translation.modules?.[moduleItem.id])
     ),
   };
+}
+
+export function localizeCourse(course: Course, locale: Locale): Course {
+  if (locale === "en") {
+    return course;
+  }
+
+  const translation = courseTranslationsByLocale[locale]?.[course.slug];
+  return applyCourseTranslation(course, translation);
 }

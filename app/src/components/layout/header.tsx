@@ -24,8 +24,8 @@ export function Header() {
 
   const navItems = [
     { href: "/courses", label: t("courses") },
-    { href: "/components", label: "Components" },
-    { href: "/playground", label: "Playground" },
+    { href: "/components", label: t("components") },
+    { href: "/playground", label: t("playground") },
     { href: "/devlab", label: t("devlab") },
     { href: "/leaderboard", label: t("leaderboard") },
   ];
