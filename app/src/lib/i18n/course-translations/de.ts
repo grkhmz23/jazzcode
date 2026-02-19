@@ -1,5 +1,3 @@
-import { deGeneratedCourseTranslations } from "./de.generated";
-import { buildMergedCourseTranslations } from "./merge";
 import type { CourseTranslationMap } from "./types";
 
 const deCuratedCourseTranslations: CourseTranslationMap = {
@@ -10,7 +8,4 @@ const deCuratedCourseTranslations: CourseTranslationMap = {
   },
 };
 
-export const deCourseTranslations: CourseTranslationMap = buildMergedCourseTranslations(
-  deGeneratedCourseTranslations,
-  deCuratedCourseTranslations
-);
+export const deCourseTranslations: CourseTranslationMap = deCuratedCourseTranslations;

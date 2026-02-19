@@ -1,5 +1,3 @@
-import { arGeneratedCourseTranslations } from "./ar.generated";
-import { buildMergedCourseTranslations } from "./merge";
 import type { CourseTranslationMap } from "./types";
 
 const arCuratedCourseTranslations: CourseTranslationMap = {
@@ -9,7 +7,4 @@ const arCuratedCourseTranslations: CourseTranslationMap = {
   },
 };
 
-export const arCourseTranslations: CourseTranslationMap = buildMergedCourseTranslations(
-  arGeneratedCourseTranslations,
-  arCuratedCourseTranslations
-);
+export const arCourseTranslations: CourseTranslationMap = arCuratedCourseTranslations;

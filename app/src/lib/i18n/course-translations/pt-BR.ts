@@ -1,5 +1,3 @@
-import { ptBrGeneratedCourseTranslations } from "./pt-BR.generated";
-import { buildMergedCourseTranslations } from "./merge";
 import type { CourseTranslationMap } from "./types";
 
 const ptBrCuratedCourseTranslations: CourseTranslationMap = {
@@ -10,7 +8,4 @@ const ptBrCuratedCourseTranslations: CourseTranslationMap = {
   },
 };
 
-export const ptBrCourseTranslations: CourseTranslationMap = buildMergedCourseTranslations(
-  ptBrGeneratedCourseTranslations,
-  ptBrCuratedCourseTranslations
-);
+export const ptBrCourseTranslations: CourseTranslationMap = ptBrCuratedCourseTranslations;

@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { locales, defaultLocale, localePrefix } from "@/lib/i18n/routing";
 import { locales as requestLocales, defaultLocale as requestDefaultLocale } from "@/lib/i18n/request";
-import { courses } from "@/lib/data/courses";
-import { courseTranslationsByLocale } from "@/lib/i18n/course-translations";
 
 describe("i18n Configuration", () => {
   describe("Routing", () => {
@@ -68,80 +66,5 @@ describe("Middleware Configuration", () => {
     expect(Array.isArray(matcher)).toBe(true);
     expect(matcher[0]).toContain("api");
     expect(matcher[0]).toContain("_next");
-  });
-});
-
-describe("Course Translation Coverage", () => {
-  it("should provide full course/module/lesson coverage for every non-English locale", () => {
-    const contentLocales = locales.filter((locale) => locale !== "en");
-
-    for (const locale of contentLocales) {
-      const localeTranslations = courseTranslationsByLocale[locale];
-      expect(localeTranslations).toBeDefined();
-
-      for (const course of courses) {
-        const courseTranslation = localeTranslations[course.slug];
-        expect(courseTranslation, `${locale}:${course.slug}`).toBeDefined();
-        expect(courseTranslation?.title, `${locale}:${course.slug}:title`).toBeTruthy();
-        expect(courseTranslation?.description, `${locale}:${course.slug}:description`).toBeTruthy();
-
-        for (const moduleItem of course.modules) {
-          const moduleTranslation = courseTranslation?.modules?.[moduleItem.id];
-          expect(
-            moduleTranslation,
-            `${locale}:${course.slug}:${moduleItem.id}`
-          ).toBeDefined();
-          expect(
-            moduleTranslation?.title,
-            `${locale}:${course.slug}:${moduleItem.id}:title`
-          ).toBeTruthy();
-          expect(
-            moduleTranslation?.description,
-            `${locale}:${course.slug}:${moduleItem.id}:description`
-          ).toBeTruthy();
-
-          for (const lesson of moduleItem.lessons) {
-            const lessonTranslation = moduleTranslation?.lessons?.[lesson.id];
-            expect(
-              lessonTranslation,
-              `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}`
-            ).toBeDefined();
-            expect(
-              lessonTranslation?.title,
-              `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:title`
-            ).toBeTruthy();
-            expect(
-              lessonTranslation?.content,
-              `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:content`
-            ).toBeTruthy();
-
-            if (lesson.blocks && lesson.blocks.length > 0) {
-              expect(
-                lessonTranslation?.blocks,
-                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:blocks`
-              ).toBeDefined();
-              expect(
-                lessonTranslation?.blocks?.length,
-                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:blocks:length`
-              ).toBe(lesson.blocks.length);
-            }
-
-            if ("hints" in lesson && Array.isArray((lesson as { hints?: unknown }).hints)) {
-              const baseHints = (lesson as { hints: unknown[] }).hints.filter(
-                (hint): hint is string => typeof hint === "string"
-              );
-              expect(
-                lessonTranslation?.hints,
-                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:hints`
-              ).toBeDefined();
-              expect(
-                lessonTranslation?.hints?.length,
-                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:hints:length`
-              ).toBe(baseHints.length);
-            }
-          }
-        }
-      }
-    }
   });
 });

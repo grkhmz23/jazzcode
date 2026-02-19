@@ -1,5 +1,3 @@
-import { zhCnGeneratedCourseTranslations } from "./zh-CN.generated";
-import { buildMergedCourseTranslations } from "./merge";
 import type { CourseTranslationMap } from "./types";
 
 const zhCnCuratedCourseTranslations: CourseTranslationMap = {
@@ -9,7 +7,4 @@ const zhCnCuratedCourseTranslations: CourseTranslationMap = {
   },
 };
 
-export const zhCnCourseTranslations: CourseTranslationMap = buildMergedCourseTranslations(
-  zhCnGeneratedCourseTranslations,
-  zhCnCuratedCourseTranslations
-);
+export const zhCnCourseTranslations: CourseTranslationMap = zhCnCuratedCourseTranslations;

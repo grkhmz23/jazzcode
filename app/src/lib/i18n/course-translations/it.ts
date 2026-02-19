@@ -1,5 +1,3 @@
-import { itGeneratedCourseTranslations } from "./it.generated";
-import { buildMergedCourseTranslations } from "./merge";
 import type { CourseTranslationMap } from "./types";
 
 const itCuratedCourseTranslations: CourseTranslationMap = {
@@ -10,7 +8,4 @@ const itCuratedCourseTranslations: CourseTranslationMap = {
   },
 };
 
-export const itCourseTranslations: CourseTranslationMap = buildMergedCourseTranslations(
-  itGeneratedCourseTranslations,
-  itCuratedCourseTranslations
-);
+export const itCourseTranslations: CourseTranslationMap = itCuratedCourseTranslations;
