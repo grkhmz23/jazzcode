@@ -1,0 +1,10 @@
+{
+  "id": "signer-missing",
+  "name": "Exploit missing signer check",
+  "exploitType": "missing-signer",
+  "amount": "700",
+  "attackerIsSigner": true,
+  "authorityIsSigner": false,
+  "useSpoofedPda": false,
+  "useWrongVaultOwner": false
+}

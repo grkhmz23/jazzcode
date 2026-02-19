@@ -1,0 +1,29 @@
+{
+  "name": "Jazz Fee Token",
+  "symbol": "JFEE",
+  "decimals": 6,
+  "mintAuthority": "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
+  "freezeAuthority": null,
+  "updateAuthority": "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
+  "initialSupply": "50000000000",
+  "extensions": {
+    "transferFee": {
+      "authority": "8fj6zQ5yGS8nD6KSqg6fC5QdP53r5v6pk7v4Uy6Rr2Fo",
+      "feeBps": 250,
+      "maxFee": "5000000"
+    },
+    "defaultAccountState": {
+      "state": "initialized"
+    }
+  },
+  "recipients": [
+    {
+      "owner": "7Y4f3Taf6YKqz3Y3h2Hj9uV4UT2Df6gKGfE6q8SxT6aY",
+      "amount": "12000000000"
+    },
+    {
+      "owner": "FnAaYH2xfUhJFFj7W2JML4D8XbQWfN2swf3zspu8i7M1",
+      "amount": "8000000000"
+    }
+  ]
+}
