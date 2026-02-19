@@ -1,17 +1,22 @@
 "use client";
 
-import { Link } from "@/lib/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Code2, Menu, X, LogOut, User, Settings, LayoutDashboard } from "lucide-react";
+import { Code2, Menu, X, LogOut, User, Settings, LayoutDashboard, Globe } from "lucide-react";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { WalletButton } from "@/components/auth/WalletButton";
+import { localeOptions } from "@/lib/i18n/locales";
+import type { Locale } from "@/lib/i18n/routing";
 
 export function Header() {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { data: session, status } = useSession();
@@ -27,6 +32,10 @@ export function Header() {
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
+  };
+
+  const handleLocaleChange = (nextLocale: Locale) => {
+    router.replace(pathname, { locale: nextLocale });
   };
 
   const userInitials = session?.user?.name
@@ -60,6 +69,21 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="hidden md:flex items-center space-x-2">
+            <div className="flex items-center gap-1 rounded-md border px-2 py-1">
+              <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+              <select
+                aria-label={t("language")}
+                className="bg-transparent text-xs outline-none"
+                value={locale}
+                onChange={(e) => handleLocaleChange(e.target.value as Locale)}
+              >
+                {localeOptions.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.flag} {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <WalletButton />
             {isAuthenticated && session?.user ? (
               <div className="relative">
@@ -148,6 +172,21 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t">
           <div className="container py-4 space-y-3">
+            <div className="flex items-center gap-2 rounded-md border px-2 py-1">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <select
+                aria-label={t("language")}
+                className="w-full bg-transparent text-sm outline-none"
+                value={locale}
+                onChange={(e) => handleLocaleChange(e.target.value as Locale)}
+              >
+                {localeOptions.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.flag} {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             {navItems.map((item) => (
               <Link
                 key={item.href}
