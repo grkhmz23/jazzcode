@@ -50,12 +50,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
             <Code2 className="h-6 w-6 text-solana-purple" />
-            <span className="font-bold">{tc("appName")}</span>
+            <span className="font-bold ltr-isolate">{tc("appName")}</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -67,8 +67,8 @@ export function Header() {
             ))}
           </nav>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          <nav className="hidden md:flex items-center space-x-2">
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <nav className="hidden md:flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-md border px-2 py-1">
               <Globe className="h-3.5 w-3.5 text-muted-foreground" />
               <select
@@ -112,15 +112,15 @@ export function Header() {
                       size="sm"
                       onClick={() => setShowUserMenu(false)}
                     >
-                      Cancel
+                      {tc("cancel")}
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleSignOut}
-                      className="text-red-500 hover:text-red-600"
+                      className="gap-1 text-red-500 hover:text-red-600"
                     >
-                      <LogOut className="mr-1 h-4 w-4" />
+                      <LogOut className="h-4 w-4" />
                       {tc("signOut")}
                     </Button>
                   </div>
@@ -140,7 +140,7 @@ export function Header() {
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="max-w-[100px] truncate">
+                    <span dir="auto" className="bidi-safe max-w-[100px] truncate">
                       {session.user.name}
                     </span>
                   </Button>
@@ -213,7 +213,9 @@ export function Header() {
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  {session?.user?.name}
+                  <span dir="auto" className="bidi-safe truncate">
+                    {session?.user?.name}
+                  </span>
                 </Link>
                 <Link
                   href="/dashboard"
@@ -232,13 +234,13 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-red-500"
+                  className="w-full justify-start gap-2 text-red-500"
                   onClick={() => {
                     handleSignOut();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="h-4 w-4" />
                   {tc("signOut")}
                 </Button>
               </>
