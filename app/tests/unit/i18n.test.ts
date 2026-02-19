@@ -114,6 +114,31 @@ describe("Course Translation Coverage", () => {
               lessonTranslation?.content,
               `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:content`
             ).toBeTruthy();
+
+            if (lesson.blocks && lesson.blocks.length > 0) {
+              expect(
+                lessonTranslation?.blocks,
+                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:blocks`
+              ).toBeDefined();
+              expect(
+                lessonTranslation?.blocks?.length,
+                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:blocks:length`
+              ).toBe(lesson.blocks.length);
+            }
+
+            if ("hints" in lesson && Array.isArray((lesson as { hints?: unknown }).hints)) {
+              const baseHints = (lesson as { hints: unknown[] }).hints.filter(
+                (hint): hint is string => typeof hint === "string"
+              );
+              expect(
+                lessonTranslation?.hints,
+                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:hints`
+              ).toBeDefined();
+              expect(
+                lessonTranslation?.hints?.length,
+                `${locale}:${course.slug}:${moduleItem.id}:${lesson.id}:hints:length`
+              ).toBe(baseHints.length);
+            }
           }
         }
       }

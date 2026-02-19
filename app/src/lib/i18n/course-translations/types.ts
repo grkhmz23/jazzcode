@@ -1,9 +1,12 @@
 import type { Locale } from "@/lib/i18n/routing";
+import type { LessonBlock } from "@/types/content";
 
 export interface LessonTranslation {
   title?: string;
   content?: string;
   duration?: string;
+  blocks?: LessonBlock[];
+  hints?: string[];
 }
 
 export interface ModuleTranslation {

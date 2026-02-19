@@ -12,11 +12,21 @@ function applyLessonTranslation(lesson: Lesson, translation?: LessonTranslation)
     return lesson;
   }
 
+  const challengeHints =
+    "hints" in lesson
+      ? {
+          hints:
+            translation.hints ?? ((lesson as Lesson & { hints?: string[] }).hints ?? []),
+        }
+      : {};
+
   return {
     ...lesson,
     title: translation.title ?? lesson.title,
     content: translation.content ?? lesson.content,
     duration: translation.duration ?? lesson.duration,
+    blocks: translation.blocks ?? lesson.blocks,
+    ...challengeHints,
   };
 }
 

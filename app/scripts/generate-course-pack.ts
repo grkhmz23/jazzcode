@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import * as courseModule from "../src/lib/data/courses/index";
 import type { Course } from "../src/types/content";
+import type { LessonBlock } from "../src/types/content";
 import type { CourseTranslationMap } from "../src/lib/i18n/course-translations/types";
 
 type SupportedLocale = "es" | "pt-BR" | "fr" | "it" | "de" | "zh-CN" | "ar";
@@ -424,6 +425,56 @@ function translateMarkdown(text: string, config: LocaleConfig): string {
     .join("");
 }
 
+function translateBlock(block: LessonBlock, config: LocaleConfig): LessonBlock {
+  if (block.type === "quiz") {
+    return {
+      ...block,
+      title: translateSegment(block.title, config),
+      questions: block.questions.map((question) => ({
+        ...question,
+        prompt: translateSegment(question.prompt, config),
+        options: question.options.map((option) => translateSegment(option, config)),
+        explanation: translateSegment(question.explanation, config),
+      })),
+    };
+  }
+
+  if (block.type === "terminal") {
+    return {
+      ...block,
+      title: translateSegment(block.title, config),
+      steps: block.steps.map((step) => ({
+        ...step,
+        output: translateSegment(step.output, config),
+        note: step.note ? translateSegment(step.note, config) : step.note,
+      })),
+    };
+  }
+
+  if (block.type === "explorer") {
+    if (block.explorer === "AccountExplorer") {
+      return {
+        ...block,
+        title: translateSegment(block.title, config),
+        props: {
+          ...block.props,
+          samples: block.props.samples.map((sample) => ({
+            ...sample,
+            label: translateSegment(sample.label, config),
+          })),
+        },
+      };
+    }
+
+    return {
+      ...block,
+      title: translateSegment(block.title, config),
+    };
+  }
+
+  return block;
+}
+
 function buildCoursePack(locale: SupportedLocale): CourseTranslationMap {
   const config = localeConfigs[locale];
   const pack: CourseTranslationMap = {};
@@ -447,6 +498,16 @@ function buildCoursePack(locale: SupportedLocale): CourseTranslationMap {
                   title: translateSegment(lesson.title, config),
                   content: translateMarkdown(lesson.content, config),
                   duration: lesson.duration,
+                  blocks: lesson.blocks?.map((block) => translateBlock(block, config)),
+                  ...("hints" in lesson
+                    ? {
+                        hints: Array.isArray((lesson as { hints?: unknown }).hints)
+                          ? (lesson as { hints: unknown[] }).hints
+                              .filter((hint): hint is string => typeof hint === "string")
+                              .map((hint) => translateSegment(hint, config))
+                          : undefined,
+                      }
+                    : {}),
                 },
               ])
             ),
