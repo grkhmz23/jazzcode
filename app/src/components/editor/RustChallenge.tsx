@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   RotateCcw,
@@ -90,6 +91,8 @@ export function RustChallenge({
   solution,
   onComplete,
 }: RustChallengeProps) {
+  const t = useTranslations("challenge");
+  const tc = useTranslations("common");
   const editorRef = useRef<CodeEditorHandle>(null);
   const [code, setCode] = useState(starterCode);
   const [isChecking, setIsChecking] = useState(false);
@@ -110,7 +113,7 @@ export function RustChallenge({
     // Validate code first
     const validation = validateRustCode(currentCode);
     if (!validation.valid) {
-      setError(validation.error || "Invalid code");
+      setError(validation.error || t("invalidCode"));
       setResults([]);
       setAllPassed(false);
       return;
@@ -124,7 +127,7 @@ export function RustChallenge({
     setResults(checkResults);
     setAllPassed(checkResults.every((r) => r.passed));
     setIsChecking(false);
-  }, [code, solution]);
+  }, [code, solution, t]);
 
   const handleResetCode = useCallback(() => {
     editorRef.current?.setValue(starterCode);
@@ -155,15 +158,14 @@ export function RustChallenge({
       <Alert className="bg-blue-50 border-blue-200">
         <Info className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          Rust challenges are validated against expected code patterns. For full
-          compilation and testing, use{" "}
+          {t("rustValidationNotice")}{" "}
           <a
             href="https://beta.solpg.io/"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline hover:text-blue-900"
           >
-            Solana Playground
+            {t("solanaPlayground")}
           </a>
           .
         </AlertDescription>
@@ -191,12 +193,12 @@ export function RustChallenge({
           {isChecking ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Checking...
+              {t("checking")}
             </>
           ) : (
             <>
               <CheckCircle2 className="h-4 w-4" />
-              Check Code
+              {t("checkCode")}
             </>
           )}
         </Button>
@@ -208,7 +210,7 @@ export function RustChallenge({
           className="gap-2"
         >
           <RotateCcw className="h-4 w-4" />
-          Reset Code
+          {t("resetCode")}
         </Button>
 
         <Button
@@ -218,7 +220,7 @@ export function RustChallenge({
           className={cn("gap-2", showHints && "bg-blue-50")}
         >
           <Lightbulb className="h-4 w-4" />
-          {showHints ? "Hide Hints" : "Show Hints"}
+          {showHints ? t("hideHints") : t("showHints")}
         </Button>
 
         <Button
@@ -228,7 +230,7 @@ export function RustChallenge({
           className="gap-2 border-yellow-500/50 text-yellow-700 hover:bg-yellow-50"
         >
           <Eye className="h-4 w-4" />
-          Show Solution
+          {t("showSolution")}
         </Button>
 
         <Button
@@ -237,7 +239,7 @@ export function RustChallenge({
           className="gap-2 ml-auto"
         >
           <ExternalLink className="h-4 w-4" />
-          Open in Solana Playground
+          {t("openInSolanaPlayground")}
         </Button>
       </div>
 
@@ -249,8 +251,7 @@ export function RustChallenge({
         <Alert className="bg-yellow-50 border-yellow-200">
           <Eye className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You&apos;ve viewed the solution. You won&apos;t receive the
-            &quot;Perfect Score&quot; achievement for this challenge.
+            {t("solutionViewedWarning")}
           </AlertDescription>
         </Alert>
       )}
@@ -260,18 +261,17 @@ export function RustChallenge({
         <div className="animate-in zoom-in-95 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-green-700">
             <CheckCircle2 className="h-6 w-6" />
-            <span className="text-lg font-bold">All structural checks passed! ✅</span>
+            <span className="text-lg font-bold">{t("allStructuralChecksPassed")}</span>
           </div>
           <p className="mt-1 text-sm text-green-600">
-            We recommend testing your code in Solana Playground to verify it
-            compiles and runs correctly.
+            {t("recommendTestInSolanaPlayground")}
           </p>
           <Button
             onClick={handleComplete}
             className="mt-3 gap-2 bg-green-600 hover:bg-green-700"
           >
             <CheckCircle2 className="h-4 w-4" />
-            Complete & Claim XP
+            {t("completeAndClaimXp")}
           </Button>
         </div>
       )}
@@ -280,10 +280,10 @@ export function RustChallenge({
         <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-green-700">
             <CheckCircle2 className="h-6 w-6" />
-            <span className="text-lg font-bold">Challenge Completed!</span>
+            <span className="text-lg font-bold">{t("challengeCompletedTitle")}</span>
           </div>
           <p className="mt-1 text-sm text-green-600">
-            You&apos;ve earned XP for this challenge. Keep up the great work!
+            {t("challengeCompletedBody")}
           </p>
         </div>
       )}
@@ -299,14 +299,17 @@ export function RustChallenge({
       {results.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Structural Checks</h3>
+            <h3 className="text-sm font-medium">{t("structuralChecks")}</h3>
             <span
               className={cn(
                 "text-sm font-medium",
                 allPassed ? "text-green-600" : "text-red-600"
               )}
             >
-              {results.filter((r) => r.passed).length}/{results.length} passed
+              {t("checksPassedCount", {
+                passed: results.filter((r) => r.passed).length,
+                total: results.length,
+              })}
             </span>
           </div>
           <div className="space-y-2">
@@ -328,18 +331,17 @@ export function RustChallenge({
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset Code?</DialogTitle>
+            <DialogTitle>{t("resetCodeTitle")}</DialogTitle>
             <DialogDescription>
-              This will restore the starter code and clear your current progress.
-              Your check results will also be reset.
+              {t("resetCodeChecksDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleResetCode} variant="destructive">
-              Reset Code
+              {t("resetCode")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -349,18 +351,17 @@ export function RustChallenge({
       <Dialog open={solutionDialogOpen} onOpenChange={setSolutionDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>View Solution?</DialogTitle>
+            <DialogTitle>{t("viewSolutionTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure? Viewing the solution means you won&apos;t get the
-              &quot;Perfect Score&quot; achievement for this challenge.
+              {t("viewSolutionWarning")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSolutionDialogOpen(false)}>
-              Keep Trying
+              {t("keepTrying")}
             </Button>
             <Button onClick={handleShowSolution} variant="default">
-              Show Solution
+              {t("showSolution")}
             </Button>
           </DialogFooter>
         </DialogContent>

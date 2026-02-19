@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Play, RotateCcw, Lightbulb, Eye, CheckCircle2, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
 import { trackEvent } from "@/components/analytics/GoogleAnalytics";
@@ -46,19 +47,6 @@ interface ChallengeRunnerProps {
 }
 
 type RunStatus = "idle" | "running" | "passed" | "failed";
-
-function statusLabel(status: RunStatus): string {
-  switch (status) {
-    case "running":
-      return "Running";
-    case "passed":
-      return "Passed";
-    case "failed":
-      return "Failed";
-    default:
-      return "Idle";
-  }
-}
 
 function statusBadgeClass(status: RunStatus): string {
   switch (status) {
@@ -108,6 +96,8 @@ export function ChallengeRunner({
   onComplete,
   onRunComplete,
 }: ChallengeRunnerProps) {
+  const t = useTranslations("challenge");
+  const tc = useTranslations("common");
   const editorRef = useRef<CodeEditorHandle>(null);
   const [code, setCode] = useState(starterCode);
   const [isRunning, setIsRunning] = useState(false);
@@ -183,6 +173,12 @@ export function ChallengeRunner({
 
   const failedResults = runState.results.filter((result) => !result.passed);
   const firstFailure = failedResults[0] ?? null;
+  const statusLabel = {
+    idle: t("statusIdle"),
+    running: t("statusRunning"),
+    passed: t("statusPassed"),
+    failed: t("statusFailed"),
+  } as const;
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -213,7 +209,7 @@ export function ChallengeRunner({
           ) : (
             <>
               <Play className="h-4 w-4" />
-              {runState.status === "passed" ? "Re-run Tests (Passed)" : "Run Tests"}
+              {runState.status === "passed" ? t("rerunTestsPassed") : t("runTests")}
             </>
           )}
         </Button>
@@ -225,7 +221,7 @@ export function ChallengeRunner({
           className="gap-2"
         >
           <RotateCcw className="h-4 w-4" />
-          Reset to Starter
+          {t("resetToStarter")}
         </Button>
 
         <Button
@@ -235,7 +231,7 @@ export function ChallengeRunner({
           className={cn("gap-2", showHints && "bg-blue-50")}
         >
           <Lightbulb className="h-4 w-4" />
-          {showHints ? "Hide Hints" : "Show Hints"}
+          {showHints ? t("hideHints") : t("showHints")}
         </Button>
 
         <Button
@@ -245,11 +241,11 @@ export function ChallengeRunner({
           className="gap-2 border-yellow-500/50 text-yellow-700 hover:bg-yellow-50"
         >
           <Eye className="h-4 w-4" />
-          Show Solution Outline
+          {t("showSolutionOutline")}
         </Button>
 
         <Badge variant="outline" className={cn("ml-2", statusBadgeClass(runState.status))}>
-          {statusLabel(runState.status)}
+          {statusLabel[runState.status]}
         </Badge>
       </div>
 
@@ -259,17 +255,17 @@ export function ChallengeRunner({
       <Card>
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Run Summary</span>
+            <span className="text-sm font-medium">{t("runSummary")}</span>
             <Badge variant="outline" className={statusBadgeClass(runState.status)}>
-              {statusLabel(runState.status)}
+              {statusLabel[runState.status]}
             </Badge>
           </div>
           <Separator />
           <p className="text-sm text-muted-foreground">
-            {runState.status === "idle" && "No test run yet."}
-            {runState.status === "running" && "Executing deterministic test cases..."}
-            {runState.status === "passed" && `All tests passed in ${runState.totalTime}ms.`}
-            {runState.status === "failed" && `Run failed in ${runState.totalTime}ms.`}
+            {runState.status === "idle" && t("noTestRunYet")}
+            {runState.status === "running" && t("executingDeterministicTests")}
+            {runState.status === "passed" && t("testsPassedIn", { ms: runState.totalTime })}
+            {runState.status === "failed" && t("runFailedIn", { ms: runState.totalTime })}
           </p>
           {runState.status === "failed" && firstFailure && (
             <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm">
@@ -278,7 +274,10 @@ export function ChallengeRunner({
                 <p className="mt-1 text-red-700">{firstFailure.error}</p>
               ) : (
                 <p className="mt-1 text-red-700">
-                  Expected `{firstFailure.expectedOutput}` but got `{firstFailure.actualOutput}`.
+                  {t("expectedButGot", {
+                    expected: firstFailure.expectedOutput,
+                    actual: firstFailure.actualOutput,
+                  })}
                 </p>
               )}
             </div>
@@ -291,7 +290,7 @@ export function ChallengeRunner({
         <Alert className="bg-yellow-50 border-yellow-200">
           <Eye className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You&apos;ve viewed the solution. You won&apos;t receive the &quot;Perfect Score&quot; achievement for this challenge.
+            {t("solutionViewedWarning")}
           </AlertDescription>
         </Alert>
       )}
@@ -301,17 +300,17 @@ export function ChallengeRunner({
         <div className="animate-in zoom-in-95 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-green-700">
             <Trophy className="h-6 w-6" />
-            <span className="text-lg font-bold">All tests passed! 🎉</span>
+            <span className="text-lg font-bold">{t("allTestsPassedCelebration")}</span>
           </div>
           <p className="mt-1 text-sm text-green-600">
-            Great job! You can now complete this challenge and claim your XP.
+            {t("greatJobClaimXp")}
           </p>
           <Button
             onClick={handleComplete}
             className="mt-3 gap-2 bg-green-600 hover:bg-green-700"
           >
             <CheckCircle2 className="h-4 w-4" />
-            Complete & Claim XP
+            {t("completeAndClaimXp")}
           </Button>
         </div>
       )}
@@ -320,10 +319,10 @@ export function ChallengeRunner({
         <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-green-700">
             <CheckCircle2 className="h-6 w-6" />
-            <span className="text-lg font-bold">Challenge Completed!</span>
+            <span className="text-lg font-bold">{t("challengeCompletedTitle")}</span>
           </div>
           <p className="mt-1 text-sm text-green-600">
-            You&apos;ve earned XP for this challenge. Keep up the great work!
+            {t("challengeCompletedBody")}
           </p>
         </div>
       )}
@@ -338,7 +337,7 @@ export function ChallengeRunner({
       {runState.status === "failed" && failedResults.length > 0 && (
         <Alert>
           <AlertDescription>
-            <p className="mb-2 font-medium">Failing tests:</p>
+            <p className="mb-2 font-medium">{t("failingTests")}</p>
             <ul className="list-inside list-disc space-y-1 text-sm">
               {failedResults.map((result) => (
                 <li key={result.name}>
@@ -347,15 +346,17 @@ export function ChallengeRunner({
                     <span className="text-muted-foreground"> - {result.error}</span>
                   ) : (
                     <span className="text-muted-foreground">
-                      {" "}
-                      - expected `{result.expectedOutput}` got `{result.actualOutput}`
+                      {" "}{t("expectedGotInline", {
+                        expected: result.expectedOutput,
+                        actual: result.actualOutput,
+                      })}
                     </span>
                   )}
                 </li>
               ))}
             </ul>
             <details className="mt-3 rounded border p-2">
-              <summary className="cursor-pointer text-sm font-medium">Full output</summary>
+              <summary className="cursor-pointer text-sm font-medium">{t("fullOutput")}</summary>
               <pre className="mt-2 whitespace-pre-wrap text-xs">
                 {failedResults
                   .map((result) =>
@@ -391,18 +392,17 @@ export function ChallengeRunner({
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset Code?</DialogTitle>
+            <DialogTitle>{t("resetCodeTitle")}</DialogTitle>
             <DialogDescription>
-              This will restore the starter code and clear your current progress.
-              Your test results will also be reset.
+              {t("resetCodeDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button onClick={handleResetCode} variant="destructive">
-              Reset to Starter
+              {t("resetToStarter")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -412,9 +412,9 @@ export function ChallengeRunner({
       <Dialog open={solutionDialogOpen} onOpenChange={setSolutionDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Solution Outline</DialogTitle>
+            <DialogTitle>{t("solutionOutlineTitle")}</DialogTitle>
             <DialogDescription>
-              This shows a high-level structure only. Full code is intentionally hidden.
+              {t("solutionOutlineDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-md border bg-muted/40 p-3">
@@ -428,10 +428,10 @@ export function ChallengeRunner({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSolutionDialogOpen(false)}>
-              Keep Coding
+              {t("keepCoding")}
             </Button>
             <Button onClick={handleShowSolutionOutline} variant="default">
-              I Understand
+              {t("iUnderstand")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -24,7 +24,9 @@
     "i18n:course-template": "tsx scripts/generate-course-translation-template.ts",
     "i18n:generate-course-pack": "node --import tsx scripts/generate-course-pack.ts",
     "i18n:generate-es-courses": "node --import tsx scripts/generate-course-pack.ts es",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "i18n:curation-report": "node --import tsx scripts/curation-coverage-report.ts",
+    "i18n:smoke-audit": "node --import tsx scripts/localization-smoke-audit.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.0",

@@ -285,7 +285,7 @@ export default function CourseDetailPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t("instructor")}</span>
-                  <span className="font-medium">Superteam Academy</span>
+                  <span className="font-medium">{tc("appName")}</span>
                 </div>
               </div>
 

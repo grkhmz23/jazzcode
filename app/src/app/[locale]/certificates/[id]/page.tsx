@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,7 @@ interface VerificationResult {
 
 export default function CertificatePage({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
+  const locale = useLocale();
   const t = useTranslations("certificate");
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [verification, setVerification] = useState<{ valid: boolean; owner: string | null } | null>(null);
@@ -108,14 +109,14 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
         }
       } catch (err) {
         console.error("Failed to fetch credential:", err);
-        setCredentialError("Failed to fetch on-chain credential");
+        setCredentialError(t("fetchCredentialFailed"));
       } finally {
         setIsLoadingCredential(false);
       }
     }
 
     void fetchCertificate();
-  }, [params.id]);
+  }, [params.id, t]);
 
   const handleShare = useCallback(async () => {
     if (!certificate) return;
@@ -200,7 +201,7 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
         <Award className="mb-4 h-16 w-16 text-muted-foreground/30" />
-        <h1 className="text-2xl font-bold">Certificate Not Found</h1>
+        <h1 className="text-2xl font-bold">{t("notFound")}</h1>
       </div>
     );
   }
@@ -240,7 +241,7 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
               {/* Date */}
               <p className="mt-6 text-sm text-muted-foreground">
                 {t("completedOn", {
-                  date: new Date(certificate.completedAt).toLocaleDateString("en-US", {
+                  date: new Date(certificate.completedAt).toLocaleDateString(locale, {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -259,12 +260,12 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                   {verification.valid || hasOnChainCredential ? (
                     <>
                       <CheckCircle2 className="h-4 w-4 text-solana-green" />
-                      <span className="text-sm text-solana-green">Verified on Solana</span>
+                      <span className="text-sm text-solana-green">{t("verifiedOnSolana")}</span>
                     </>
                   ) : (
                     <>
                       <XCircle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Pending on-chain verification</span>
+                      <span className="text-sm text-muted-foreground">{t("pendingOnChainVerification")}</span>
                     </>
                   )}
                 </div>
@@ -274,11 +275,11 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
               {session?.user && !session.user.walletAddress && (
                 <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
                   <p className="text-sm text-amber-800 dark:text-amber-200">
-                    Link a wallet to mint your certificate on-chain.
+                    {t("linkWalletToMint")}
                   </p>
                   <Link href="/settings">
                     <Button variant="link" className="h-auto p-0 text-sm text-amber-800 dark:text-amber-200">
-                      Go to Settings →
+                      {t("goToSettings")}
                     </Button>
                   </Link>
                 </div>
@@ -320,7 +321,7 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Shield className="h-5 w-5 text-solana-green" />
-              On-Chain Credential
+              {t("onChainCredential")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -340,33 +341,33 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
             {/* Credential Details */}
             <div className="grid gap-3 text-sm">
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Name</span>
+                <span className="text-muted-foreground">{t("fieldName")}</span>
                 <span className="font-medium">{credential?.name}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Track</span>
+                <span className="text-muted-foreground">{t("fieldTrack")}</span>
                 <span className="font-medium">{credential?.trackName}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Level</span>
+                <span className="text-muted-foreground">{t("fieldLevel")}</span>
                 <Badge variant="outline">{credential?.level}</Badge>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Mint Address</span>
+                <span className="text-muted-foreground">{t("mintAddress")}</span>
                 <code className="text-xs">
                   {credential?.mintAddress.slice(0, 8)}...
                   {credential?.mintAddress.slice(-8)}
                 </code>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Owner</span>
+                <span className="text-muted-foreground">{t("fieldOwner")}</span>
                 <code className="text-xs">
                   {credential?.owner.slice(0, 8)}...{credential?.owner.slice(-8)}
                 </code>
               </div>
               {credential?.collection && (
                 <div className="flex justify-between border-b pb-2">
-                  <span className="text-muted-foreground">Collection</span>
+                  <span className="text-muted-foreground">{t("fieldCollection")}</span>
                   <code className="text-xs">
                     {credential?.collection.slice(0, 8)}...
                     {credential?.collection.slice(-8)}
@@ -374,21 +375,21 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                 </div>
               )}
               <div className="flex justify-between border-b pb-2">
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-muted-foreground">{t("fieldType")}</span>
                 <span className="font-medium">
-                  {credential?.compressed ? "Compressed NFT (cNFT)" : "Standard NFT"}
+                  {credential?.compressed ? t("typeCompressed") : t("typeStandard")}
                 </span>
               </div>
               {credential?.metadataUri && (
                 <div className="flex justify-between border-b pb-2">
-                  <span className="text-muted-foreground">Metadata URI</span>
+                  <span className="text-muted-foreground">{t("fieldMetadataUri")}</span>
                   <a
                     href={credential.metadataUri}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                   >
-                    View JSON
+                    {t("viewJson")}
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
@@ -397,7 +398,7 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
 
             {/* Ownership Verification Section */}
             <div className="border-t pt-4">
-              <h4 className="mb-3 text-sm font-medium">Ownership Verification</h4>
+              <h4 className="mb-3 text-sm font-medium">{t("ownershipVerification")}</h4>
               
               {!ownershipVerification ? (
                 <Button
@@ -409,12 +410,12 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                   {isVerifyingOwnership ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Verifying...
+                      {t("verifying")}
                     </>
                   ) : (
                     <>
                       <ShieldCheck className="h-4 w-4" />
-                      Verify Ownership
+                      {t("verifyOwnership")}
                     </>
                   )}
                 </Button>
@@ -424,10 +425,10 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                     <ShieldCheck className="h-5 w-5 text-green-600" />
                     <div>
                       <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                        Ownership Verified ✓
+                        {t("ownershipVerified")} ✓
                       </p>
                       <p className="text-xs text-green-700 dark:text-green-300">
-                        Current owner: {ownershipVerification.currentOwner?.slice(0, 8)}...
+                        {t("currentOwner")}: {ownershipVerification.currentOwner?.slice(0, 8)}...
                         {ownershipVerification.currentOwner?.slice(-8)}
                       </p>
                     </div>
@@ -437,16 +438,16 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                     <ShieldAlert className="h-5 w-5 text-yellow-600" />
                     <div>
                       <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                        Could Not Verify
+                        {t("couldNotVerify")}
                       </p>
                       <p className="text-xs text-yellow-700 dark:text-yellow-300">
                         {ownershipVerification.currentOwner ? (
                           <>
-                            Asset owned by: {ownershipVerification.currentOwner.slice(0, 8)}...
+                            {t("assetOwnedBy")}: {ownershipVerification.currentOwner.slice(0, 8)}...
                             {ownershipVerification.currentOwner.slice(-8)}
                           </>
                         ) : (
-                          "Asset not found or ownership mismatch"
+                          t("assetNotFound")
                         )}
                       </p>
                     </div>
@@ -457,10 +458,10 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                   <HelpCircle className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      On-chain verification unavailable
+                      {t("onChainUnavailable")}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Helius API key not configured
+                      {t("heliusNotConfigured")}
                     </p>
                   </div>
                 </div>
@@ -475,7 +476,7 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
                 className="flex-1 gap-2"
               >
                 <ExternalLink className="h-4 w-4" />
-                View on Explorer
+                {t("viewOnExplorer")}
               </Button>
               <Button variant="ghost" size="icon" onClick={handleCopyMint}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -496,11 +497,10 @@ export default function CertificatePage({ params }: { params: { id: string } }) 
           <CardContent className="flex flex-col items-center justify-center py-8 text-center">
             <AlertCircle className="mb-3 h-10 w-10 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">
-              On-chain verification available after program deployment
+              {t("onChainAfterDeployment")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Your certificate is saved locally and will be minted once the credential
-              program is live on devnet.
+              {t("savedLocallyUntilMint")}
             </p>
           </CardContent>
         </Card>

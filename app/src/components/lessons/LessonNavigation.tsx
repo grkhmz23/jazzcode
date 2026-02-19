@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
@@ -52,6 +53,8 @@ export function LessonNavigation({
   modules,
   completedLessons,
 }: LessonNavigationProps) {
+  const t = useTranslations("lesson");
+  const tc = useTranslations("common");
   const lessons = useMemo(
     () => flattenLessons(modules, completedLessons),
     [modules, completedLessons]
@@ -81,14 +84,14 @@ export function LessonNavigation({
           >
             <Button variant="ghost" size="sm" className="gap-1">
               <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Previous Lesson</span>
-              <span className="sm:hidden">Previous</span>
+              <span className="hidden sm:inline">{t("previousLesson")}</span>
+              <span className="sm:hidden">{tc("previous")}</span>
             </Button>
           </Link>
         ) : (
           <Button variant="ghost" size="sm" disabled className="gap-1">
             <ChevronLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Previous Lesson</span>
+            <span className="hidden sm:inline">{t("previousLesson")}</span>
           </Button>
         )}
       </div>
@@ -100,15 +103,14 @@ export function LessonNavigation({
           <span className="hidden sm:inline">{currentLesson.moduleTitle}</span>
         </div>
         <div className="text-sm font-medium">
-          Lesson {currentLesson.lessonIndex + 1} of{" "}
-          {
-            lessons.filter((l) => l.moduleId === currentLesson.moduleId)
-              .length
-          }
+          {t("lessonProgress", {
+            current: currentLesson.lessonIndex + 1,
+            total: lessons.filter((l) => l.moduleId === currentLesson.moduleId).length,
+          })}
         </div>
         {nextLesson && nextLesson.moduleId !== currentLesson.moduleId && (
           <div className="text-xs text-muted-foreground">
-            Next: {nextLesson.moduleTitle}
+            {t("nextModule", { module: nextLesson.moduleTitle })}
           </div>
         )}
       </div>
@@ -120,15 +122,15 @@ export function LessonNavigation({
             href={`/courses/${courseSlug}/lessons/${nextLesson.id}`}
           >
             <Button variant="ghost" size="sm" className="gap-1">
-              <span className="hidden sm:inline">Next Lesson</span>
-              <span className="sm:hidden">Next</span>
+              <span className="hidden sm:inline">{t("nextLesson")}</span>
+              <span className="sm:hidden">{tc("next")}</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         ) : (
           <Link href={`/courses/${courseSlug}`}>
             <Button variant="ghost" size="sm" className="gap-1">
-              Back to Course
+              {t("backToCourse")}
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>

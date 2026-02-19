@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const levelColors: Record<string, string> = {
 };
 
 export function CredentialCard({ credential, className }: CredentialCardProps) {
+  const t = useTranslations("credentials");
   const [imageError, setImageError] = useState(false);
 
   const handleViewOnExplorer = () => {
@@ -73,7 +75,7 @@ export function CredentialCard({ credential, className }: CredentialCardProps) {
             <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-muted to-muted/50">
               <ImageOff className="h-12 w-12 text-muted-foreground/30" />
               <span className="mt-2 text-xs text-muted-foreground">
-                No image available
+                {t("noImageAvailable")}
               </span>
             </div>
           )}
@@ -82,7 +84,7 @@ export function CredentialCard({ credential, className }: CredentialCardProps) {
           {credential.compressed && (
             <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-solana-green/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
               <CheckCircle2 className="h-3 w-3" />
-              Verified
+              {t("verified")}
             </div>
           )}
         </div>
@@ -122,7 +124,7 @@ export function CredentialCard({ credential, className }: CredentialCardProps) {
               onClick={handleViewOnExplorer}
             >
               <ExternalLink className="h-3 w-3" />
-              View on Explorer
+              {t("viewOnExplorer")}
             </Button>
             {credential.metadataUri && (
               <Button
@@ -131,7 +133,7 @@ export function CredentialCard({ credential, className }: CredentialCardProps) {
                 className="text-xs"
                 onClick={handleViewMetadata}
               >
-                Metadata
+                {t("viewMetadata")}
               </Button>
             )}
           </div>

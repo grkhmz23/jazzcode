@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Lightbulb, ChevronRight, AlertCircle, ListChecks, Code2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -80,6 +81,7 @@ function hintKindLabel(kind: HintKind): string {
 }
 
 export function HintsPanel({ hints, defaultOpen = false }: HintsPanelProps) {
+  const t = useTranslations("lesson");
   const normalizedHints = useMemo(() => normalizeHints(hints), [hints]);
   const totalHints = normalizedHints.length;
   const [revealedCount, setRevealedCount] = useState(() =>
@@ -95,7 +97,7 @@ export function HintsPanel({ hints, defaultOpen = false }: HintsPanelProps) {
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Lightbulb className="h-4 w-4 text-blue-600" />
-            Hints
+            {t("hintsTitle")}
             <Badge variant="secondary">{totalHints}</Badge>
           </CardTitle>
           {totalHints > 0 && (
@@ -108,7 +110,7 @@ export function HintsPanel({ hints, defaultOpen = false }: HintsPanelProps) {
                 disabled={!hasMoreHints}
                 className="gap-1"
               >
-                Reveal next
+                {t("revealNextHint")}
                 <ChevronRight className="h-3 w-3" />
               </Button>
               <Button
@@ -118,7 +120,7 @@ export function HintsPanel({ hints, defaultOpen = false }: HintsPanelProps) {
                 onClick={() => setRevealedCount(totalHints)}
                 disabled={revealedCount >= totalHints}
               >
-                Reveal all
+                {t("revealAllHints")}
               </Button>
             </div>
           )}
@@ -127,20 +129,20 @@ export function HintsPanel({ hints, defaultOpen = false }: HintsPanelProps) {
       <CardContent className="space-y-3">
         {totalHints === 0 && (
           <div className="rounded-lg border border-dashed border-blue-300/70 bg-white/70 p-4">
-            <p className="text-sm font-medium text-blue-900">No hints were provided for this challenge yet.</p>
+            <p className="text-sm font-medium text-blue-900">{t("noHintsYet")}</p>
             <p className="mt-1 text-xs text-blue-700/80">
-              If this looks wrong, report the challenge so we can fix the lesson data.
+              {t("reportHintDataIssue")}
             </p>
             <Button type="button" size="sm" variant="outline" className="mt-3">
-              Report issue
+              {t("reportIssue")}
             </Button>
           </div>
         )}
 
         {totalHints > 0 && revealedCount === 0 && (
           <div className="rounded-lg border border-dashed border-blue-300/70 bg-white/70 p-4">
-            <p className="text-sm text-blue-900">Hints are available for this challenge.</p>
-            <p className="mt-1 text-xs text-blue-700/80">Use “Reveal next” to see one hint at a time.</p>
+            <p className="text-sm text-blue-900">{t("hintsAvailable")}</p>
+            <p className="mt-1 text-xs text-blue-700/80">{t("useRevealNextHint")}</p>
           </div>
         )}
 

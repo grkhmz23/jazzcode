@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type {
   PanelCollapseState,
@@ -54,6 +55,7 @@ export function WorkbenchShell({
   onQuestComplete,
   className,
 }: WorkbenchShellProps) {
+  const t = useTranslations("playground");
   // Use default quest if none provided
   const activeQuest = quest ?? solanaFundamentalsQuest;
   const activeDefinition = React.useMemo<WorkspaceDefinition>(() => definition ?? {
@@ -372,7 +374,7 @@ export function WorkbenchShell({
             "rounded bg-muted px-2 py-1 text-xs font-medium hover:bg-muted/80",
             collapsed.left && "bg-primary text-primary-foreground"
           )}
-          title="Toggle file explorer"
+          title={t("toggleFileExplorer")}
         >
           Files
         </button>
@@ -382,7 +384,7 @@ export function WorkbenchShell({
             "rounded bg-muted px-2 py-1 text-xs font-medium hover:bg-muted/80",
             collapsed.bottom && "bg-primary text-primary-foreground"
           )}
-          title="Toggle terminal"
+          title={t("toggleTerminal")}
         >
           Terminal
         </button>
@@ -392,7 +394,7 @@ export function WorkbenchShell({
             "rounded bg-muted px-2 py-1 text-xs font-medium hover:bg-muted/80",
             collapsed.right && "bg-primary text-primary-foreground"
           )}
-          title="Toggle task panel"
+          title={t("toggleTaskPanel")}
         >
           Tasks
         </button>

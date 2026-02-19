@@ -57,7 +57,9 @@
     "yesterday": "Yesterday",
     "ago": "ago",
     "connectWallet": "Connect Wallet",
-    "linkWallet": "Link Wallet"
+    "linkWallet": "Link Wallet",
+    "errorSupportMessage": "تم إبلاغنا بالمشكلة ونعمل على إصلاحها.",
+    "achievementUnlocked": "تم فتح إنجاز جديد!"
   },
   "nav": {
     "home": "Home",
@@ -88,7 +90,8 @@
     "hints": "Hints",
     "score": "Score",
     "nextMission": "Next Mission",
-    "complete": "Complete"
+    "complete": "Complete",
+    "showHint": "إظهار تلميح"
   },
   "landing": {
     "heroTitle": "Master Solana Development",
@@ -131,7 +134,21 @@
     "playgroundFeature1": "Live TypeScript execution with Solana mocks",
     "playgroundFeature2": "Pre-built templates for common operations",
     "playgroundFeature3": "Share your code with a URL",
-    "playgroundFeature4": "No wallet connection required"
+    "playgroundFeature4": "No wallet connection required",
+    "heroBadge": "مجاني · مفتوح المصدر · Solana Native",
+    "devlabBadge": "DevLab",
+    "devlabTitle": "Solana DevLab",
+    "devlabSubtitle": "محاكي CLI تفاعلي. تعلم بالممارسة في بيئة شبيهة بـ VS Code. اكثر من 30 مهمة موجهة.",
+    "devlabCTA": "تشغيل DevLab",
+    "devlabUri": "solana-devlab://builder-track/mission-1",
+    "devlabExplorer": "المستكشف",
+    "devlabPath": "programs/my_program/src/lib.rs",
+    "devlabPromptUser": "user@solana-devlab",
+    "devlabPromptPath": ":~/my-solana-project$",
+    "devlabCommand": "solana config set --url devnet",
+    "componentHubItem1Install": "npm install @jazzcode/wallet-connect-button",
+    "componentHubItem2Install": "npm install @jazzcode/token-balance-card",
+    "componentHubItem3Install": "npm install @jazzcode/nft-gallery"
   },
   "courses": {
     "title": "Course Catalog",
@@ -221,7 +238,57 @@
     "courseCompleteDescription": "Congratulations! You completed every lesson in this course.",
     "courseCompleteTotalXp": "Total XP earned",
     "markingComplete": "Marking complete...",
-    "signInToTrack": "Sign in to track progress"
+    "signInToTrack": "Sign in to track progress",
+    "lessonProgress": "الدرس {current} من {total}",
+    "nextModule": "التالي: {module}",
+    "hintsTitle": "تلميحات",
+    "revealNextHint": "إظهار التالي",
+    "revealAllHints": "إظهار الكل",
+    "noHintsYet": "لا توجد تلميحات لهذا التحدي بعد.",
+    "reportHintDataIssue": "إذا بدا هذا غير صحيح، أبلغ عن التحدي لكي نصلح بيانات الدرس.",
+    "reportIssue": "الإبلاغ عن مشكلة",
+    "hintsAvailable": "تتوفر تلميحات لهذا التحدي.",
+    "useRevealNextHint": "استخدم \"إظهار التالي\" لرؤية تلميح واحد في كل مرة.",
+    "markCompleteLocal": "وضع علامة مكتمل (محلي)",
+    "projectStatus": "حالة المشروع",
+    "walletAddress": "عنوان المحفظة",
+    "lastTransferSummary": "ملخص آخر تحويل",
+    "runLessonTransferSummary": "شغّل اختبارات تحدي الدرس 4 أو 8 لالتقاط ملخص التحويل.",
+    "clearLocalProgress": "مسح التقدم المحلي",
+    "shortcutsNextPrev": "الاختصارات: n = التالي، p = السابق",
+    "previousLessonShort": "السابق",
+    "nextLessonShort": "التالي",
+    "startFromTemplate": "ابدأ من القالب",
+    "importFromGithub": "استيراد من GitHub",
+    "runAnchorBuild": "تشغيل Anchor Build",
+    "runAnchorTest": "تشغيل Anchor Test",
+    "runSimulatedCommands": "تشغيل أوامر Solana CLI المحاكاة",
+    "autosaveEnabled": "تم تفعيل الحفظ التلقائي. سيتم استئناف تقدم الدرس تلقائيًا.",
+    "invalidInput": "إدخال غير صالح",
+    "programIdPlaceholder": "معرّف البرنامج",
+    "commaSeparatedSeedsPlaceholder": "بذور مفصولة بفواصل",
+    "programPlaceholder": "البرنامج",
+    "accountsCommaSeparatedPlaceholder": "حسابات مفصولة بفواصل",
+    "addInstruction": "إضافة تعليمة",
+    "totalAccountsReferenced": "إجمالي الحسابات المشار إليها: {count}",
+    "walletAddressPlaceholder": "عنوان المحفظة",
+    "tokenAccountsCount": "حسابات التوكن: {count}",
+    "dataLength": "طول البيانات",
+    "ownerLabel": "المالك",
+    "ownerProgramMutates": "يمكن لبرنامج المالك فقط تعديل بيانات الحساب.",
+    "executableLabel": "قابل للتنفيذ",
+    "executableTrueMeans": "تعني `true` أن هذا الحساب يخزن بايت كود البرنامج بدلًا من حالة تطبيق قابلة للتعديل.",
+    "dataLengthLabel": "طول البيانات",
+    "rentExemptionScales": "متطلبات الإعفاء من الإيجار تزداد مع عدد البايتات المخزنة.",
+    "lamportsSol": "{lamports} ({sol} SOL)",
+    "challengeAlreadyCompleted": "لقد أكملت هذا التحدي بالفعل ✅",
+    "challengeCanStillPractice": "لا يزال بإمكانك تعديل الكود وتشغيله للتدرب",
+    "courseProgress": "تقدم الدورة",
+    "courseContent": "محتوى الدورة",
+    "programId": "معرف البرنامج",
+    "derivedPda": "PDA المشتقة",
+    "seedBytesUtf8": "بايتات البذور (UTF-8)",
+    "checkAnswers": "تحقق من الإجابات"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -254,7 +321,16 @@
     "onChainPending": "On-chain XP will be available after program deployment.",
     "viewTokenAccount": "View token account",
     "linkWalletForXP": "Link wallet for on-chain XP",
-    "activityCompletedIn": "Lesson completed in {course}"
+    "activityCompletedIn": "Lesson completed in {course}",
+    "weekWarrior": "محارب الأسبوع",
+    "monthlyMaster": "خبير الشهر",
+    "consistencyKing": "ملك الاستمرارية",
+    "startStreakToday": "ابدأ سلسلة اليوم!",
+    "startStreakDescription": "أكمل درسًا لبدء سلسلة التعلّم الخاصة بك. حافظ على الاستمرارية واكسب الإنجازات!",
+    "best": "الأفضل",
+    "allMilestonesCompleted": "اكتملت جميع المحطات!",
+    "highestMilestoneAchieved": "لقد وصلت إلى أعلى محطة في السلسلة! استمر بهذا الأداء!",
+    "daysToMilestone": "{current}/{days} يوم للوصول إلى {milestone}"
   },
   "profile": {
     "title": "Profile",
@@ -362,7 +438,8 @@
     "saveChanges": "Save Changes",
     "usernamePlaceholder": "your_username",
     "displayNamePlaceholder": "Display Name",
-    "bioPlaceholder": "Tell us about yourself..."
+    "bioPlaceholder": "Tell us about yourself...",
+    "solanaWallet": "محفظة سولانا"
   },
   "certificate": {
     "title": "Certificate of Completion",
@@ -383,7 +460,28 @@
     "verifyOwnership": "Verify Ownership",
     "verifying": "Verifying...",
     "currentOwner": "Current owner",
-    "assetNotFound": "Asset not found or ownership mismatch"
+    "assetNotFound": "Asset not found or ownership mismatch",
+    "verifiedOnSolana": "تم التحقق على Solana",
+    "pendingOnChainVerification": "التحقق على السلسلة قيد الانتظار",
+    "linkWalletToMint": "اربط محفظة لسك شهادةك على السلسلة.",
+    "goToSettings": "اذهب الى الاعدادات →",
+    "fieldName": "الاسم",
+    "fieldTrack": "المسار",
+    "fieldLevel": "المستوى",
+    "fieldOwner": "المالك",
+    "fieldCollection": "المجموعة",
+    "fieldType": "النوع",
+    "typeCompressed": "NFT مضغوط (cNFT)",
+    "typeStandard": "NFT قياسي",
+    "fieldMetadataUri": "URI البيانات الوصفية",
+    "viewJson": "عرض JSON",
+    "ownershipVerification": "التحقق من الملكية",
+    "assetOwnedBy": "الاصل مملوك بواسطة",
+    "viewOnExplorer": "عرض في Explorer",
+    "onChainAfterDeployment": "التحقق على السلسلة متاح بعد نشر البرنامج",
+    "savedLocallyUntilMint": "تم حفظ شهادتك محليا وسيتم سكها عندما يصبح برنامج الاعتماد متاحا على devnet.",
+    "fetchCredentialFailed": "فشل في جلب الاعتماد على السلسلة",
+    "onChainCredential": "اعتماد On-Chain"
   },
   "auth": {
     "signInTitle": "Sign In to Superteam Academy",
@@ -398,7 +496,10 @@
     "linkAccount": "Link Account",
     "accountLinked": "Account linked successfully!",
     "linkFailed": "Failed to link account",
-    "signatureRequired": "Signature required to link wallet"
+    "signatureRequired": "Signature required to link wallet",
+    "signing": "جارٍ التوقيع...",
+    "termsPrefix": "بتسجيل الدخول، فإنك توافق على",
+    "termsOfService": "شروط الخدمة"
   },
   "footer": {
     "builtBy": "Built by Superteam Brazil",
@@ -427,7 +528,55 @@
     "showSolution": "Show Solution",
     "nextLesson": "Next Lesson",
     "challengeComplete": "Challenge Complete!",
-    "xpEarned": "XP earned"
+    "xpEarned": "XP earned",
+    "statusIdle": "خامل",
+    "statusRunning": "قيد التشغيل",
+    "statusPassed": "ناجح",
+    "statusFailed": "فشل",
+    "rerunTestsPassed": "إعادة تشغيل الاختبارات (نجحت)",
+    "runTests": "تشغيل الاختبارات",
+    "resetToStarter": "إعادة التعيين إلى البداية",
+    "hideHints": "إخفاء التلميحات",
+    "showSolutionOutline": "عرض مخطط الحل",
+    "runSummary": "ملخص التشغيل",
+    "noTestRunYet": "لا يوجد تشغيل للاختبارات بعد.",
+    "executingDeterministicTests": "جارٍ تنفيذ حالات اختبار حتمية...",
+    "testsPassedIn": "نجحت كل الاختبارات خلال {ms}ms.",
+    "runFailedIn": "فشل التشغيل خلال {ms}ms.",
+    "expectedButGot": "المتوقع `{expected}` لكن الناتج `{actual}`.",
+    "solutionViewedWarning": "لقد شاهدت الحل. لن تحصل على إنجاز \"Perfect Score\" لهذا التحدي.",
+    "allTestsPassedCelebration": "نجحت كل الاختبارات! 🎉",
+    "greatJobClaimXp": "عمل رائع! يمكنك الآن إنهاء هذا التحدي والمطالبة بـ XP.",
+    "completeAndClaimXp": "إكمال والمطالبة بـ XP",
+    "challengeCompletedTitle": "اكتمل التحدي!",
+    "challengeCompletedBody": "لقد حصلت على XP لهذا التحدي. استمر بالعمل الرائع!",
+    "failingTests": "الاختبارات الفاشلة:",
+    "expectedGotInline": "- المتوقع `{expected}` والناتج `{actual}`",
+    "fullOutput": "المخرجات الكاملة",
+    "resetCodeTitle": "إعادة تعيين الكود؟",
+    "resetCodeDescription": "سيؤدي هذا إلى استعادة كود البداية ومسح تقدمك الحالي. كما سيتم إعادة تعيين نتائج الاختبار.",
+    "solutionOutlineTitle": "مخطط الحل",
+    "solutionOutlineDescription": "يعرض هذا بنية عالية المستوى فقط. الكود الكامل مخفي عمدًا.",
+    "keepCoding": "واصل البرمجة",
+    "iUnderstand": "فهمت",
+    "invalidCode": "الكود غير صالح",
+    "rustValidationNotice": "يتم التحقق من تحديات Rust مقابل أنماط الكود المتوقعة. للترجمة والاختبار الكاملين استخدم",
+    "solanaPlayground": "Solana Playground",
+    "checking": "جارٍ التحقق...",
+    "openInSolanaPlayground": "فتح في Solana Playground",
+    "allStructuralChecksPassed": "نجحت جميع الفحوصات الهيكلية! ✅",
+    "recommendTestInSolanaPlayground": "نوصي باختبار الكود في Solana Playground للتحقق من أنه يترجم ويعمل بشكل صحيح.",
+    "structuralChecks": "الفحوصات الهيكلية",
+    "checksPassedCount": "نجح {passed}/{total}",
+    "resetCodeChecksDescription": "سيؤدي هذا إلى استعادة كود البداية ومسح تقدمك الحالي. كما سيتم إعادة تعيين نتائج الفحص.",
+    "viewSolutionTitle": "عرض الحل؟",
+    "viewSolutionWarning": "هل أنت متأكد؟ عرض الحل يعني أنك لن تحصل على إنجاز \"Perfect Score\" لهذا التحدي.",
+    "keepTrying": "واصل المحاولة",
+    "runningTests": "جارٍ تشغيل الاختبارات...",
+    "msSuffix": "ms",
+    "monacoFailedFallback": "فشل تحميل Monaco بعد 10 ثوانٍ. يتم استخدام محرر بديل.",
+    "fallbackCodeEditorAriaLabel": "محرر كود بديل",
+    "loadingEditor": "جارٍ تحميل المحرر..."
   },
   "components": {
     "title": "Component Hub",
@@ -454,7 +603,20 @@
     "categoryToken": "Token Operations",
     "categoryNft": "NFT & Metaplex",
     "categoryDefi": "DeFi Integration",
-    "categorySecurity": "Security & Audit"
+    "categorySecurity": "Security & Audit",
+    "searchPlaceholder": "ابحث عن المكونات...",
+    "allCategories": "الكل",
+    "allComponents": "كل المكونات",
+    "noPropsAvailable": "لا توجد خصائص متاحة",
+    "copyInstall": "نسخ أمر التثبيت",
+    "openInPlayground": "فتح في Playground",
+    "interactivePreviewSoon": "المعاينة التفاعلية قريبًا",
+    "openInPlaygroundForLivePreview": "افتح في Playground للمعاينة المباشرة",
+    "installTitle": "التثبيت",
+    "cliInstall": "تثبيت CLI",
+    "dependencies": "الاعتماديات",
+    "requiredPermissions": "الأذونات المطلوبة",
+    "productionNotes": "ملاحظات الإنتاج"
   },
   "playground": {
     "title": "Solana Playground",
@@ -474,7 +636,86 @@
     "sandboxNotice": "Playground runs in a sandboxed environment. Some APIs return simulated data.",
     "shareSuccess": "Share URL copied to clipboard!",
     "shareError": "Code too long to share via URL. Save feature coming soon.",
-    "noOutput": "Click Run to see output"
+    "noOutput": "Click Run to see output",
+    "applyArtifactsToWorkspace": "تطبيق المخرجات على مساحة العمل",
+    "githubPushPat": "دفع GitHub (PAT)",
+    "clearCachedPat": "مسح PAT المخزن",
+    "downloadArtifacts": "تنزيل المخرجات",
+    "importPublicGithubRepoTitle": "استيراد مستودع GitHub عام",
+    "importPublicGithubRepoDescription": "يدعم owner/repo أو الرابط الكامل. يتم استيراد الملفات للقراءة فقط.",
+    "githubRepositoryAriaLabel": "مستودع GitHub",
+    "githubBranchPlaceholder": "الفرع (اختياري، الافتراضي HEAD)",
+    "githubBranchAriaLabel": "فرع GitHub",
+    "downloadingFiles": "جارٍ تنزيل الملفات...",
+    "importing": "جارٍ الاستيراد...",
+    "import": "استيراد",
+    "templateGalleryTitle": "معرض القوالب",
+    "templateGalleryDescription": "اختر قالبًا لاستبدال ملفات مساحة العمل الخاصة بك.",
+    "githubPushPatDescription": "ادفع عبر HTTPS باستخدام رمز وصول شخصي. يُستخدم الرمز في الذاكرة لهذه العملية فقط.",
+    "githubRemoteUrlAriaLabel": "عنوان GitHub البعيد",
+    "gitBranchAriaLabel": "فرع git",
+    "githubPatPlaceholder": "github_pat_xxx أو ghp_xxx",
+    "githubPatAriaLabel": "رمز وصول GitHub الشخصي",
+    "push": "دفع",
+    "githubTokenRequiredTitle": "مطلوب رمز GitHub",
+    "githubTokenRequiredDescription": "أدخل رمز وصول شخصيًا لاستخدام git push أو الوصول إلى مستودع خاص. يتم حفظ الرمز في ذاكرة الجلسة فقط.",
+    "uploadFiles": "رفع ملف(ات)",
+    "uploadFolder": "رفع مجلد",
+    "importZip": "استيراد ZIP",
+    "githubImport": "استيراد GitHub",
+    "export": "تصدير",
+    "exportAsZip": "تصدير كـ ZIP",
+    "exportCurrentFile": "تصدير الملف الحالي",
+    "importConflictsTitle": "تعارضات الاستيراد",
+    "importConflictsDescription": "يوجد بالفعل {count} ملف في مساحة العمل:",
+    "skipAll": "تخطي الكل",
+    "keepBoth": "الاحتفاظ بكليهما",
+    "overwriteAll": "الاستبدال الكلي",
+    "objectives": "الأهداف",
+    "assertFileContains": "الملف {path} يحتوي على المحتوى المطلوب",
+    "assertBalanceAtLeast": "رصيد {address} لا يقل عن {minSol} SOL",
+    "assertKeypairExists": "المفتاح موجود في {path}",
+    "revealHintRemaining": "إظهار تلميح ({remaining} متبقٍ)",
+    "resetWorkspaceTitle": "إعادة تعيين مساحة العمل",
+    "walletsWithBalance": "محافظ برصيد:",
+    "tokenMints": "سكّ العملات:",
+    "taskPanelAriaLabel": "لوحة المهام",
+    "tasksComplete": "{complete}/{total} مهام مكتملة",
+    "burnerSecretNotice": "يتم تخزين سر burner في IndexedDB لهذا الملف الشخصي للمتصفح.",
+    "revealHintCount": "إظهار تلميح ({revealed}/{total})",
+    "noBadgesYet": "لا توجد شارات بعد.",
+    "cliErrorHints": "تلميحات أخطاء CLI",
+    "noActiveErrors": "لا توجد أخطاء نشطة.",
+    "welcomeTitle": "واجهة JazzCode التجريبية",
+    "welcomeSubtitle": "ابدأ مشروعًا جديدًا، اختر قالبًا، أو استورد من GitHub.",
+    "newEmpty": "جديد فارغ",
+    "noFilesOpen": "لا توجد ملفات مفتوحة",
+    "noFileSelected": "لم يتم تحديد ملف",
+    "selectFileToEdit": "حدد ملفًا من المستكشف لبدء التحرير",
+    "editorLineColumn": "سطر 1، عمود 1",
+    "typeCommandPlaceholder": "اكتب أمرًا...",
+    "historyTabHelper": "استخدم ↑↓ للسجل، وTab للإكمال",
+    "pressEnterExecute": "اضغط Enter للتنفيذ",
+    "toggleFileExplorer": "تبديل مستكشف الملفات",
+    "toggleTerminal": "تبديل الطرفية",
+    "toggleTaskPanel": "تبديل لوحة المهام",
+    "exportZip": "تصدير zip",
+    "copyLink": "نسخ الرابط",
+    "loadTemplate": "تحميل القالب",
+    "terminalPanelAriaLabel": "لوحة الطرفية",
+    "terminalCommandInputAriaLabel": "إدخال أوامر الطرفية",
+    "terminalCommandInputPlaceholder": "اكتب help أو solana config get أو anchor init myproj",
+    "noFilesLoaded": "لم يتم تحميل أي ملفات",
+    "newFile": "ملف جديد",
+    "newFolder": "مجلد جديد",
+    "noActiveFile": "لا يوجد ملف نشط",
+    "editorPaneAriaLabel": "لوحة المحرر",
+    "fileExplorerAriaLabel": "مستكشف الملفات",
+    "createFileAriaLabel": "إنشاء ملف",
+    "searchFilesPlaceholder": "اكتب للبحث عن الملفات...",
+    "noFilesMatch": "لا توجد ملفات مطابقة.",
+    "chooseYourTrack": "اختر مسارك",
+    "guidedMissionsSubtitle": "أكثر من 30 مهمة موجّهة عبر مسارات البناء والتوكن والعمليات والأمان."
   },
   "credentials": {
     "title": "On-Chain Credentials",
@@ -493,7 +734,8 @@
     "collection": "Collection",
     "type": "Type",
     "metadataUri": "Metadata URI",
-    "viewJson": "View JSON"
+    "viewJson": "View JSON",
+    "noImageAvailable": "لا توجد صورة متاحة"
   },
   "errors": {
     "404": "Page not found",

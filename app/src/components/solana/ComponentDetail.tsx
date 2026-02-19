@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { HubComponent } from "@/lib/component-hub/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,8 @@ interface ComponentDetailProps {
 }
 
 export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
+  const t = useTranslations("components");
+  const tc = useTranslations("common");
   // All hooks must be at the top level
   const [selectedFile, setSelectedFile] = useState(component.files[0]?.path || "");
   const [copied, setCopied] = useState(false);
@@ -88,7 +91,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
   const renderPropsPanel = () => (
     <div className="space-y-4">
       {component.props.length === 0 ? (
-        <p className="text-sm text-zinc-500">No props available</p>
+        <p className="text-sm text-zinc-500">{t("noPropsAvailable")}</p>
       ) : (
         component.props.map((prop) => (
           <div key={prop.name} className="space-y-2">
@@ -143,7 +146,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
       <div className="mb-6 flex items-center gap-4">
         <Button variant="outline" size="sm" onClick={onBack}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          {tc("back")}
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -156,7 +159,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={copyInstallCommand}>
             <Package className="mr-2 h-4 w-4" />
-            Copy Install
+            {t("copyInstall")}
           </Button>
           <Button 
             onClick={openInPlayground} 
@@ -171,7 +174,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
             ) : (
               <>
                 <Play className="mr-2 h-4 w-4" />
-                Open in Playground
+                {t("openInPlayground")}
               </>
             )}
           </Button>
@@ -203,8 +206,8 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
                 <div className="flex items-center justify-center h-full text-zinc-500">
                   <div className="text-center">
                     <Play className="mx-auto h-12 w-12 mb-4 text-zinc-700" />
-                    <p>Interactive preview coming soon</p>
-                    <p className="text-sm">Open in Playground for live preview</p>
+                    <p>{t("interactivePreviewSoon")}</p>
+                    <p className="text-sm">{t("openInPlaygroundForLivePreview")}</p>
                   </div>
                 </div>
               </div>
@@ -233,12 +236,12 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
                     {copied ? (
                       <>
                         <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
-                        Copied
+                        {t("copied")}
                       </>
                     ) : (
                       <>
                         <Copy className="mr-2 h-4 w-4" />
-                        Copy
+                        {tc("copy")}
                       </>
                     )}
                   </Button>
@@ -251,11 +254,11 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
 
             <TabsContent value="install" className="mt-4">
               <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
-                <h3 className="mb-4 font-semibold text-white">Installation</h3>
+                <h3 className="mb-4 font-semibold text-white">{t("installTitle")}</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-2 block text-sm text-zinc-400">CLI Install</label>
+                    <label className="mb-2 block text-sm text-zinc-400">{t("cliInstall")}</label>
                     <div className="flex gap-2">
                       <code className="flex-1 rounded-lg bg-zinc-900 px-4 py-3 font-mono text-sm text-white">
                         {installCommand}
@@ -267,7 +270,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm text-zinc-400">Dependencies</label>
+                    <label className="mb-2 block text-sm text-zinc-400">{t("dependencies")}</label>
                     <div className="flex flex-wrap gap-2">
                       {component.dependencies.map((dep) => (
                         <Badge key={dep.name} variant="secondary" className="text-xs">
@@ -278,7 +281,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm text-zinc-400">Required Permissions</label>
+                    <label className="mb-2 block text-sm text-zinc-400">{t("requiredPermissions")}</label>
                     <div className="flex flex-wrap gap-2">
                       {component.permissions.map((perm) => (
                         <Badge
@@ -303,7 +306,7 @@ export function ComponentDetail({ component, onBack }: ComponentDetailProps) {
           {/* Production Notes */}
           {component.productionNotes.length > 0 && (
             <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
-              <h3 className="mb-4 font-semibold text-white">Production Notes</h3>
+              <h3 className="mb-4 font-semibold text-white">{t("productionNotes")}</h3>
               <div className="space-y-3">
                 {component.productionNotes.map((note, i) => (
                   <div

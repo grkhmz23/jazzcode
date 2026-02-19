@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Trophy } from "lucide-react";
 import type { AchievementDefinition } from "@/types/achievements";
 
@@ -33,6 +34,7 @@ function getRarityColor(rarity: AchievementDefinition["rarity"]): string {
  * Shows when an achievement is unlocked
  */
 export function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
+  const t = useTranslations("common");
   useEffect(() => {
     const timer = setTimeout(onDismiss, 5000);
     return () => clearTimeout(timer);
@@ -49,7 +51,7 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
           <Trophy className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-medium">Achievement Unlocked!</p>
+          <p className="font-medium">{t("achievementUnlocked")}</p>
           <p className="text-lg font-bold">{achievement.name}</p>
           <p className="text-sm opacity-80">{achievement.description}</p>
           <div className="mt-1 flex items-center gap-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { DirectoryNode, FSNode } from "@/lib/workbench/fs";
 import { FileIcon, FolderIcon, FolderOpenIcon, PlusIcon, TrashIcon, Edit2Icon } from "lucide-react";
@@ -188,6 +189,7 @@ export function FileExplorer({
   onDeleteFile,
   className,
 }: FileExplorerProps) {
+  const t = useTranslations("playground");
   const [selectedPath, setSelectedPath] = React.useState<string | null>(null);
   const [expandedPaths, setExpandedPaths] = React.useState<Set<string>>(() => new Set([fs.path]));
   const [isCreating, setIsCreating] = React.useState(false);
@@ -244,7 +246,7 @@ export function FileExplorer({
           size="icon"
           className="h-6 w-6"
           onClick={() => setIsCreating(true)}
-          title="New file"
+          title={t("newFile")}
         >
           <PlusIcon className="h-3.5 w-3.5" />
         </Button>

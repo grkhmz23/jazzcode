@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { get, set } from "idb-keyval";
 import { Button } from "@/components/ui/button";
@@ -92,6 +93,8 @@ export function LearnRunner({
   manifest: CourseManifest;
   mdxByLesson: Record<string, MDXRemoteSerializeResult>;
 }) {
+  const t = useTranslations("lesson");
+  const tp = useTranslations("playground");
   const { data: session } = useSession();
   const userId = session?.user?.email ?? "anonymous";
   const [workspace, setWorkspace] = useState<WorkspaceDocument | null>(null);
@@ -268,7 +271,7 @@ export function LearnRunner({
                   });
                 }}
               >
-                Start from template
+                {t("startFromTemplate")}
               </Button>
               <input
                 value={importUrl}
@@ -305,7 +308,7 @@ export function LearnRunner({
                     });
                 }}
               >
-                Import from GitHub
+                {t("importFromGithub")}
               </Button>
               {importStatus ? (
                 <p className="text-[11px] text-[#9d9d9d]">{importStatus}</p>
@@ -351,7 +354,7 @@ export function LearnRunner({
                         setCurrentLessonId(manifest.lessons[nextLessonIndex].id);
                       }}
                     >
-                      Next Lesson
+                      {t("nextLesson")}
                     </Button>
                   ) : null}
                 </div>
@@ -391,7 +394,7 @@ export function LearnRunner({
                       });
                   }}
                 >
-                  Run Anchor Build
+                  {t("runAnchorBuild")}
                 </Button>
                 <Button
                   type="button"
@@ -426,7 +429,7 @@ export function LearnRunner({
                       });
                   }}
                 >
-                  Run Anchor Test
+                  {t("runAnchorTest")}
                 </Button>
               </div>
             )}
@@ -470,16 +473,16 @@ export function LearnRunner({
                 value={terminalInput}
                 onChange={(event) => setTerminalInput(event.target.value)}
                 className="w-full rounded border border-[#3c3c3c] bg-[#252526] px-2 py-1 text-xs"
-                placeholder="Run simulated Solana CLI commands"
+                placeholder={t("runSimulatedCommands")}
               />
               <Button type="submit" size="sm">
-                Run
+                {tp("run")}
               </Button>
             </form>
           </div>
 
           <div className="border-t border-l border-[#3c3c3c] bg-[#1f1f1f] p-2 text-xs text-[#9d9d9d]">
-            Autosave enabled. Lesson progress resumes automatically.
+            {t("autosaveEnabled")}
           </div>
         </div>
       </div>

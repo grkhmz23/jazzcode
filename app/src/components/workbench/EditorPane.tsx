@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { WorkspaceState } from "@/lib/workbench/types";
 import type { OnMount } from "@monaco-editor/react";
@@ -12,9 +13,7 @@ import { XIcon, CircleIcon } from "lucide-react";
 const MonacoEditor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.Editor), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center text-muted-foreground">
-      Loading editor...
-    </div>
+    <div className="h-full" />
   ),
 });
 
@@ -60,6 +59,7 @@ export function EditorPane({
   onFileSave,
   className,
 }: EditorPaneProps) {
+  const t = useTranslations("playground");
   const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null);
   // Build tabs from open files
   const tabs: EditorTab[] = React.useMemo(() => {
@@ -103,7 +103,7 @@ export function EditorPane({
       {/* Tabs */}
       <div className="flex overflow-x-auto border-b border-border bg-[#252526]">
         {tabs.length === 0 ? (
-          <div className="px-3 py-2 text-sm text-muted-foreground">No files open</div>
+          <div className="px-3 py-2 text-sm text-muted-foreground">{t("noFilesOpen")}</div>
         ) : (
           tabs.map((tab) => (
             <button
@@ -168,8 +168,8 @@ export function EditorPane({
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-muted-foreground">
             <div className="text-center">
-              <p className="text-lg font-medium">No file selected</p>
-              <p className="text-sm">Select a file from the explorer to start editing</p>
+              <p className="text-lg font-medium">{t("noFileSelected")}</p>
+              <p className="text-sm">{t("selectFileToEdit")}</p>
             </div>
           </div>
         )}
@@ -184,7 +184,7 @@ export function EditorPane({
           </div>
           <div className="flex items-center gap-4">
             <span>UTF-8</span>
-            <span>Ln 1, Col 1</span>
+            <span>{t("editorLineColumn")}</span>
           </div>
         </div>
       )}

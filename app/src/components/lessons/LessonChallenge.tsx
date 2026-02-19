@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { ChallengeRunner } from "@/components/editor/ChallengeRunner";
 import { RustChallenge } from "@/components/editor/RustChallenge";
 import { getLessonHints } from "@/components/lessons/challenge-utils";
@@ -41,6 +42,7 @@ export function LessonChallenge({
   onComplete,
   onProjectStateUpdate,
 }: LessonChallengeProps) {
+  const t = useTranslations("lesson");
   const [savedCode, setSavedCode] = useState<string | null>(null);
 
   // Load saved code from localStorage on mount
@@ -154,10 +156,10 @@ export function LessonChallenge({
       {isCompleted && (
         <div className="absolute left-4 right-4 top-4 z-10 rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-center">
           <span className="text-sm font-medium text-green-700">
-            You&apos;ve already completed this challenge ✅
+            {t("challengeAlreadyCompleted")}
           </span>
           <p className="text-xs text-green-600">
-            You can still edit and run the code for practice
+            {t("challengeCanStillPractice")}
           </p>
         </div>
       )}

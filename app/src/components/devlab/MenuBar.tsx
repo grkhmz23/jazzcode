@@ -31,7 +31,7 @@ export function MenuBar() {
           </button>
         ))}
       </div>
-      <div className="flex-1 text-center font-medium text-[#d4d4d4]">Solana DevLab</div>
+      <div className="flex-1 text-center font-medium text-[#d4d4d4]">{t("title")}</div>
       <div className="flex items-center gap-4 text-[11px]">
         <span className="max-w-[220px] truncate text-[#9cdcfe]">{mission?.title ?? t("title")}</span>
         <span className="text-[#b5cea8]">{totalXP} XP</span>

@@ -4,6 +4,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditorPane } from "@/components/playground/EditorPane";
@@ -134,6 +135,8 @@ function downloadTarGzFromBase64(base64: string, filename: string): void {
 }
 
 export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
+  const t = useTranslations("playground");
+  const tc = useTranslations("common");
   const [workspace, dispatch] = useReducer(
     workspaceReducer,
     emptyWorkspaceTemplate,
@@ -1073,11 +1076,11 @@ export default function Demo() {
             onChange={(event) => setApplyRunnerArtifacts(event.target.checked)}
             className="h-3.5 w-3.5"
           />
-          Apply artifacts to workspace
+          {t("applyArtifactsToWorkspace")}
         </label>
         <div className="flex items-center gap-2">
           <Button type="button" size="sm" variant="outline" onClick={() => setGitPushDialogOpen(true)}>
-            GitHub Push (PAT)
+            {t("githubPushPat")}
           </Button>
           <Button
             type="button"
@@ -1093,7 +1096,7 @@ export default function Demo() {
               toast.success("Cleared cached PAT from session");
             }}
           >
-            Clear Cached PAT
+            {t("clearCachedPat")}
           </Button>
           <Button
             type="button"
@@ -1105,7 +1108,7 @@ export default function Demo() {
               downloadTarGzFromBase64(runnerJobView.outputFilesTarGzBase64, `runner-artifacts-${runnerJobView.jobId}.tar.gz`);
             }}
           >
-            Download Artifacts
+            {t("downloadArtifacts")}
           </Button>
         </div>
       </div>
@@ -1201,28 +1204,28 @@ export default function Demo() {
         <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Import Public GitHub Repo</DialogTitle>
-              <DialogDescription>Supports owner/repo or full URL. Imports files as read-only.</DialogDescription>
+              <DialogTitle>{t("importPublicGithubRepoTitle")}</DialogTitle>
+              <DialogDescription>{t("importPublicGithubRepoDescription")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               <Input
                 value={importRepo}
                 onChange={(event) => setImportRepo(event.target.value)}
                 placeholder="solana-labs/solana-program-library"
-                aria-label="GitHub repository"
+                aria-label={t("githubRepositoryAriaLabel")}
                 disabled={importBusy}
               />
               <Input
                 value={importBranch}
                 onChange={(event) => setImportBranch(event.target.value)}
-                placeholder="Branch (optional, defaults to HEAD)"
-                aria-label="GitHub branch"
+                placeholder={t("githubBranchPlaceholder")}
+                aria-label={t("githubBranchAriaLabel")}
                 disabled={importBusy}
               />
               {importProgress && (
                 <div className="space-y-2 pt-2">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Downloading files...</span>
+                    <span>{t("downloadingFiles")}</span>
                     <span>
                       {importProgress.completed} / {importProgress.total}
                     </span>
@@ -1243,10 +1246,10 @@ export default function Demo() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setImportModalOpen(false)} disabled={importBusy}>
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
-                {importBusy ? "Importing..." : "Import"}
+                {importBusy ? t("importing") : t("import")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1462,8 +1465,8 @@ export default function Demo() {
       <Dialog open={templateModalOpen} onOpenChange={setTemplateModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Template Gallery</DialogTitle>
-            <DialogDescription>Select a template to replace your workspace files.</DialogDescription>
+            <DialogTitle>{t("templateGalleryTitle")}</DialogTitle>
+            <DialogDescription>{t("templateGalleryDescription")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             {playgroundTemplatesV2.map((template) => (
@@ -1487,28 +1490,28 @@ export default function Demo() {
       <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Public GitHub Repo</DialogTitle>
-            <DialogDescription>Supports owner/repo or full URL. Imports files as read-only.</DialogDescription>
+            <DialogTitle>{t("importPublicGithubRepoTitle")}</DialogTitle>
+            <DialogDescription>{t("importPublicGithubRepoDescription")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <Input
               value={importRepo}
               onChange={(event) => setImportRepo(event.target.value)}
               placeholder="solana-labs/solana-program-library"
-              aria-label="GitHub repository"
+              aria-label={t("githubRepositoryAriaLabel")}
               disabled={importBusy}
             />
             <Input
               value={importBranch}
               onChange={(event) => setImportBranch(event.target.value)}
-              placeholder="Branch (optional, defaults to HEAD)"
-              aria-label="GitHub branch"
+              placeholder={t("githubBranchPlaceholder")}
+              aria-label={t("githubBranchAriaLabel")}
               disabled={importBusy}
             />
             {importProgress && (
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Downloading files...</span>
+                  <span>{t("downloadingFiles")}</span>
                   <span>
                     {importProgress.completed} / {importProgress.total}
                   </span>
@@ -1529,10 +1532,10 @@ export default function Demo() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setImportModalOpen(false)} disabled={importBusy}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={() => void handleImportGithub()} disabled={importBusy || !importRepo.trim()}>
-              {importBusy ? "Importing..." : "Import"}
+              {importBusy ? t("importing") : t("import")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1541,9 +1544,9 @@ export default function Demo() {
       <Dialog open={gitPushDialogOpen} onOpenChange={setGitPushDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>GitHub Push (PAT)</DialogTitle>
+            <DialogTitle>{t("githubPushPat")}</DialogTitle>
             <DialogDescription>
-              Push via HTTPS using a personal access token. The token is used in memory for this push only.
+              {t("githubPushPatDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -1551,20 +1554,20 @@ export default function Demo() {
               value={gitPushRemoteUrl}
               onChange={(event) => setGitPushRemoteUrl(event.target.value)}
               placeholder="https://github.com/owner/repo.git"
-              aria-label="GitHub remote URL"
+              aria-label={t("githubRemoteUrlAriaLabel")}
             />
             <Input
               value={gitPushBranch}
               onChange={(event) => setGitPushBranch(event.target.value)}
               placeholder="main"
-              aria-label="Git branch"
+              aria-label={t("gitBranchAriaLabel")}
             />
             <Input
               type="password"
               value={gitPushToken}
               onChange={(event) => setGitPushToken(event.target.value)}
-              placeholder="github_pat_xxx or ghp_xxx"
-              aria-label="GitHub personal access token"
+              placeholder={t("githubPatPlaceholder")}
+              aria-label={t("githubPatAriaLabel")}
             />
           </div>
           <DialogFooter>
@@ -1577,10 +1580,10 @@ export default function Demo() {
                 setGitPushToken("");
               }}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={() => void handleGitPushWithPat()} disabled={!gitPushToken.trim()}>
-              Push
+              {t("push")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1599,9 +1602,9 @@ export default function Demo() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>GitHub Token Required</DialogTitle>
+            <DialogTitle>{t("githubTokenRequiredTitle")}</DialogTitle>
             <DialogDescription>
-              Enter a personal access token for git push or private repo access. The token is stored in session memory only.
+              {t("githubTokenRequiredDescription")}
             </DialogDescription>
           </DialogHeader>
           <Input
@@ -1609,7 +1612,7 @@ export default function Demo() {
             value={gitTokenInput}
             onChange={(e) => setGitTokenInput(e.target.value)}
             placeholder="ghp_xxxxxxxxxxxx"
-            aria-label="GitHub personal access token"
+            aria-label={t("githubPatAriaLabel")}
           />
           <DialogFooter>
             <Button
@@ -1622,7 +1625,7 @@ export default function Demo() {
                 setGitTokenInput("");
               }}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button
               type="button"
@@ -1634,7 +1637,7 @@ export default function Demo() {
               }}
               disabled={!gitTokenInput.trim()}
             >
-              Submit
+              {tc("submit")}
             </Button>
           </DialogFooter>
         </DialogContent>

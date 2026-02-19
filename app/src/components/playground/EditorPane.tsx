@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { Button } from "@/components/ui/button";
@@ -14,14 +15,15 @@ interface EditorPaneProps {
 }
 
 export function EditorPane({ workspace, onChangeContent, onActivateFile, onCloseFile }: EditorPaneProps) {
+  const t = useTranslations("playground");
   const file = workspace.files[workspace.activeFile];
 
   if (!file) {
-    return <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No active file</div>;
+    return <div className="flex h-full items-center justify-center text-sm text-muted-foreground">{t("noActiveFile")}</div>;
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-[#1e1e1e] text-[#d4d4d4]" aria-label="Editor pane">
+    <section className="flex h-full min-h-0 flex-col bg-[#1e1e1e] text-[#d4d4d4]" aria-label={t("editorPaneAriaLabel")}>
       <div className="flex min-h-10 items-center overflow-x-auto border-b border-[#2f2f2f] bg-[#181818] px-2">
         {workspace.openFiles.map((path) => {
           const isActive = path === workspace.activeFile;

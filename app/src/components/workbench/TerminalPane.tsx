@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { TerminalEntry } from "@/lib/workbench/types";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ export function TerminalPane({
   onExecuteCommand,
   className,
 }: TerminalPaneProps) {
+  const t = useTranslations("playground");
   const [input, setInput] = React.useState("");
   const [historyIndex, setHistoryIndex] = React.useState<number | null>(null);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
@@ -193,7 +195,7 @@ export function TerminalPane({
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               className="h-7 border-0 bg-transparent px-0 py-0 font-mono text-sm text-[#d4d4d4] focus-visible:ring-0 focus-visible:ring-offset-0"
-              placeholder="Type a command..."
+              placeholder={t("typeCommandPlaceholder")}
               autoComplete="off"
               spellCheck={false}
             />
@@ -221,8 +223,8 @@ export function TerminalPane({
 
         {/* Helper text */}
         <div className="mt-1 flex items-center justify-between text-xs text-[#858585]">
-          <span>Use ↑↓ for history, Tab for completion</span>
-          <span>Press Enter to execute</span>
+          <span>{t("historyTabHelper")}</span>
+          <span>{t("pressEnterExecute")}</span>
         </div>
       </div>
     </div>

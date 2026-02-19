@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Eye, EyeOff, RefreshCw, Save, Share2, Download, Upload, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +41,8 @@ export function StatusBar({
   onCopyShareLink,
   runnerStatus = "disconnected",
 }: StatusBarProps) {
+  const t = useTranslations("playground");
+  const tc = useTranslations("common");
   return (
     <div className="flex h-9 items-center justify-between border-t border-[#2f2f2f] bg-[#007acc] px-2 text-xs text-white">
       <div className="flex items-center gap-1">
@@ -64,13 +67,13 @@ export function StatusBar({
           <Upload className="mr-1 h-3 w-3" />Import
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onExportZip}>
-          <Download className="mr-1 h-3 w-3" />Export zip
+          <Download className="mr-1 h-3 w-3" />{t("exportZip")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onShareSnapshot}>
           <Share2 className="mr-1 h-3 w-3" />Share
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onCopyShareLink}>
-          Copy link
+          {t("copyLink")}
         </Button>
         <Button
           type="button"
@@ -79,7 +82,7 @@ export function StatusBar({
           className="h-7 px-2 text-white hover:bg-[#0d8ae5]"
           onClick={onLoadTemplate}
         >
-          <RefreshCw className="mr-1 h-3 w-3" />Load template
+          <RefreshCw className="mr-1 h-3 w-3" />{t("loadTemplate")}
         </Button>
         <Button
           type="button"
@@ -88,7 +91,7 @@ export function StatusBar({
           className="h-7 px-2 text-white hover:bg-[#0d8ae5]"
           onClick={onResetWorkspace}
         >
-          <RefreshCw className="mr-1 h-3 w-3" />Reset
+          <RefreshCw className="mr-1 h-3 w-3" />{tc("reset")}
         </Button>
         <span className="inline-flex items-center rounded bg-[#0d8ae5] px-2 py-1 text-[11px]">
           <Save className="mr-1 h-3 w-3" />{saveState}

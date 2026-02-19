@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { CredentialCard } from "./CredentialCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +20,7 @@ interface CredentialsData {
 }
 
 export function CredentialGrid({ walletAddress }: CredentialGridProps) {
+  const t = useTranslations("credentials");
   const [data, setData] = useState<CredentialsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,8 +74,7 @@ export function CredentialGrid({ walletAddress }: CredentialGridProps) {
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <AlertCircle className="mb-4 h-12 w-12 text-muted-foreground/30" />
           <p className="text-muted-foreground">
-            On-chain credentials will be visible once the credential program is
-            deployed on devnet.
+            {t("notAvailable")}
           </p>
         </CardContent>
       </Card>
@@ -87,7 +88,7 @@ export function CredentialGrid({ walletAddress }: CredentialGridProps) {
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <Shield className="mb-4 h-12 w-12 text-muted-foreground/30" />
           <p className="text-muted-foreground">
-            No credentials found. Complete courses to earn on-chain credentials.
+            {t("noCredentials")}
           </p>
         </CardContent>
       </Card>

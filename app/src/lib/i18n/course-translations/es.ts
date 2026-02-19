@@ -30,205 +30,255 @@ const esCuratedCourseTranslations: CourseTranslationMap = {
       },
     },
   },
-  "anchor-mental-model": {
-    title: "Modelo mental de Anchor",
-    description: "Comprende como Anchor abstrae Solana sin perder control sobre cuentas, restricciones y seguridad.",
+  "anchor-development": {
+    title: "Desarrollo con Anchor",
+    description:
+      "Curso orientado a proyectos para pasar de lo basico a ingenieria real con Anchor: modelado determinista de cuentas, construccion de instrucciones, disciplina de testing y UX de cliente confiable.",
   },
-  "frontend-v2-wallet-state-accounts-model": {
-    title: "Modelo mental de estado de wallet y cuentas para frontend",
-    description: "Disena interfaces robustas entendiendo estado de wallet, cuentas y consistencia de datos en Solana.",
+  "solana-frontend": {
+    title: "Desarrollo Frontend en Solana",
+    description:
+      "Curso orientado a proyectos para crear dashboards de Solana listos para produccion: reducers deterministas, pipelines de eventos reproducibles y UX de transacciones confiable.",
   },
-  "defi-v2-amm-basics-fees-slippage-impact": {
-    title: "Fundamentos AMM en Solana: pools, comisiones, slippage e impacto de precio",
-    description: "Aprende como se cotizan swaps y por que comisiones, slippage e impacto afectan la ejecucion real.",
+  "defi-solana": {
+    title: "DeFi en Solana",
+    description:
+      "Curso avanzado orientado a proyectos para construir sistemas de swaps: planeacion determinista estilo Jupiter sin dependencia online, ranking de rutas, seguridad de minOut y diagnosticos reproducibles.",
   },
-  "security-v2-threat-model": {
-    title: "Modelo de amenazas de Solana para auditoria",
-    description: "Analiza vectores criticos de seguridad: owners, signers, writable, PDAs y validaciones de cuenta.",
+  "solana-security": {
+    title: "Seguridad y Auditoria en Solana",
+    description:
+      "Laboratorio determinista de vulnerabilidades para auditores de Solana que necesitan evidencia de exploits repetible, guias de remediacion precisas y artefactos de auditoria de alta senal.",
   },
-  "token-v2-spl-vs-token-2022": {
-    title: "SPL Tokens vs Token-2022: impacto de las extensiones",
-    description: "Compara modelos de token y evalua como las extensiones cambian reglas, riesgos y experiencia de producto.",
+  "token-engineering": {
+    title: "Ingenieria de Tokens en Solana",
+    description:
+      "Curso orientado a proyectos para equipos que lanzan tokens reales en Solana: planeacion determinista de Token-2022, diseno de autoridades, simulacion de supply y disciplina operativa de lanzamiento.",
   },
-  "mobile-wallet-overview": {
-    title: "Panorama de wallets moviles",
-    description: "Entiende flujos moviles, UX de firma y limitaciones de plataforma para apps Solana en produccion.",
+  "solana-mobile": {
+    title: "Desarrollo Movil en Solana",
+    description:
+      "Construye dApps moviles de Solana listas para produccion con MWA, arquitectura robusta de sesiones de wallet, UX de firma explicita y operaciones de distribucion disciplinadas.",
   },
-  "testing-approaches": {
-    title: "Enfoques de testing",
-    description: "Define una estrategia de pruebas por capas para minimizar regresiones en integraciones Solana.",
+  "solana-testing": {
+    title: "Testing de Programas en Solana",
+    description:
+      "Construye sistemas de testing robustos para Solana en entornos locales, simulados y de red con invariantes de seguridad explicitas y controles de confianza de calidad de release.",
   },
-  "indexing-v2-events-model": {
-    title: "Modelo de eventos: transacciones, logs e instrucciones",
-    description: "Construye intuicion para indexar eventos on-chain de forma consistente y auditable.",
+  "solana-indexing": {
+    title: "Indexacion y Analitica en Solana",
+    description:
+      "Construye un indexador de eventos de Solana de nivel produccion con decodificacion determinista, contratos de ingesta resilientes, recuperacion por checkpoints y salidas analiticas confiables.",
   },
-  "payments-v2-address-validation": {
-    title: "Validacion de direcciones y estrategias de memo",
-    description: "Fortalece pagos en Solana validando entradas y modelando referencias/memos de forma segura.",
+  "solana-payments": {
+    title: "Pagos y Checkout en Solana",
+    description:
+      "Construye flujos de pago en Solana de nivel produccion con validaciones robustas, idempotencia segura ante reintentos, webhooks seguros y comprobantes deterministas para conciliacion.",
   },
-  "cnft-v2-merkle-trees": {
-    title: "Arboles de Merkle para compresion de estado",
-    description: "Aprende los fundamentos tecnicos de compression y como verificar pruebas de inclusion.",
+  "solana-nft-compression": {
+    title: "Fundamentos de NFTs y cNFTs",
+    description:
+      "Domina la ingenieria de NFTs comprimidos en Solana: compromisos Merkle, sistemas de pruebas, modelado de colecciones y controles de seguridad de nivel produccion.",
   },
-  "governance-v2-dao-model": {
-    title: "Modelo DAO: propuestas, votacion y ejecucion",
-    description: "Disena gobierno on-chain con reglas claras de quorum, ejecucion y control de tesoreria.",
+  "solana-governance-multisig": {
+    title: "Gobernanza y Operaciones de Tesoreria Multisig",
+    description:
+      "Construye sistemas DAO y tesoreria multisig listos para produccion con conteo de votos determinista, seguridad por timelock y controles de ejecucion seguros.",
   },
-  "performance-v2-compute-model": {
-    title: "Modelo de compute: presupuestos, costos y limites",
-    description: "Optimiza rendimiento entendiendo CUs, limites de transaccion y patrones de costo.",
+  "solana-performance": {
+    title: "Rendimiento de Solana y Optimizacion de Compute",
+    description:
+      "Domina la ingenieria de rendimiento en Solana con flujos de optimizacion medibles: compute budget, layouts de datos, eficiencia de encoding y modelado de costos determinista.",
   },
-  "swap-v2-mental-model": {
-    title: "Modelo mental de swaps: mints, ATAs, decimales y rutas",
-    description: "Modela swaps complejos con precision de tokens, rutas y restricciones de ejecucion.",
+  "defi-swap-aggregator": {
+    title: "Agregacion DeFi de Swaps",
+    description:
+      "Domina la agregacion de swaps en Solana para produccion: parseo determinista de cotizaciones, tradeoffs de optimizacion de rutas, seguridad de slippage y ejecucion consciente de confiabilidad.",
   },
-  "clmm-v2-vs-cpmm": {
-    title: "CLMM vs producto constante: por que existen los ticks",
-    description: "Compara modelos de liquidez y entiende efectos de rango, concentracion y riesgo operativo.",
+  "defi-clmm-liquidity": {
+    title: "Ingenieria de Liquidez CLMM",
+    description:
+      "Domina la ingenieria de liquidez concentrada en DEX de Solana: matematicas de ticks, diseno de estrategias por rango, dinamicas de fees e impermanent loss y reportes deterministas de posiciones LP.",
   },
-  "lending-v2-pool-model": {
-    title: "Modelo de pool de lending: supply, borrow y utilizacion",
-    description: "Interpreta tasas, salud de posiciones y dinamica de riesgo en protocolos de prestamo.",
+  "defi-lending-risk": {
+    title: "Riesgo de Lending y Liquidaciones",
+    description:
+      "Domina el riesgo de lending en Solana: mecanicas de utilizacion y tasas, analisis de rutas de liquidacion, seguridad de oraculos y reportes deterministas de escenarios.",
   },
-  "perps-v2-mental-model": {
-    title: "Perpetuos: posicion base, precio de entrada y mark vs oracle",
-    description: "Comprende PnL, funding y liquidaciones en mercados perpetuos sobre Solana.",
+  "defi-perps-risk-console": {
+    title: "Consola de Riesgo para Perpetuos",
+    description:
+      "Domina la ingenieria de riesgo de perps en Solana: contabilidad precisa de PnL y funding, monitoreo de margen, simulacion de liquidaciones y reportes deterministas en consola.",
   },
-  "txopt-v2-why-fail": {
-    title: "Por que fallan las transacciones DeFi",
-    description: "Diagnostica fallas por CU, tamano de transaccion, blockhash y estado cambiante de mercado.",
+  "defi-tx-optimizer": {
+    title: "Optimizador de Transacciones DeFi",
+    description:
+      "Domina la optimizacion de transacciones DeFi en Solana: ajuste de compute y fees, estrategia ALT, patrones de confiabilidad y planificacion determinista de estrategias de envio.",
   },
-  "mobilesign-v2-reality-check": {
-    title: "Realidad de firmas moviles: restricciones Android vs iOS",
-    description: "Adapta arquitecturas de firma a limites reales de plataforma y wallets moviles.",
+  "solana-mobile-signing": {
+    title: "Firma Movil en Solana",
+    description:
+      "Domina la firma de wallets moviles en Solana para produccion: sesiones Android MWA, restricciones de deep links en iOS, reintentos resilientes y telemetria determinista de sesion.",
   },
-  "solanapay-v2-mental-model": {
-    title: "Modelo mental de Solana Pay y codificacion de URL",
-    description: "Implementa pagos robustos con parametros correctos, encoding seguro y mejor experiencia de cobro.",
+  "solana-pay-commerce": {
+    title: "Comercio con Solana Pay",
+    description:
+      "Domina la integracion comercial de Solana Pay: encoding robusto de URLs, flujos de tracking QR y pagos, UX de confirmacion y artefactos deterministas de conciliacion POS.",
   },
-  "walletux-v2-connection-design": {
-    title: "Diseno UX de conexion de wallet",
-    description: "Crea experiencias de conexion claras, seguras y confiables para usuarios nuevos y avanzados.",
+  "wallet-ux-engineering": {
+    title: "Ingenieria UX de Wallet",
+    description:
+      "Domina la ingenieria UX de wallets en Solana para produccion: estado de conexion determinista, seguridad de red, resiliencia RPC y patrones de confiabilidad medibles.",
   },
-  "siws-v2-why-exists": {
-    title: "Por que existe SIWS",
-    description: "Entiende SIWS para autenticacion segura y consistente en productos Solana.",
+  "sign-in-with-solana": {
+    title: "Sign-In with Solana",
+    description:
+      "Domina la autenticacion SIWS en Solana para produccion: entradas estandarizadas, invariantes estrictas de verificacion, ciclo de vida de nonce resistente a replay y reportes listos para auditoria.",
   },
-  "pfcb-v2-fee-market-reality": {
-    title: "Mercados de comisiones en Solana: realidad de inclusion",
-    description: "Ajusta fees y compute budget con criterios reales de inclusion bajo congestion.",
+  "priority-fees-compute-budget": {
+    title: "Priority Fees y Compute Budget",
+    description:
+      "Ingenieria defensiva de fees en Solana con planificacion determinista de compute, politica adaptativa de prioridad y contratos de confiabilidad UX orientados a confirmacion.",
   },
-  "bundles-v2-atomicity-model": {
-    title: "Atomicidad: por que los usuarios esperan todo o nada",
-    description: "Modela flujos atomicos, compensaciones y riesgos cuando la ejecucion no es totalmente atomica.",
+  "bundles-atomicity": {
+    title: "Bundles y Atomicidad de Transacciones",
+    description:
+      "Disena flujos defensivos multi-transaccion en Solana con validacion determinista de atomicidad, modelado de compensaciones y reportes de seguridad listos para auditoria.",
   },
-  "mempoolux-v2-quote-execution-gap": {
-    title: "Brecha entre cotizacion y ejecucion",
-    description: "Protege al usuario contra deterioro de precio y cambios de estado entre quote y envio.",
+  "mempool-ux-defense": {
+    title: "Realidad del Mempool y UX Anti-Sandwich",
+    description:
+      "Ingenieria defensiva de UX para swaps con gradacion de riesgo determinista, politicas de slippage acotadas y comunicacion de seguridad lista para incidentes.",
   },
-  "indexpipe-v2-indexing-basics": {
-    title: "Indexacion 101: logs, cuentas y parseo de transacciones",
-    description: "Construye pipelines de indexacion confiables con deduplicacion e idempotencia.",
+  "indexing-webhooks-pipelines": {
+    title: "Indexers, Webhooks y Pipelines Seguros ante Reorg",
+    description:
+      "Construye pipelines deterministas de indexacion en produccion con ingesta segura ante duplicados, manejo de reorg e informes centrados en integridad.",
   },
-  "rpc-v2-failure-landscape": {
-    title: "Fallas RPC en produccion: timeouts, 429 y nodos desactualizados",
-    description: "Disena resiliencia de cliente frente a latencia, rate limit y divergencia de nodos.",
+  "rpc-reliability-latency": {
+    title: "Confiabilidad RPC e Ingenieria de Latencia",
+    description:
+      "Disena clientes RPC multi-proveedor en Solana para produccion con politicas deterministas de retry, routing, cache y observabilidad.",
   },
-  "rdb-v2-layout-alignment-padding": {
-    title: "Layout de memoria: alineacion y padding",
-    description: "Evita errores de serializacion comprendiendo alineacion y representacion binaria.",
+  "rust-data-layout-borsh": {
+    title: "Rust Data Layout y Dominio de Borsh",
+    description:
+      "Ingenieria de layout de datos en Solana con enfoque Rust y tooling determinista a nivel de bytes, junto con practicas de esquema seguras para compatibilidad.",
   },
-  "rei-v2-error-taxonomy": {
-    title: "Taxonomia de errores: recuperables vs fatales",
-    description: "Estandariza diagnostico y tratamiento de errores para sistemas robustos.",
+  "rust-errors-invariants": {
+    title: "Diseno de Errores e Invariantes en Rust",
+    description:
+      "Construye librerias de guardas por invariantes tipadas con artefactos de evidencia determinista, contratos de error seguros para compatibilidad y reportes listos para auditoria.",
   },
-  "rpot-v2-perf-mental-model": {
-    title: "Modelo de rendimiento: asignaciones, clones y hashing",
-    description: "Reduce costo computacional detectando patrones ineficientes en rutas criticas.",
+  "rust-perf-onchain-thinking": {
+    title: "Rendimiento Rust para Mentalidad On-chain",
+    description:
+      "Simula y optimiza comportamiento de costo de compute con tooling determinista Rust-first y gobernanza de rendimiento guiada por presupuesto.",
   },
-  "raip-v2-async-fundamentals": {
-    title: "Fundamentos async: futures, tareas y canales",
-    description: "Domina concurrencia en pipelines para indexacion y servicios de alto volumen.",
+  "rust-async-indexer-pipeline": {
+    title: "Concurrencia y Async para Indexers (Rust)",
+    description:
+      "Ingenieria de pipelines async con enfoque Rust-first y concurrencia acotada, reducers seguros ante replay y reportes operativos deterministas.",
   },
-  "rpmcs-v2-macro-mental-model": {
-    title: "Modelo mental de macros: declarativas vs procedurales",
-    description: "Usa macros con seguridad y mantenibilidad en bases de codigo Rust de larga vida.",
+  "rust-proc-macros-codegen-safety": {
+    title: "Macros Procedurales y Codegen para Seguridad",
+    description:
+      "Seguridad de macros y codegen en Rust ensenada mediante parser determinista y tooling de generacion de chequeos con salidas amigables para auditoria.",
   },
-  "aum-v2-upgrade-authority-lifecycle": {
-    title: "Ciclo de vida de la autoridad de upgrade en Anchor",
-    description: "Gestiona upgrades de programas con controles de seguridad, migraciones y gobernanza.",
+  "anchor-upgrades-migrations": {
+    title: "Upgrades de Anchor y Migraciones de Cuentas",
+    description:
+      "Disena flujos de release seguros para produccion en Anchor con planificacion determinista de migraciones, gates de upgrade, playbooks de rollback y evidencia de readiness.",
   },
   "solana-reliability": {
-    title: "Ingenieria de confiabilidad para Solana",
-    description: "Estrategias de confiabilidad para mantener sistemas Solana estables bajo condiciones reales.",
+    title: "Ingenieria de Confiabilidad para Solana",
+    description:
+      "Ingenieria de confiabilidad enfocada en produccion para sistemas Solana: tolerancia a fallos, retries, deadlines, circuit breakers y degradacion gradual con resultados operativos medibles.",
   },
   "solana-testing-strategies": {
-    title: "Estrategias de testing para Solana",
-    description: "Disena suites de pruebas efectivas para programas, clientes e integraciones on-chain.",
+    title: "Estrategias de Testing para Solana",
+    description:
+      "Estrategia integral de testing para Solana orientada a produccion: pruebas unitarias deterministas, integraciones realistas, fuzz/property testing y reportes de confianza para release.",
   },
   "solana-program-optimization": {
-    title: "Optimizacion de programas Solana",
-    description: "Mejora rendimiento y costo en programas con tecnicas de optimizacion aplicadas.",
+    title: "Optimizacion de Programas Solana",
+    description:
+      "Disena rendimiento de nivel produccion en Solana: compute budgeting, eficiencia de layout de cuentas, tradeoffs de memoria/rent y workflows de optimizacion deterministas.",
   },
   "solana-tokenomics-design": {
-    title: "Diseno de tokenomics en Solana",
-    description: "Construye modelos economicos sostenibles para tokens, incentivos y gobernanza.",
+    title: "Diseno de Tokenomics para Solana",
+    description:
+      "Disena economias de token robustas en Solana con disciplina de distribucion, seguridad de vesting, incentivos de staking y mecanicas de gobernanza defendibles operativamente.",
   },
   "solana-defi-primitives": {
     title: "Primitivas DeFi en Solana",
-    description: "Comprende componentes base de DeFi para construir protocolos composables.",
+    description:
+      "Construye fundamentos practicos de DeFi en Solana: mecanicas AMM, contabilidad de liquidez, primitivas de lending y patrones de composicion seguros ante flash loans.",
   },
   "solana-nft-standards": {
     title: "Estandares NFT en Solana",
-    description: "Explora estandares y patrones de metadata para experiencias NFT interoperables.",
+    description:
+      "Implementa NFTs de Solana con estandares listos para produccion: integridad de metadata, disciplina de colecciones y comportamientos avanzados programables/no transferibles.",
   },
   "solana-cpi-patterns": {
-    title: "Patrones de invocacion cross-program (CPI)",
-    description: "Aprende patrones CPI seguros para composicion entre programas en Solana.",
+    title: "Patrones de Invocacion Cross-Program (CPI)",
+    description:
+      "Domina la composicion CPI en Solana con validacion segura de cuentas, disciplina de firmantes PDA y patrones deterministas de orquestacion multi-programa.",
   },
   "solana-mev-strategies": {
-    title: "MEV y ordenamiento de transacciones",
-    description: "Analiza impacto de MEV y diseña defensas de ejecucion para proteger usuarios.",
+    title: "MEV y Ordenamiento de Transacciones",
+    description:
+      "Ingenieria enfocada en produccion para ordenamiento de transacciones en Solana: routing consciente de MEV, estrategia de bundles, modelado de liquidacion/arbitraje y controles de ejecucion que protegen al usuario.",
   },
   "solana-deployment-cicd": {
-    title: "Despliegue de programas y CI/CD",
-    description: "Automatiza pipelines de build, test y deploy para operaciones de programa confiables.",
+    title: "Despliegue de Programas y CI/CD",
+    description:
+      "Ingenieria de despliegue para produccion en programas Solana: estrategia de entornos, gates de release, controles de calidad CI/CD y flujos operativos seguros para upgrades.",
   },
   "solana-cross-chain-bridges": {
-    title: "Bridges cross-chain y Wormhole",
-    description: "Comprende arquitectura de puentes y riesgos operativos al mover valor entre cadenas.",
+    title: "Bridges Cross-Chain y Wormhole",
+    description:
+      "Construye integraciones cross-chain mas seguras en Solana con mensajeria estilo Wormhole, verificacion de attestations y controles deterministas del estado del bridge.",
   },
   "solana-oracle-pyth": {
-    title: "Integracion de oraculos y red Pyth",
-    description: "Consume precios on-chain con validaciones adecuadas para evitar errores de mercado.",
+    title: "Integracion de Oraculos y Red Pyth",
+    description:
+      "Integra feeds de oraculos en Solana de forma segura: validacion de precios, politicas de confianza/staleness y agregacion multi-fuente para decisiones de protocolo resilientes.",
   },
   "solana-dao-tooling": {
-    title: "Tooling DAO y organizaciones autonomas",
-    description: "Evalua herramientas DAO para gobernanza, tesoreria y ejecucion automatizada.",
+    title: "Tooling DAO y Organizaciones Autonomas",
+    description:
+      "Construye sistemas DAO listos para produccion en Solana: gobernanza de propuestas, integridad de votacion, controles de tesoreria y flujos deterministas de ejecucion/reporting.",
   },
   "solana-gaming": {
-    title: "Gaming y gestion de estado de juego",
-    description: "Disena sistemas de juego on-chain con estado consistente y experiencia fluida.",
+    title: "Gaming y Gestion del Estado de Juego",
+    description:
+      "Construye sistemas de juego on-chain listos para produccion en Solana: modelos de estado eficientes, integridad de turnos, controles de equidad y economia escalable de progresion de jugadores.",
   },
   "solana-permanent-storage": {
-    title: "Almacenamiento permanente y Arweave",
-    description: "Integra almacenamiento permanente para activos y metadata con buenas practicas de costo.",
+    title: "Almacenamiento Permanente y Arweave",
+    description:
+      "Integra almacenamiento descentralizado permanente con Solana usando flujos estilo Arweave: content addressing, integridad de manifests y acceso verificable a datos de largo plazo.",
   },
   "solana-staking-economics": {
-    title: "Staking y economia de validadores",
-    description: "Comprende incentivos de staking, seguridad de red y dinamicas economicas de validacion.",
+    title: "Staking y Economia de Validadores",
+    description:
+      "Comprende staking y economia de validadores en Solana para decisiones del mundo real: estrategia de delegacion, dinamica de recompensas, efectos de comision y sostenibilidad operativa.",
   },
   "solana-account-abstraction": {
-    title: "Abstraccion de cuentas y smart wallets",
-    description: "Explora patrones de wallets programables para mejorar UX y seguridad de custodia.",
+    title: "Abstraccion de Cuentas y Smart Wallets",
+    description:
+      "Implementa patrones de smart-wallet/abstraccion de cuentas en Solana con autorizacion programable, controles de recuperacion y validacion de transacciones guiada por politicas.",
   },
   "solana-pda-mastery": {
-    title: "Dominio de Program Derived Addresses (PDA)",
-    description: "Profundiza en diseno, derivacion y validacion de PDAs en escenarios complejos.",
+    title: "Dominio de Program Derived Addresses",
+    description:
+      "Domina ingenieria avanzada de PDAs en Solana: diseno de esquemas de seeds, disciplina de bump y uso seguro de PDAs cross-program a escala de produccion.",
   },
   "solana-economics": {
-    title: "Economia de Solana y flujos de token",
-    description: "Analiza flujos economicos, incentivos y comportamiento de valor dentro del ecosistema.",
+    title: "Economia de Solana y Flujos de Token",
+    description:
+      "Analiza dinamicas economicas de Solana en contexto de produccion: interaccion inflacion/fee-burn, flujos de staking, movimiento de supply y tradeoffs de sostenibilidad de protocolos.",
   },
 };
 

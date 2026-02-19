@@ -55,7 +55,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
         <div className="container relative py-24 md:py-32 lg:py-40">
           <div className="mx-auto max-w-3xl text-center">
             <Badge variant="solana" className="mb-6 px-4 py-1.5 text-sm">
-              {tc("free")} · Open Source · Solana Native
+              {t("heroBadge")}
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
               <span className="text-gradient-solana">{t("heroTitle")}</span>
@@ -178,7 +178,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                   {t("componentHubItem1Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
-                  <code className="text-xs">npm install @jazzcode/wallet-connect-button</code>
+                  <code className="text-xs">{t("componentHubItem1Install")}</code>
                 </div>
               </CardContent>
             </Card>
@@ -194,7 +194,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                   {t("componentHubItem2Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
-                  <code className="text-xs">npm install @jazzcode/token-balance-card</code>
+                  <code className="text-xs">{t("componentHubItem2Install")}</code>
                 </div>
               </CardContent>
             </Card>
@@ -210,7 +210,7 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
                   {t("componentHubItem3Desc")}
                 </p>
                 <div className="mt-4 rounded-md bg-muted p-2">
-                  <code className="text-xs">npm install @jazzcode/nft-gallery</code>
+                  <code className="text-xs">{t("componentHubItem3Install")}</code>
                 </div>
               </CardContent>
             </Card>
@@ -303,19 +303,19 @@ main();`}
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div>
               <Badge variant="outline" className="mb-4">
-                DevLab
+                {t("devlabBadge")}
               </Badge>
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Solana DevLab
+                {t("devlabTitle")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Interactive CLI simulator. Learn by doing in a VS Code-like environment. 30+ guided missions.
+                {t("devlabSubtitle")}
               </p>
               <div className="mt-8">
                 <Link href="/devlab">
                   <Button variant="solana" className="gap-2">
                     <Terminal className="h-4 w-4" />
-                    Launch DevLab
+                    {t("devlabCTA")}
                   </Button>
                 </Link>
               </div>
@@ -323,15 +323,15 @@ main();`}
             <Card className="overflow-hidden border-primary/30 bg-card/80 shadow-lg">
               <CardContent className="p-0">
                 <div className="border-b bg-muted/70 px-4 py-2 text-xs text-muted-foreground">
-                  solana-devlab://builder-track/mission-1
+                  {t("devlabUri")}
                 </div>
                 <div className="grid grid-cols-3 bg-[#1e1e1e] text-[#d4d4d4]">
-                  <div className="border-r border-[#343434] p-3 text-[11px] text-[#9d9d9d]">Explorer</div>
-                  <div className="col-span-2 p-3 text-[11px]">programs/my_program/src/lib.rs</div>
+                  <div className="border-r border-[#343434] p-3 text-[11px] text-[#9d9d9d]">{t("devlabExplorer")}</div>
+                  <div className="col-span-2 p-3 text-[11px]">{t("devlabPath")}</div>
                 </div>
                 <div className="border-t bg-[#1a1a1a] px-4 py-3 font-mono text-xs text-[#d4d4d4]">
-                  <span className="text-[#4ec9b0]">user@solana-devlab</span>
-                  <span className="text-[#9cdcfe]">:~/my-solana-project$</span> solana config set --url devnet
+                  <span className="text-[#4ec9b0]">{t("devlabPromptUser")}</span>
+                  <span className="text-[#9cdcfe]">{t("devlabPromptPath")}</span> {t("devlabCommand")}
                 </div>
               </CardContent>
             </Card>

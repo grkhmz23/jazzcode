@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Flame, Trophy, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -15,25 +16,30 @@ interface StreakMilestone {
   icon: string;
 }
 
-const MILESTONES: StreakMilestone[] = [
-  { days: 7, name: "Week Warrior", icon: "🔥" },
-  { days: 30, name: "Monthly Master", icon: "💪" },
-  { days: 100, name: "Consistency King", icon: "👑" },
-];
-
 /**
  * Streak Stats Component
  * Shows current streak, longest streak, and progress to next milestone
  */
 export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) {
+  const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
+  const milestones: StreakMilestone[] = useMemo(
+    () => [
+      { days: 7, name: t("weekWarrior"), icon: "🔥" },
+      { days: 30, name: t("monthlyMaster"), icon: "💪" },
+      { days: 100, name: t("consistencyKing"), icon: "👑" },
+    ],
+    [t]
+  );
+
   // Calculate next milestone and progress
   const { nextMilestone, progress, isMilestoneReached } = useMemo(() => {
     // Find the next milestone that hasn't been reached
-    const next = MILESTONES.find((m) => currentStreak < m.days);
+    const next = milestones.find((m) => currentStreak < m.days);
 
     if (!next) {
       // All milestones reached
-      const lastMilestone = MILESTONES[MILESTONES.length - 1];
+      const lastMilestone = milestones[milestones.length - 1];
       return {
         nextMilestone: lastMilestone,
         progress: 100,
@@ -42,8 +48,8 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
     }
 
     // Find the previous milestone (or 0 if at the first one)
-    const prevMilestoneIndex = MILESTONES.indexOf(next) - 1;
-    const prevDays = prevMilestoneIndex >= 0 ? MILESTONES[prevMilestoneIndex].days : 0;
+    const prevMilestoneIndex = milestones.indexOf(next) - 1;
+    const prevDays = prevMilestoneIndex >= 0 ? milestones[prevMilestoneIndex].days : 0;
 
     // Calculate progress within the current milestone range
     const range = next.days - prevDays;
@@ -55,7 +61,7 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
       progress: progressPercent,
       isMilestoneReached: false,
     };
-  }, [currentStreak]);
+  }, [currentStreak, milestones]);
 
   // If streak is 0, show motivational message
   if (currentStreak === 0) {
@@ -66,18 +72,17 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
             <Flame className="h-5 w-5 text-orange-500" />
           </div>
           <div className="flex-1">
-            <p className="font-medium">Start a streak today!</p>
+            <p className="font-medium">{t("startStreakToday")}</p>
             <p className="text-sm text-muted-foreground">
-              Complete a lesson to begin your learning streak. Build consistency
-              and earn achievements!
+              {t("startStreakDescription")}
             </p>
             <div className="mt-3">
               <p className="text-xs text-muted-foreground">
-                Next milestone: <span className="font-medium">{MILESTONES[0].name}</span> ({MILESTONES[0].days} days)
+                {t("nextMilestone")}: <span className="font-medium">{milestones[0].name}</span> ({milestones[0].days} {tc("days")})
               </p>
               <div className="mt-1 flex items-center gap-2">
                 <Progress value={0} className="h-1.5 flex-1" />
-                <span className="text-xs text-muted-foreground">0/{MILESTONES[0].days}</span>
+                <span className="text-xs text-muted-foreground">0/{milestones[0].days}</span>
               </div>
             </div>
           </div>
@@ -98,9 +103,9 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-bold">{currentStreak}</span>
-              <span className="text-sm text-muted-foreground">days</span>
+              <span className="text-sm text-muted-foreground">{tc("days")}</span>
             </div>
-            <p className="text-xs text-muted-foreground">Current Streak</p>
+            <p className="text-xs text-muted-foreground">{t("currentStreak")}</p>
           </div>
         </div>
 
@@ -115,9 +120,9 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold">{longestStreak}</span>
-              <span className="text-xs text-muted-foreground">days</span>
+              <span className="text-xs text-muted-foreground">{tc("days")}</span>
             </div>
-            <p className="text-xs text-muted-foreground">Best</p>
+            <p className="text-xs text-muted-foreground">{t("best")}</p>
           </div>
         </div>
       </div>
@@ -127,23 +132,26 @@ export function StreakStats({ currentStreak, longestStreak }: StreakStatsProps) 
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">
-            {isMilestoneReached ? "All milestones completed!" : "Next Milestone"}
+            {isMilestoneReached ? t("allMilestonesCompleted") : t("nextMilestone")}
           </span>
         </div>
 
         {isMilestoneReached ? (
           <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="text-lg">{MILESTONES[MILESTONES.length - 1].icon}</span>
+            <span className="text-lg">{milestones[milestones.length - 1].icon}</span>
             <span>
-              You&apos;ve achieved the highest streak milestone! Keep up the amazing work!
+              {t("highestMilestoneAchieved")}
             </span>
           </div>
         ) : (
           <div className="mt-2">
             <div className="flex items-center justify-between text-sm">
               <span>
-                {currentStreak}/{nextMilestone.days} days to{" "}
-                <span className="font-medium">{nextMilestone.name}</span>
+                {t("daysToMilestone", {
+                  current: currentStreak,
+                  days: nextMilestone.days,
+                  milestone: nextMilestone.name,
+                })}
               </span>
               <span className="text-lg">{nextMilestone.icon}</span>
             </div>

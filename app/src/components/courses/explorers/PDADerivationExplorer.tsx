@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PublicKey } from "@solana/web3.js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -18,6 +19,7 @@ function toHex(bytes: Uint8Array): string {
 }
 
 export function PDADerivationExplorer({ title, programId, seeds }: PDADerivationExplorerProps) {
+  const t = useTranslations("lesson");
   const seedBytes = seeds.map((seed) => toSeedBytes(seed));
   const [pda, bump] = PublicKey.findProgramAddressSync(seedBytes, new PublicKey(programId));
 
@@ -28,11 +30,11 @@ export function PDADerivationExplorer({ title, programId, seeds }: PDADerivation
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <div>
-          <p className="text-xs text-muted-foreground">Program ID</p>
+          <p className="text-xs text-muted-foreground">{t("programId")}</p>
           <p className="font-mono text-xs">{programId}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Derived PDA</p>
+          <p className="text-xs text-muted-foreground">{t("derivedPda")}</p>
           <p className="font-mono text-xs">{pda.toBase58()}</p>
         </div>
         <div>
@@ -40,7 +42,7 @@ export function PDADerivationExplorer({ title, programId, seeds }: PDADerivation
           <p className="font-mono text-xs">{bump}</p>
         </div>
         <div>
-          <p className="mb-2 text-xs text-muted-foreground">Seed bytes (UTF-8)</p>
+          <p className="mb-2 text-xs text-muted-foreground">{t("seedBytesUtf8")}</p>
           <ul className="space-y-1">
             {seeds.map((seed, index) => (
               <li key={`${seed}-${index}`} className="rounded-md border bg-background p-2 text-xs">

@@ -419,12 +419,11 @@ function ProfileContent() {
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <Shield className="mb-4 h-12 w-12 text-muted-foreground/30" />
                 <p className="text-muted-foreground">
-                  Link a wallet in{" "}
-                  <Link href="/settings" className="text-primary hover:underline">
-                    Settings
-                  </Link>{" "}
-                  to view your on-chain credentials
+                  {t("linkWalletPrompt", { link: t("settingsLink") })}
                 </p>
+                <Link href="/settings" className="mt-3 text-sm text-primary hover:underline">
+                  {t("settingsLink")}
+                </Link>
               </CardContent>
             </Card>
           ) : (

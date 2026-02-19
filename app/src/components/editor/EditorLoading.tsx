@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface EditorLoadingProps {
   height?: string;
 }
@@ -9,6 +11,7 @@ interface EditorLoadingProps {
  * Shows a dark background with subtle shimmer animation while Monaco loads
  */
 export function EditorLoading({ height = "100%" }: EditorLoadingProps) {
+  const t = useTranslations("challenge");
   return (
     <div
       className="w-full overflow-hidden rounded-md border bg-muted/40"
@@ -16,7 +19,7 @@ export function EditorLoading({ height = "100%" }: EditorLoadingProps) {
       data-testid="editor-loading"
     >
       <div className="border-b bg-muted/70 px-4 py-2 text-xs text-muted-foreground">
-        Loading editor...
+        {t("loadingEditor")}
       </div>
       <div className="space-y-3 p-4">
         <div className="h-3 w-2/3 animate-pulse rounded bg-muted-foreground/20" />

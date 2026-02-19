@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, Lock, Timer, Trophy, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,11 +54,12 @@ export function TaskPanel({
   externalConnected,
   terminalHints,
 }: TaskPanelProps) {
+  const t = useTranslations("playground");
   const completeCount = results.filter((item) => item.complete).length;
   const percent = Math.floor((completeCount / quest.tasks.length) * 100);
 
   return (
-    <aside className="flex h-full min-h-0 flex-col border-l border-[#2f2f2f] bg-[#1f1f1f] text-[#d4d4d4]" aria-label="Task panel">
+    <aside className="flex h-full min-h-0 flex-col border-l border-[#2f2f2f] bg-[#1f1f1f] text-[#d4d4d4]" aria-label={t("taskPanelAriaLabel")}>
       <div className="space-y-2 border-b border-[#313131] p-3">
         <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
           Quest
@@ -72,7 +74,7 @@ export function TaskPanel({
             <div className="h-full bg-[#007acc]" style={{ width: `${percent}%` }} />
           </div>
           <p className="text-xs text-[#9d9d9d]">
-            {completeCount}/{quest.tasks.length} tasks complete
+            {t("tasksComplete", { complete: completeCount, total: quest.tasks.length })}
           </p>
         </div>
 
@@ -106,7 +108,7 @@ export function TaskPanel({
                 <Button size="sm" variant="outline" onClick={onExportBurner} disabled={!burnerAddress}>Export</Button>
                 <Button size="sm" variant="outline" onClick={onResetBurner} disabled={!burnerAddress}>Reset</Button>
               </div>
-              <p className="text-[11px] text-amber-300">Burner secret is stored in IndexedDB for this browser profile.</p>
+              <p className="text-[11px] text-amber-300">{t("burnerSecretNotice")}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -151,7 +153,7 @@ export function TaskPanel({
                   {!locked ? (
                     <div className="mt-2 space-y-1">
                       <Button size="sm" variant="outline" onClick={() => onRevealHint(task.id)}>
-                        Reveal hint ({revealed}/{task.hints.length})
+                        {t("revealHintCount", { revealed, total: task.hints.length })}
                       </Button>
                       {task.hints.slice(0, revealed).map((hint) => (
                         <p key={hint} className="rounded bg-[#1e1e1e] px-2 py-1 text-[#cccccc]">
@@ -169,7 +171,7 @@ export function TaskPanel({
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
           <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">Achievements</h3>
           {achievements.length === 0 ? (
-            <p className="text-xs text-[#9d9d9d]">No badges yet.</p>
+            <p className="text-xs text-[#9d9d9d]">{t("noBadgesYet")}</p>
           ) : (
             <ul className="space-y-1">
               {achievements.map((badge) => (
@@ -183,9 +185,9 @@ export function TaskPanel({
         </div>
 
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">CLI Error Hints</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">{t("cliErrorHints")}</h3>
           {terminalHints.length === 0 ? (
-            <p className="text-xs text-[#9d9d9d]">No active errors.</p>
+            <p className="text-xs text-[#9d9d9d]">{t("noActiveErrors")}</p>
           ) : (
             <ul className="space-y-1 text-xs text-[#cccccc]">
               {terminalHints.map((hint) => (

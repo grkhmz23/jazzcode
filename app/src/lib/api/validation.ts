@@ -1,5 +1,6 @@
 import { z, ZodError, ZodSchema } from "zod";
 import { Errors } from "./errors";
+import { locales } from "@/lib/i18n/routing";
 
 /**
  * Format ZodError into a Record<string, string[]> for API responses
@@ -88,7 +89,7 @@ export const Schemas = {
   uuid: z.string().uuid("Invalid UUID format"),
   
   // Locale
-  locale: z.enum(["en", "pt-BR", "es"]),
+  locale: z.enum(locales),
   
   // Course slug
   slug: z.string()

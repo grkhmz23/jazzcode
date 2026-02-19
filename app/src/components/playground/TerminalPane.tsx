@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, ReactNode, Ref, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AutocompleteResult, TerminalEntry } from "@/lib/playground";
@@ -24,6 +25,7 @@ export function TerminalPane({
   inputRef,
   topPanel,
 }: TerminalPaneProps) {
+  const t = useTranslations("playground");
   const [command, setCommand] = useState("");
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
@@ -99,7 +101,7 @@ export function TerminalPane({
   };
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-[#181818] text-[#d4d4d4]" aria-label="Terminal panel">
+    <section className="flex h-full min-h-0 flex-col bg-[#181818] text-[#d4d4d4]" aria-label={t("terminalPanelAriaLabel")}>
       <div className="border-b border-[#313131] px-3 py-2 text-xs uppercase tracking-wide text-[#9d9d9d]">Terminal</div>
       {topPanel ? <div className="border-b border-[#313131] bg-[#1b1b1b] p-3">{topPanel}</div> : null}
       <div className="min-h-0 flex-1 space-y-1 overflow-auto p-3 font-mono text-xs" role="log" aria-live="polite">
@@ -139,9 +141,9 @@ export function TerminalPane({
             setSuggestionIndex(-1);
           }}
           onKeyDown={onKeyDown}
-          aria-label="Terminal command input"
+          aria-label={t("terminalCommandInputAriaLabel")}
           className="h-8 border-[#323232] bg-[#1e1e1e] font-mono text-xs"
-          placeholder="Type help, solana config get, anchor init myproj"
+          placeholder={t("terminalCommandInputPlaceholder")}
         />
         <Button type="submit" size="sm">
           Run

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,9 +16,10 @@ interface TestResultsPanelProps {
 interface TestResultItemProps {
   result: TestResult;
   index: number;
+  challengeT: ReturnType<typeof useTranslations>;
 }
 
-function TestResultItem({ result, index }: TestResultItemProps) {
+function TestResultItem({ result, index, challengeT }: TestResultItemProps) {
   const [expanded, setExpanded] = useState(false);
   const hasError = result.error !== null;
   const hasMismatch = !result.passed && !hasError && result.actualOutput !== result.expectedOutput;
@@ -102,7 +104,7 @@ function TestResultItem({ result, index }: TestResultItemProps) {
           {/* Console Logs */}
           {result.logs.length > 0 && (
             <div className="rounded bg-muted p-2">
-              <p className="text-xs font-medium text-muted-foreground">Console output:</p>
+              <p className="text-xs font-medium text-muted-foreground">{challengeT("consoleOutput")}:</p>
               <pre className="mt-1 font-mono text-xs text-muted-foreground whitespace-pre-wrap">
                 {result.logs.join("\n")}
               </pre>
@@ -115,6 +117,7 @@ function TestResultItem({ result, index }: TestResultItemProps) {
 }
 
 export function TestResultsPanel({ results, isRunning, totalTime }: TestResultsPanelProps) {
+  const t = useTranslations("challenge");
   const passedCount = results.filter((r) => r.passed).length;
   const totalCount = results.length;
   const allPassed = passedCount === totalCount && totalCount > 0;
@@ -131,7 +134,7 @@ export function TestResultsPanel({ results, isRunning, totalTime }: TestResultsP
           {isRunning ? (
             <>
               <Clock className="h-4 w-4 animate-pulse text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Running tests...</span>
+              <span className="text-sm text-muted-foreground">{t("runningTests")}</span>
             </>
           ) : (
             <>
@@ -141,10 +144,10 @@ export function TestResultsPanel({ results, isRunning, totalTime }: TestResultsP
                   allPassed ? "text-green-600" : "text-red-600"
                 )}
               >
-                {passedCount}/{totalCount} tests passed
+                {passedCount}/{totalCount} {t("testsPassed")}
               </span>
               <span className="text-xs text-muted-foreground">
-                ({totalTime}ms)
+                ({totalTime}{t("msSuffix")})
               </span>
             </>
           )}
@@ -155,7 +158,7 @@ export function TestResultsPanel({ results, isRunning, totalTime }: TestResultsP
       {results.length > 0 && (
         <div className="space-y-2">
           {results.map((result, index) => (
-            <TestResultItem key={result.name} result={result} index={index} />
+            <TestResultItem key={result.name} result={result} index={index} challengeT={t} />
           ))}
         </div>
       )}

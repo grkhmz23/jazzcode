@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { componentRegistry, categories, getFeaturedComponents, HubComponent, ComponentCategory } from "@/lib/component-hub/registry";
 import { ComponentCard } from "@/components/solana/ComponentCard";
 import { ComponentDetail } from "@/components/solana/ComponentDetail";
@@ -19,6 +20,8 @@ const categoryIcons: Record<ComponentCategory, typeof Search> = {
 };
 
 export default function ComponentsPage() {
+  const t = useTranslations("components");
+  const tc = useTranslations("common");
   const [selectedComponent, setSelectedComponent] = useState<HubComponent | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | "all">("all");
@@ -58,9 +61,9 @@ export default function ComponentsPage() {
     <section className="container py-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Component Hub</h1>
+        <h1 className="text-3xl font-bold text-white">{t("title")}</h1>
         <p className="mt-2 text-zinc-400">
-          Production-ready Solana components. Copy, install, or open in Playground.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -70,7 +73,7 @@ export default function ComponentsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <Input
             type="text"
-            placeholder="Search components..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -85,7 +88,7 @@ export default function ComponentsPage() {
         className="mb-8"
       >
         <TabsList className="flex flex-wrap gap-2">
-          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="all">{t("allCategories")}</TabsTrigger>
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.id];
             return (
@@ -103,7 +106,7 @@ export default function ComponentsPage() {
             <div className="mb-8">
               <div className="mb-4 flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-purple-500" />
-                <h2 className="text-lg font-semibold text-white">Featured Components</h2>
+                <h2 className="text-lg font-semibold text-white">{t("featuredComponents")}</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {featuredComponents.map((component) => (
@@ -122,14 +125,16 @@ export default function ComponentsPage() {
         <TabsContent value={selectedCategory} className="mt-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">
-              {selectedCategory === "all" ? "All Components" : categories.find((c) => c.id === selectedCategory)?.name}
+              {selectedCategory === "all"
+                ? t("allComponents")
+                : categories.find((c) => c.id === selectedCategory)?.name}
             </h2>
             <Badge variant="secondary">{filteredComponents.length}</Badge>
           </div>
 
           {filteredComponents.length === 0 ? (
             <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center">
-              <p className="text-zinc-500">No components found</p>
+              <p className="text-zinc-500">{tc("noResults")}</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AccountExplorerSample } from "@/types/content";
 
@@ -11,6 +12,7 @@ function lamportsToSol(lamports: number): string {
 }
 
 export function AccountExplorer({ title, samples }: AccountExplorerProps) {
+  const t = useTranslations("lesson");
   return (
     <Card className="mt-8 border-border/60 bg-card/60">
       <CardHeader>
@@ -26,7 +28,7 @@ export function AccountExplorer({ title, samples }: AccountExplorerProps) {
                 <th className="px-2 py-2">Owner</th>
                 <th className="px-2 py-2">Lamports</th>
                 <th className="px-2 py-2">Executable</th>
-                <th className="px-2 py-2">Data Length</th>
+                <th className="px-2 py-2">{t("dataLength")}</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +37,7 @@ export function AccountExplorer({ title, samples }: AccountExplorerProps) {
                   <td className="px-2 py-2 font-medium">{sample.label}</td>
                   <td className="px-2 py-2 font-mono text-xs">{sample.address}</td>
                   <td className="px-2 py-2 font-mono text-xs">{sample.owner}</td>
-                  <td className="px-2 py-2">{sample.lamports} ({lamportsToSol(sample.lamports)} SOL)</td>
+                  <td className="px-2 py-2">{t("lamportsSol", { lamports: sample.lamports, sol: lamportsToSol(sample.lamports) })}</td>
                   <td className="px-2 py-2">{sample.executable ? "true" : "false"}</td>
                   <td className="px-2 py-2">{sample.dataLen} bytes</td>
                 </tr>
@@ -45,13 +47,13 @@ export function AccountExplorer({ title, samples }: AccountExplorerProps) {
         </div>
         <div className="mt-4 space-y-2 text-xs text-muted-foreground">
           <p>
-            <strong>Owner:</strong> Only the owner program can mutate account data.
+            <strong>{t("ownerLabel")}:</strong> {t("ownerProgramMutates")}
           </p>
           <p>
-            <strong>Executable:</strong> `true` means this account stores program bytecode rather than mutable app state.
+            <strong>{t("executableLabel")}:</strong> {t("executableTrueMeans")}
           </p>
           <p>
-            <strong>Data length:</strong> Rent-exemption requirements scale with bytes stored.
+            <strong>{t("dataLengthLabel")}:</strong> {t("rentExemptionScales")}
           </p>
         </div>
       </CardContent>

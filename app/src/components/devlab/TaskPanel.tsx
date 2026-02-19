@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, Lightbulb, Pencil, TerminalSquare } from "lucide-react";
 import { getQuestByTrack } from "@/lib/data/devlab-quests";
 import { evaluateMission } from "@/lib/devlab/quest-engine";
@@ -13,6 +14,7 @@ function difficultyColor(value: "easy" | "medium" | "hard") {
 }
 
 export function TaskPanel() {
+  const t = useTranslations("devlab");
   const currentTrack = useDevLabStore((state) => state.currentTrack);
   const missionIndex = useDevLabStore((state) => state.currentMissionIndex);
   const objectiveStatus = useDevLabStore((state) => state.objectiveStatus);
@@ -88,7 +90,7 @@ export function TaskPanel() {
             }}
           >
             <Lightbulb className="h-3.5 w-3.5 text-[#d7ba7d]" />
-            Show Hint
+            {t("showHint")}
           </button>
 
           <div className="space-y-1">

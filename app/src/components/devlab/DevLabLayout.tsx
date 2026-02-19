@@ -1,6 +1,7 @@
 "use client";
 
 import { MouseEvent as ReactMouseEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Lock, Shield, TerminalSquare, Wrench, Coins } from "lucide-react";
 import { devlabQuests } from "@/lib/data/devlab-quests";
 import { useDevLabStore } from "@/lib/devlab/store";
@@ -18,6 +19,7 @@ function TrackIcon({ track }: { track: string }) {
 }
 
 export function DevLabLayout() {
+  const t = useTranslations("playground");
   const panelSizes = useDevLabStore((state) => state.panelSizes);
   const setPanelSize = useDevLabStore((state) => state.setPanelSize);
   const selectTrack = useDevLabStore((state) => state.selectTrack);
@@ -59,8 +61,8 @@ export function DevLabLayout() {
   if (!trackSelected) {
     return (
       <div className="h-full overflow-auto bg-[#1e1e1e] p-6 text-[#d4d4d4]">
-        <h1 className="mb-2 text-2xl font-bold">Choose Your Track</h1>
-        <p className="mb-6 text-sm text-[#9d9d9d]">30+ guided missions across builder, token, ops, and security workflows.</p>
+        <h1 className="mb-2 text-2xl font-bold">{t("chooseYourTrack")}</h1>
+        <p className="mb-6 text-sm text-[#9d9d9d]">{t("guidedMissionsSubtitle")}</p>
         <div className="grid gap-4 md:grid-cols-2">
           {devlabQuests.map((quest) => {
             const locked = quest.track === "security" && !builderComplete;

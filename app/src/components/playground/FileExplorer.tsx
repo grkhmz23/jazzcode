@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight, FileCode2, FileJson, FileText, FolderClosed, FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,7 @@ export function FileExplorer({
   onDeleteFile,
   onImportFiles,
 }: FileExplorerProps) {
+  const t = useTranslations("playground");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [dialog, setDialog] = useState<ExplorerDialog>(null);
   const [nextPath, setNextPath] = useState("");
@@ -188,7 +190,7 @@ export function FileExplorer({
   return (
     <section
       className={`flex h-full min-h-0 flex-col text-[#d4d4d4] ${dragOver ? "bg-[#007acc]/10" : "bg-[#252526]"}`}
-      aria-label="File explorer"
+      aria-label={t("fileExplorerAriaLabel")}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }}
       onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }}
       onDrop={(e) => void handleDrop(e)}
@@ -201,7 +203,7 @@ export function FileExplorer({
           variant="ghost"
           className="h-7 w-7"
           onClick={() => openCreateDialog()}
-          aria-label="Create file"
+          aria-label={t("createFileAriaLabel")}
         >
           <Plus className="h-3.5 w-3.5" />
         </Button>

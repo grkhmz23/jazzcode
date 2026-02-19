@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight, FileCode2, FileJson, FileText, Folder, FolderOpen } from "lucide-react";
 import { useDevLabStore } from "@/lib/devlab/store";
 import { VFSNode } from "@/lib/devlab/types";
@@ -33,6 +34,7 @@ function getNode(root: VFSNode, path: string): VFSNode | null {
 }
 
 export function FileExplorer() {
+  const t = useTranslations("playground");
   const vfs = useDevLabStore((state) => state.vfs);
   const openFile = useDevLabStore((state) => state.openFile);
   const createVfsFile = useDevLabStore((state) => state.createVfsFile);
@@ -45,7 +47,7 @@ export function FileExplorer() {
   const root = useMemo(() => getNode(vfs, "/my-solana-project"), [vfs]);
 
   if (!root || root.type !== "directory") {
-    return <div className="h-full bg-[#252526] p-3 text-xs text-[#c5c5c5]">No files loaded</div>;
+    return <div className="h-full bg-[#252526] p-3 text-xs text-[#c5c5c5]">{t("noFilesLoaded")}</div>;
   }
 
   const toggle = (path: string) => {
@@ -133,7 +135,7 @@ export function FileExplorer() {
               setMenu(null);
             }}
           >
-            New File
+            {t("newFile")}
           </button>
           <button
             type="button"
@@ -144,7 +146,7 @@ export function FileExplorer() {
               setMenu(null);
             }}
           >
-            New Folder
+            {t("newFolder")}
           </button>
           <button
             type="button"

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type {
   TaskQuest,
@@ -34,9 +35,10 @@ interface TaskItemProps {
   result: TaskResult | undefined;
   revealedHintCount: number;
   onRevealHint: () => void;
+  t: ReturnType<typeof useTranslations>;
 }
 
-function TaskItem({ task, result, revealedHintCount, onRevealHint }: TaskItemProps) {
+function TaskItem({ task, result, revealedHintCount, onRevealHint, t }: TaskItemProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const isComplete = result?.complete ?? false;
   const isLocked = result?.locked ?? true;
@@ -110,7 +112,7 @@ function TaskItem({ task, result, revealedHintCount, onRevealHint }: TaskItemPro
           {/* Assertions */}
           <div className="mt-3 space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Objectives
+              {t("objectives")}
             </p>
             <ul className="space-y-1">
               {task.assertions.map((assertion, index) => (
@@ -123,13 +125,13 @@ function TaskItem({ task, result, revealedHintCount, onRevealHint }: TaskItemPro
                     <span>Execute: <code className="rounded bg-muted px-1">{assertion.command}</code></span>
                   )}
                   {assertion.type === "file_contains" && (
-                    <span>File <code className="rounded bg-muted px-1">{assertion.path}</code> contains required content</span>
+                    <span>{t("assertFileContains", { path: assertion.path })}</span>
                   )}
                   {assertion.type === "balance_at_least" && (
-                    <span>Balance of {assertion.address.slice(0, 8)}... at least {assertion.minSol} SOL</span>
+                    <span>{t("assertBalanceAtLeast", { address: `${assertion.address.slice(0, 8)}...`, minSol: assertion.minSol })}</span>
                   )}
                   {assertion.type === "keypair_exists" && (
-                    <span>Keypair exists at <code className="rounded bg-muted px-1">{assertion.path}</code></span>
+                    <span>{t("assertKeypairExists", { path: assertion.path })}</span>
                   )}
                 </li>
               ))}
@@ -139,7 +141,7 @@ function TaskItem({ task, result, revealedHintCount, onRevealHint }: TaskItemPro
           {/* Hints */}
           <div className="mt-4 space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Hints
+              {t("hintsTitle")}
             </p>
             {availableHints.length > 0 && (
               <ul className="space-y-2">
@@ -162,7 +164,7 @@ function TaskItem({ task, result, revealedHintCount, onRevealHint }: TaskItemPro
                 className="h-auto py-1 text-xs text-muted-foreground hover:text-foreground"
               >
                 <LightbulbIcon className="mr-1 h-3 w-3" />
-                Reveal hint ({task.hints.length - revealedHintCount} remaining)
+                {t("revealHintRemaining", { remaining: task.hints.length - revealedHintCount })}
               </Button>
             )}
           </div>
@@ -181,6 +183,7 @@ export function TaskPanel({
   simulation,
   className,
 }: TaskPanelProps) {
+  const t = useTranslations("playground");
   const progress = React.useMemo(() => {
     const completed = results.filter((r) => r.complete).length;
     const total = quest.tasks.length;
@@ -204,7 +207,7 @@ export function TaskPanel({
             variant="ghost"
             size="icon"
             onClick={onReset}
-            title="Reset workspace"
+            title={t("resetWorkspaceTitle")}
           >
             <RotateCcwIcon className="h-4 w-4" />
           </Button>
@@ -224,15 +227,16 @@ export function TaskPanel({
 
       {/* Task list */}
       <div className="flex-1 overflow-auto p-4 space-y-3">
-        {quest.tasks.map((task, index) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            result={results[index]}
-            revealedHintCount={revealedHintsByTask[task.id] ?? 0}
-            onRevealHint={() => onRevealHint(task.id)}
-          />
-        ))}
+          {quest.tasks.map((task, index) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              result={results[index]}
+              revealedHintCount={revealedHintsByTask[task.id] ?? 0}
+              onRevealHint={() => onRevealHint(task.id)}
+              t={t}
+            />
+          ))}
       </div>
 
       {/* Footer - Simulation info */}
@@ -250,7 +254,7 @@ export function TaskPanel({
           </div>
           {Object.keys(simulation.balances).length > 0 && (
             <div className="flex justify-between">
-              <span>Wallets with balance:</span>
+              <span>{t("walletsWithBalance")}</span>
               <span className="font-mono text-foreground">
                 {Object.keys(simulation.balances).length}
               </span>
@@ -258,7 +262,7 @@ export function TaskPanel({
           )}
           {Object.keys(simulation.tokenMints).length > 0 && (
             <div className="flex justify-between">
-              <span>Token mints:</span>
+              <span>{t("tokenMints")}</span>
               <span className="font-mono text-foreground">
                 {Object.keys(simulation.tokenMints).length}
               </span>

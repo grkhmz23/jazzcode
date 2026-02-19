@@ -352,7 +352,7 @@ function SettingsContent() {
                     <Wallet className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Solana Wallet</p>
+                    <p className="text-sm font-medium">{t("solanaWallet")}</p>
                     <p className="text-xs text-muted-foreground">
                       {settings?.linkedWallets && settings.linkedWallets.length > 0
                         ? `${settings.linkedWallets[0].slice(0, 6)}...${settings.linkedWallets[0].slice(-4)}`

@@ -33,7 +33,7 @@ export default function Error({
         </div>
         <h2 className="mt-4 text-2xl font-bold">{t("error")}</h2>
         <p className="mt-2 text-muted-foreground">
-          We&apos;ve been notified and are working to fix the issue.
+          {t("errorSupportMessage")}
         </p>
         <div className="mt-6 flex gap-4">
           <Button onClick={reset} variant="default">

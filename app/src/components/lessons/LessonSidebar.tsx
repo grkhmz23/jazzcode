@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -138,6 +139,7 @@ export function LessonSidebar({
   completedLessons,
   courseTitle,
 }: LessonSidebarProps) {
+  const t = useTranslations("lesson");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Calculate overall progress
@@ -166,7 +168,7 @@ export function LessonSidebar({
           </h2>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Course Progress</span>
+          <span className="text-sm font-medium">{t("courseProgress")}</span>
           <span className="text-xs text-muted-foreground">
             {completedCount}/{totalLessons}
           </span>
@@ -196,7 +198,7 @@ export function LessonSidebar({
     <>
       {/* Mobile Toggle */}
       <div className="flex items-center justify-between border-b p-4 lg:hidden">
-        <span className="text-sm font-medium">Course Content</span>
+        <span className="text-sm font-medium">{t("courseContent")}</span>
         <Button
           variant="ghost"
           size="sm"

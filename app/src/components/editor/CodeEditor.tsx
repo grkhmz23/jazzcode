@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type { editor } from "monaco-editor";
 
@@ -70,6 +71,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     },
     ref
   ) {
+    const t = useTranslations("challenge");
     const { theme: appTheme } = useTheme();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -221,7 +223,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       return (
         <div className="relative h-full w-full overflow-hidden rounded-md border">
           <div className="border-b bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Monaco failed to load after 10s. Using fallback editor.
+            {t("monacoFailedFallback")}
           </div>
           <textarea
             className="h-[calc(100%-2.25rem)] w-full resize-none bg-background p-3 font-mono text-sm outline-none"
@@ -234,7 +236,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             }}
             readOnly={readOnly}
             spellCheck={false}
-            aria-label="Fallback code editor"
+            aria-label={t("fallbackCodeEditorAriaLabel")}
           />
         </div>
       );

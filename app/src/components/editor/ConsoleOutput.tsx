@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ function parseLogs(logs: string[]): LogEntry[] {
 }
 
 export function ConsoleOutput({ logs, onClear, className }: ConsoleOutputProps) {
+  const t = useTranslations("challenge");
   const scrollRef = useRef<HTMLDivElement>(null);
   const parsedLogs = parseLogs(logs);
 
@@ -59,7 +61,7 @@ export function ConsoleOutput({ logs, onClear, className }: ConsoleOutputProps) 
       {/* Header */}
       <div className="flex items-center justify-between border-b bg-muted px-3 py-2">
         <span className="text-xs font-medium text-muted-foreground">
-          Console Output ({logs.length})
+          {t("consoleOutput")} ({logs.length})
         </span>
         <Button
           variant="ghost"

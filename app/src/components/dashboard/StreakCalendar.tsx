@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -65,6 +66,8 @@ export function StreakCalendar({
   currentStreak,
   longestStreak,
 }: StreakCalendarProps) {
+  const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const [hoveredCell, setHoveredCell] = useState<CalendarCell | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
@@ -228,16 +231,16 @@ export function StreakCalendar({
       {/* Stats row */}
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <div className="flex items-center gap-1.5">
-          <span className="font-medium">Current Streak:</span>
-          <span className="font-bold">{currentStreak} days</span>
+          <span className="font-medium">{t("currentStreak")}:</span>
+          <span className="font-bold">{currentStreak} {tc("days")}</span>
           {currentStreak > 0 && <span>🔥</span>}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-medium">Longest Streak:</span>
-          <span className="font-bold">{longestStreak} days</span>
+          <span className="font-medium">{t("longestStreak")}:</span>
+          <span className="font-bold">{longestStreak} {tc("days")}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-medium">Active today:</span>
+          <span className="font-medium">{t("todayActive")}:</span>
           <span>{isActiveToday ? "✓" : "✗"}</span>
         </div>
       </div>

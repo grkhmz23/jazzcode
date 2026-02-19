@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ interface QuizBlockProps {
 }
 
 export function QuizBlock({ block }: QuizBlockProps) {
+  const t = useTranslations("lesson");
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -82,7 +84,7 @@ export function QuizBlock({ block }: QuizBlockProps) {
 
         <div className="flex items-center justify-between border-t pt-4">
           <Button type="button" onClick={() => setSubmitted(true)}>
-            Check Answers
+            {t("checkAnswers")}
           </Button>
           {submitted ? (
             <p className="text-sm font-medium" aria-live="polite">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { FileCode2, Github, Upload, FolderUp } from "lucide-react";
 import { WorkspaceTemplate } from "@/lib/playground/types";
 
@@ -18,13 +19,14 @@ export function WelcomeScreen({
   onOpenGithubImport,
   onOpenFileUpload,
 }: WelcomeScreenProps) {
+  const t = useTranslations("playground");
   return (
     <div className="flex h-full items-center justify-center bg-[#1e1e1e] p-8">
       <div className="w-full max-w-2xl space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#d4d4d4]">JazzCode Playground</h1>
+          <h1 className="text-2xl font-bold text-[#d4d4d4]">{t("welcomeTitle")}</h1>
           <p className="mt-2 text-sm text-[#9d9d9d]">
-            Start a new project, pick a template, or import from GitHub.
+            {t("welcomeSubtitle")}
           </p>
         </div>
 
@@ -35,7 +37,7 @@ export function WelcomeScreen({
             onClick={onNewEmpty}
           >
             <FileCode2 className="h-6 w-6 text-[#007acc]" />
-            <span className="text-xs font-medium">New Empty</span>
+            <span className="text-xs font-medium">{t("newEmpty")}</span>
           </button>
           <button
             type="button"
@@ -43,7 +45,7 @@ export function WelcomeScreen({
             onClick={onOpenGithubImport}
           >
             <Github className="h-6 w-6 text-[#9d9d9d]" />
-            <span className="text-xs font-medium">GitHub Import</span>
+            <span className="text-xs font-medium">{t("githubImport")}</span>
           </button>
           <button
             type="button"
@@ -51,7 +53,7 @@ export function WelcomeScreen({
             onClick={onOpenFileUpload}
           >
             <Upload className="h-6 w-6 text-[#9d9d9d]" />
-            <span className="text-xs font-medium">Upload Files</span>
+            <span className="text-xs font-medium">{t("uploadFiles")}</span>
           </button>
           <button
             type="button"
@@ -59,7 +61,7 @@ export function WelcomeScreen({
             onClick={onOpenFileUpload}
           >
             <FolderUp className="h-6 w-6 text-[#9d9d9d]" />
-            <span className="text-xs font-medium">Upload Folder</span>
+            <span className="text-xs font-medium">{t("uploadFolder")}</span>
           </button>
         </div>
 

@@ -3,6 +3,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { signIn, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Wallet, Copy, LogOut, Loader2 } from "lucide-react";
@@ -12,6 +13,7 @@ import bs58 from "bs58";
 import { createWalletSignInMessage } from "@/lib/auth/wallet-message";
 
 export function WalletButton() {
+  const tc = useTranslations("common");
   const { publicKey, connected, disconnect, signMessage } = useWallet();
   const { setVisible } = useWalletModal();
   const { status } = useSession();
@@ -130,7 +132,7 @@ export function WalletButton() {
     return (
       <Button variant="outline" size="sm" onClick={handleConnect}>
         <Wallet className="mr-2 h-4 w-4" />
-        <span className="hidden sm:inline">Connect Wallet</span>
+        <span className="hidden sm:inline">{tc("connectWallet")}</span>
         <span className="sm:hidden">Connect</span>
       </Button>
     );

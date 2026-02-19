@@ -509,7 +509,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                   </Badge>
                   {currentLessonMeta && (
                     <span className="text-sm text-muted-foreground">
-                      {currentLessonMeta.module.title} • Lesson {currentLessonIndex + 1} of {totalLessons}
+                      {currentLessonMeta.module.title} • {t("lessonProgress", { current: currentLessonIndex + 1, total: totalLessons })}
                     </span>
                   )}
                 </div>
@@ -571,7 +571,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                               ) : (
                                 <>
                                   <CheckCircle2 className="h-4 w-4" />
-                                  {isAuthenticated ? t("markComplete") : "Mark Complete (Local)"}
+                                  {isAuthenticated ? t("markComplete") : t("markCompleteLocal")}
                                 </>
                               )}
                             </Button>
@@ -595,17 +595,17 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
               <aside className="hidden border-l p-4 xl:block">
                 <Card className="sticky top-4">
                   <CardHeader>
-                    <CardTitle className="text-base">Project Status</CardTitle>
+                    <CardTitle className="text-base">{t("projectStatus")}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 text-sm">
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Wallet Address</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("walletAddress")}</p>
                       <p className="mt-1 break-all font-mono text-xs">
                         {localState.walletKeypair?.publicKey ?? "Not initialized"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Last Transfer Summary</p>
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("lastTransferSummary")}</p>
                       {localState.lastTransferSummary ? (
                         <dl className="mt-1 space-y-1 text-xs">
                           <div className="grid grid-cols-[90px_1fr] gap-1">
@@ -628,11 +628,11 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                           </div>
                         </dl>
                       ) : (
-                        <p className="mt-1 text-xs text-muted-foreground">Run lesson 4 or 8 challenge tests to capture a transfer summary.</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{t("runLessonTransferSummary")}</p>
                       )}
                     </div>
                     <Button variant="outline" size="sm" onClick={clearLocalProjectState} className="w-full">
-                      Clear Local Progress
+                      {t("clearLocalProgress")}
                     </Button>
                   </CardContent>
                 </Card>
@@ -641,7 +641,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
           </div>
 
           <div className="sticky bottom-0 z-10 flex items-center justify-between border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-            <div className="text-xs text-muted-foreground">Shortcuts: n = next, p = previous</div>
+            <div className="text-xs text-muted-foreground">{t("shortcutsNextPrev")}</div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -654,7 +654,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                 }}
               >
                 <ChevronLeft className="mr-1 h-4 w-4" />
-                Prev
+                {t("previousLessonShort")}
               </Button>
               <Button
                 variant="outline"
@@ -666,7 +666,7 @@ export function LessonPageClient({ slug, initialData }: LessonPageClientProps) {
                   }
                 }}
               >
-                Next
+                {t("nextLessonShort")}
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>

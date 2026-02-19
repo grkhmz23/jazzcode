@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Download, FolderUp, Github, Upload, FileDown, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,8 @@ export function PlaygroundTopBar({
   onResetWorkspace,
   gitBranch,
 }: PlaygroundTopBarProps) {
+  const t = useTranslations("playground");
+  const tc = useTranslations("common");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -222,7 +225,7 @@ export function PlaygroundTopBar({
             }}
           >
             <Upload className="h-3 w-3" />
-            Import
+            {t("import")}
             <ChevronDown className="h-3 w-3" />
           </Button>
           {importDropdownOpen && (
@@ -236,7 +239,7 @@ export function PlaygroundTopBar({
                 }}
               >
                 <FolderUp className="h-3 w-3" />
-                Upload file(s)
+                {t("uploadFiles")}
               </button>
               <button
                 type="button"
@@ -247,7 +250,7 @@ export function PlaygroundTopBar({
                 }}
               >
                 <FolderUp className="h-3 w-3" />
-                Upload folder
+                {t("uploadFolder")}
               </button>
               <button
                 type="button"
@@ -258,7 +261,7 @@ export function PlaygroundTopBar({
                 }}
               >
                 <FolderUp className="h-3 w-3" />
-                Import ZIP
+                {t("importZip")}
               </button>
               <button
                 type="button"
@@ -269,7 +272,7 @@ export function PlaygroundTopBar({
                 }}
               >
                 <Github className="h-3 w-3" />
-                GitHub Import
+                {t("githubImport")}
               </button>
             </div>
           )}
@@ -288,7 +291,7 @@ export function PlaygroundTopBar({
             }}
           >
             <Download className="h-3 w-3" />
-            Export
+            {t("export")}
             <ChevronDown className="h-3 w-3" />
           </Button>
           {exportDropdownOpen && (
@@ -302,7 +305,7 @@ export function PlaygroundTopBar({
                 }}
               >
                 <Download className="h-3 w-3" />
-                Export as ZIP
+                {t("exportAsZip")}
               </button>
               <button
                 type="button"
@@ -314,7 +317,7 @@ export function PlaygroundTopBar({
                 disabled={!activeFile}
               >
                 <FileDown className="h-3 w-3" />
-                Export current file
+                {t("exportCurrentFile")}
               </button>
             </div>
           )}
@@ -335,7 +338,7 @@ export function PlaygroundTopBar({
           className="h-7 px-2 text-xs text-[#cccccc] hover:bg-[#2a2d2e]"
           onClick={onResetWorkspace}
         >
-          Reset
+          {tc("reset")}
         </Button>
 
         {/* Hidden file inputs */}
@@ -383,9 +386,9 @@ export function PlaygroundTopBar({
       <Dialog open={conflictDialogOpen} onOpenChange={(open) => { if (!open) { setConflictDialogOpen(false); setPendingEntries([]); setConflictPaths([]); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Conflicts</DialogTitle>
+            <DialogTitle>{t("importConflictsTitle")}</DialogTitle>
             <DialogDescription>
-              {conflictPaths.length} file(s) already exist in your workspace:
+              {t("importConflictsDescription", { count: conflictPaths.length })}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-40 overflow-auto rounded border border-[#323232] bg-[#1e1e1e] p-2 font-mono text-xs text-[#d4d4d4]">
@@ -395,13 +398,13 @@ export function PlaygroundTopBar({
           </div>
           <DialogFooter className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => handleResolveConflict("skip")}>
-              Skip all
+              {t("skipAll")}
             </Button>
             <Button type="button" variant="outline" onClick={() => handleResolveConflict("keep_both")}>
-              Keep both
+              {t("keepBoth")}
             </Button>
             <Button type="button" onClick={() => handleResolveConflict("overwrite")}>
-              Overwrite all
+              {t("overwriteAll")}
             </Button>
           </DialogFooter>
         </DialogContent>

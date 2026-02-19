@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PublicKey } from "@solana/web3.js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ type TxInstruction = {
 };
 
 function PDAViz() {
+  const t = useTranslations("lesson");
   const [programId, setProgramId] = useState("11111111111111111111111111111111");
   const [seedInput, setSeedInput] = useState("vault,user");
 
@@ -31,14 +33,14 @@ function PDAViz() {
 
       return { pda: pda.toBase58(), bump, error: "" };
     } catch (error) {
-      return { pda: "", bump: -1, error: error instanceof Error ? error.message : "Invalid input" };
+      return { pda: "", bump: -1, error: error instanceof Error ? error.message : t("invalidInput") };
     }
-  }, [programId, seedInput]);
+  }, [programId, seedInput, t]);
 
   return (
     <div className="space-y-2">
-      <Input value={programId} onChange={(event) => setProgramId(event.target.value)} placeholder="Program ID" />
-      <Input value={seedInput} onChange={(event) => setSeedInput(event.target.value)} placeholder="Comma-separated seeds" />
+      <Input value={programId} onChange={(event) => setProgramId(event.target.value)} placeholder={t("programIdPlaceholder")} />
+      <Input value={seedInput} onChange={(event) => setSeedInput(event.target.value)} placeholder={t("commaSeparatedSeedsPlaceholder")} />
       {result.error ? (
         <p className="text-xs text-red-600">{result.error}</p>
       ) : (
@@ -52,6 +54,7 @@ function PDAViz() {
 }
 
 function TxBuilder() {
+  const t = useTranslations("lesson");
   const [program, setProgram] = useState("SystemProgram");
   const [accounts, setAccounts] = useState("from,to");
   const [data, setData] = useState("transfer:1000000");
@@ -64,8 +67,8 @@ function TxBuilder() {
 
   return (
     <div className="space-y-2">
-      <Input value={program} onChange={(event) => setProgram(event.target.value)} placeholder="Program" />
-      <Input value={accounts} onChange={(event) => setAccounts(event.target.value)} placeholder="accounts comma-separated" />
+      <Input value={program} onChange={(event) => setProgram(event.target.value)} placeholder={t("programPlaceholder")} />
+      <Input value={accounts} onChange={(event) => setAccounts(event.target.value)} placeholder={t("accountsCommaSeparatedPlaceholder")} />
       <Input value={data} onChange={(event) => setData(event.target.value)} placeholder="data" />
       <Button
         type="button"
@@ -81,17 +84,18 @@ function TxBuilder() {
           ]);
         }}
       >
-        Add Instruction
+        {t("addInstruction")}
       </Button>
       <div className="rounded border bg-background p-2 text-xs">
         <p>Instructions: {instructions.length}</p>
-        <p>Total Accounts Referenced: {totalAccounts}</p>
+        <p>{t("totalAccountsReferenced", { count: totalAccounts })}</p>
       </div>
     </div>
   );
 }
 
 function AccountExplorer() {
+  const t = useTranslations("lesson");
   const { terminalState } = useLearnRuntime();
   const [address, setAddress] = useState("");
 
@@ -102,10 +106,10 @@ function AccountExplorer() {
 
   return (
     <div className="space-y-2">
-      <Input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Wallet address" />
+      <Input value={address} onChange={(event) => setAddress(event.target.value)} placeholder={t("walletAddressPlaceholder")} />
       <div className="rounded border bg-background p-2 text-xs">
         <p>Lamports: {lamports.toString()}</p>
-        <p>Token Accounts: {tokenAccounts.length}</p>
+        <p>{t("tokenAccountsCount", { count: tokenAccounts.length })}</p>
       </div>
     </div>
   );

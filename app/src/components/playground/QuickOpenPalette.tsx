@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface QuickOpenPaletteProps {
   open: boolean;
@@ -22,6 +23,7 @@ function fuzzyMatch(query: string, target: string): boolean {
 }
 
 export function QuickOpenPalette({ open, filePaths, onSelect, onClose }: QuickOpenPaletteProps) {
+  const t = useTranslations("playground");
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,12 +88,12 @@ export function QuickOpenPalette({ open, filePaths, onSelect, onClose }: QuickOp
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type to search files..."
+          placeholder={t("searchFilesPlaceholder")}
           className="w-full rounded-t-lg border-b border-[#454545] bg-[#1e1e1e] px-4 py-3 text-sm text-[#d4d4d4] outline-none placeholder:text-[#6d6d6d]"
         />
         <div className="max-h-60 overflow-auto">
           {filtered.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-[#6d6d6d]">No files match.</p>
+            <p className="px-4 py-3 text-xs text-[#6d6d6d]">{t("noFilesMatch")}</p>
           ) : (
             filtered.map((path, i) => (
               <button
