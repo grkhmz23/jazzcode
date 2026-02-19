@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Challenge, Lesson, Module } from "@/types/content";
 import { getContentService } from "@/lib/services/content-factory";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/routing";
 import { getLessonHints } from "@/components/lessons/challenge-utils";
 import LessonPageClient, {
   type LessonApiResponse,
@@ -8,6 +9,7 @@ import LessonPageClient, {
 
 interface LessonPageProps {
   params: {
+    locale: string;
     slug: string;
     id: string;
   };
@@ -78,14 +80,17 @@ function buildLessonPayload(
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
+  const locale: Locale = locales.includes(params.locale as Locale)
+    ? (params.locale as Locale)
+    : defaultLocale;
   const service = getContentService();
-  const course = await service.getCourse(params.slug);
+  const course = await service.getCourse(params.slug, locale);
 
   if (!course) {
     notFound();
   }
 
-  const lesson = await service.getLesson(params.slug, params.id);
+  const lesson = await service.getLesson(params.slug, params.id, locale);
   if (!lesson) {
     notFound();
   }

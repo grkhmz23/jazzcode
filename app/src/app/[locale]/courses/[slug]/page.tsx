@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,7 @@ import type { Course } from "@/types/content";
 export default function CourseDetailPage() {
   const t = useTranslations("courses");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const { data: session } = useSession();
@@ -49,7 +50,9 @@ export default function CourseDetailPage() {
   useEffect(() => {
     async function fetchCourse() {
       try {
-        const res = await fetch(`/api/courses/${params.slug}`);
+        const res = await fetch(
+          `/api/courses/${params.slug}?locale=${encodeURIComponent(locale)}`
+        );
         if (res.ok) {
           const data = (await res.json()) as { course: Course };
           setCourse(data.course);
@@ -65,7 +68,7 @@ export default function CourseDetailPage() {
       }
     }
     void fetchCourse();
-  }, [params.slug]);
+  }, [params.slug, locale]);
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) => {

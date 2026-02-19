@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTheme } from "next-themes";
 import { useRouter, usePathname } from "@/lib/i18n/navigation";
+import { localeOptions } from "@/lib/i18n/locales";
+import type { Locale } from "@/lib/i18n/routing";
 import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,7 +226,7 @@ function SettingsContent() {
   }, []);
 
   const switchLocale = useCallback(
-    (locale: "en" | "pt-BR" | "es") => {
+    (locale: Locale) => {
       // Track language switch
       trackEvent("language_switch", "i18n", locale);
       router.replace(pathname, { locale });
@@ -398,12 +400,8 @@ function SettingsContent() {
             {/* Language */}
             <div>
               <label className="mb-2 block text-sm font-medium">{t("language")}</label>
-              <div className="flex gap-2">
-                {[
-                  { code: "en" as const, label: "English", flag: "🇺🇸" },
-                  { code: "pt-BR" as const, label: "Português", flag: "🇧🇷" },
-                  { code: "es" as const, label: "Español", flag: "🇪🇸" },
-                ].map((loc) => (
+              <div className="flex flex-wrap gap-2">
+                {localeOptions.map((loc) => (
                   <Button
                     key={loc.code}
                     variant="outline"

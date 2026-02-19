@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getContentService } from '@/lib/services/content-factory';
+import { defaultLocale, locales, type Locale } from '@/lib/i18n/routing';
 
 interface RouteParams {
   params: {
@@ -13,12 +14,18 @@ interface RouteParams {
  * Returns a specific lesson with context (prev/next lesson IDs)
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: RouteParams
 ): Promise<Response> {
   try {
+    const localeParam = new URL(request.url).searchParams.get("locale");
+    const locale: Locale =
+      localeParam && locales.includes(localeParam as Locale)
+        ? (localeParam as Locale)
+        : defaultLocale;
+
     const service = getContentService();
-    const course = await service.getCourse(params.slug);
+    const course = await service.getCourse(params.slug, locale);
 
     if (!course) {
       return NextResponse.json(
@@ -27,7 +34,7 @@ export async function GET(
       );
     }
 
-    const lesson = await service.getLesson(params.slug, params.id);
+    const lesson = await service.getLesson(params.slug, params.id, locale);
 
     if (!lesson) {
       return NextResponse.json(

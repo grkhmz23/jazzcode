@@ -1,27 +1,43 @@
 import { courses as localCourses } from '@/lib/data/courses/index';
+import { localizeCourse } from '@/lib/i18n/course-content';
+import { defaultLocale, type Locale } from '@/lib/i18n/routing';
 import type { Course, Lesson, Module } from '@/types/content';
 import type { CourseContentService, SearchCourseFilters } from './content';
 
 export class ContentLocalService implements CourseContentService {
-  private readonly normalizedCourses: Course[];
+  private readonly baseCourses: Course[];
+  private readonly localizedCourseCache = new Map<Locale, Course[]>();
 
   constructor() {
     if (!Array.isArray(localCourses) || localCourses.length === 0) {
       throw new Error('Local course content failed to load: no courses available');
     }
 
-    this.normalizedCourses = localCourses;
-  }
-  async getCourses(): Promise<Course[]> {
-    return this.normalizedCourses;
+    this.baseCourses = localCourses;
+    this.localizedCourseCache.set(defaultLocale, this.baseCourses);
   }
 
-  async getCourse(slug: string): Promise<Course | null> {
-    return this.normalizedCourses.find((course) => course.slug === slug) ?? null;
+  private getLocalizedCourses(locale: Locale = defaultLocale): Course[] {
+    const cached = this.localizedCourseCache.get(locale);
+    if (cached) {
+      return cached;
+    }
+
+    const localized = this.baseCourses.map((course) => localizeCourse(course, locale));
+    this.localizedCourseCache.set(locale, localized);
+    return localized;
   }
 
-  async getLesson(courseSlug: string, lessonId: string): Promise<Lesson | null> {
-    const course = await this.getCourse(courseSlug);
+  async getCourses(locale: Locale = defaultLocale): Promise<Course[]> {
+    return this.getLocalizedCourses(locale);
+  }
+
+  async getCourse(slug: string, locale: Locale = defaultLocale): Promise<Course | null> {
+    return this.getLocalizedCourses(locale).find((course) => course.slug === slug) ?? null;
+  }
+
+  async getLesson(courseSlug: string, lessonId: string, locale: Locale = defaultLocale): Promise<Lesson | null> {
+    const course = await this.getCourse(courseSlug, locale);
     if (!course) {
       return null;
     }
@@ -43,15 +59,16 @@ export class ContentLocalService implements CourseContentService {
     return null;
   }
 
-  async getModules(courseSlug: string): Promise<Module[]> {
-    const course = await this.getCourse(courseSlug);
+  async getModules(courseSlug: string, locale: Locale = defaultLocale): Promise<Module[]> {
+    const course = await this.getCourse(courseSlug, locale);
     return course?.modules ?? [];
   }
 
-  async searchCourses(query: string, filters?: SearchCourseFilters): Promise<Course[]> {
+  async searchCourses(query: string, filters?: SearchCourseFilters, locale: Locale = defaultLocale): Promise<Course[]> {
     const normalizedQuery = query.trim().toLowerCase();
+    const courses = this.getLocalizedCourses(locale);
 
-    return this.normalizedCourses.filter((course) => {
+    return courses.filter((course) => {
       const matchesQuery =
         normalizedQuery.length === 0 ||
         course.title.toLowerCase().includes(normalizedQuery) ||

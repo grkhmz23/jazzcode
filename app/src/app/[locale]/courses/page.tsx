@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,6 +91,7 @@ function categoryLabel(category: CatalogCategory): string {
 export default function CourseCatalogPage() {
   const t = useTranslations("courses");
   const tc = useTranslations("common");
+  const locale = useLocale();
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +102,7 @@ export default function CourseCatalogPage() {
   useEffect(() => {
     async function fetchCourses() {
       try {
-        const res = await fetch("/api/courses");
+        const res = await fetch(`/api/courses?locale=${encodeURIComponent(locale)}`);
         if (res.ok) {
           const data = (await res.json()) as { courses: Course[] };
           setCourses(data.courses);
@@ -113,7 +114,7 @@ export default function CourseCatalogPage() {
       }
     }
     void fetchCourses();
-  }, []);
+  }, [locale]);
 
   const filtered = useMemo(() => {
     let result = courses;

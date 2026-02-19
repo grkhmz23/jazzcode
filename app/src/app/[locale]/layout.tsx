@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/lib/i18n/request";
+import { getLocaleDirection } from "@/lib/i18n/locales";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SessionProvider } from "@/components/layout/session-provider";
 import { WalletProvider } from "@/components/layout/wallet-provider";
@@ -38,14 +39,15 @@ export async function generateMetadata({ params: { locale } }: LocaleLayoutProps
 
 export default async function LocaleLayout({ children, params: { locale } }: LocaleLayoutProps) {
   if (!locales.includes(locale as Locale)) notFound();
+  const typedLocale = locale as Locale;
 
   // Enable static rendering for next-intl
-  unstable_setRequestLocale(locale);
+  unstable_setRequestLocale(typedLocale);
 
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={typedLocale} dir={getLocaleDirection(typedLocale)} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider>
           <SessionProvider>
