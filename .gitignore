@@ -2,8 +2,14 @@ node_modules/
 app/node_modules/
 app/.next/
 .next/
+.pnpm-store/
 *.pack
 *.node
 .env
 .env.local
 .env.production
+*.log
+*.tmp
+*.swp
+.DS_Store
+app/tsconfig.tsbuildinfo
