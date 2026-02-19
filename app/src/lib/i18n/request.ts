@@ -1,8 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
-
-export const locales = ["en", "pt-BR", "es"] as const;
-export const defaultLocale = "en" as const;
-export type Locale = (typeof locales)[number];
+import type { AbstractIntlMessages } from "next-intl";
+import { locales, defaultLocale, type Locale } from "./routing";
 
 function isLocale(value: string): value is Locale {
   return locales.includes(value as Locale);
@@ -12,8 +10,17 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const requestedLocale = await requestLocale;
   const locale = requestedLocale && isLocale(requestedLocale) ? requestedLocale : defaultLocale;
 
+  let messages: AbstractIntlMessages;
+  try {
+    messages = (await import(`@/messages/${locale}.json`)).default as AbstractIntlMessages;
+  } catch {
+    messages = (await import("@/messages/en.json")).default as AbstractIntlMessages;
+  }
+
   return {
     locale,
-    messages: (await import(`@/messages/${locale}.json`)).default,
+    messages,
   };
 });
+
+export { locales, defaultLocale, type Locale };

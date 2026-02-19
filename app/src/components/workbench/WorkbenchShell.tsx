@@ -113,7 +113,7 @@ export function WorkbenchShell({
         // If loading fails, use default
       }
     }
-  }, [activeDefinition.id]);
+  }, [activeDefinition]);
 
   // Save to storage when state changes
   React.useEffect(() => {
