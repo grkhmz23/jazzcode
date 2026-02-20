@@ -4,6 +4,11 @@ export {
   parseGitHubRepoRef,
 } from "@/lib/runner/github-import";
 export { defaultRunnerPolicy, validateRunnerRequestPolicy } from "@/lib/runner/policy";
+export {
+  getLocalRunnerToolchainCapabilities,
+  getRemoteRunnerToolchainCapabilities,
+  getRunnerToolchainCapabilities,
+} from "@/lib/runner/capabilities";
 export { redactRunnerLogs } from "@/lib/runner/redaction";
 export { enforceRunnerRateLimit } from "@/lib/runner/rate-limit";
 export { runRunnerJob } from "@/lib/runner/service";
