@@ -9,8 +9,8 @@ import { WalletProvider } from "@/components/layout/wallet-provider";
 import { AnalyticsProvider } from "@/lib/analytics/provider";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
-import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AppSidebarShell } from "@/components/layout/app-sidebar-shell";
 import { Toaster } from "@/components/ui/sonner";
 
 interface LocaleLayoutProps {
@@ -55,8 +55,7 @@ export default async function LocaleLayout({ children, params: { locale } }: Loc
               <NextIntlClientProvider messages={messages}>
                 <AnalyticsProvider>
                   <div className="relative flex min-h-screen flex-col">
-                    <Header />
-                    <main className="flex-1">{children}</main>
+                    <AppSidebarShell>{children}</AppSidebarShell>
                     <Footer />
                   </div>
                   <GoogleAnalytics />
