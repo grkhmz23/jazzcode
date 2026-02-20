@@ -1,5 +1,6 @@
 import { Workspace } from "@/lib/playground/types";
 import { TerminalError } from "@/lib/playground/terminal/errors";
+import type { PreflightReport } from "@/lib/playground/preflight/types";
 
 export interface ParsedCommand {
   raw: string;
@@ -56,6 +57,8 @@ export interface TerminalIo {
   shouldApplyRunnerArtifacts?: () => boolean;
   runRunnerJob?: (request: {
     jobType:
+      | "anchor_build"
+      | "anchor_test"
       | "anchor_deploy"
       | "anchor_idl_build"
       | "anchor_idl_fetch"
@@ -78,6 +81,7 @@ export interface TerminalIo {
     error?: string;
     streamed?: boolean;
   }>;
+  runPreflight?: () => Promise<PreflightReport>;
   wallet: {
     mode: "burner" | "external";
     burnerAddress: string | null;
@@ -124,6 +128,7 @@ export interface CommandDefinition {
 
 export const COMMAND_DEFINITIONS: CommandDefinition[] = [
   { name: "help", description: "List supported commands.", usage: "help", flags: [] },
+  { name: "preflight", description: "Run deploy readiness checks.", usage: "preflight", flags: [] },
   { name: "clear", description: "Clear terminal output.", usage: "clear", flags: [] },
   { name: "pwd", description: "Print current directory.", usage: "pwd", flags: [] },
   { name: "ls", description: "List files/directories.", usage: "ls [path]", flags: [] },

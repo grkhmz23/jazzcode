@@ -19,6 +19,7 @@ import {
 import { createTerminalError } from "@/lib/playground/terminal/errors";
 import { handleGitCommand } from "@/lib/playground/terminal/git-commands";
 import { normalizePath } from "@/lib/playground/workspace";
+import type { PreflightReport } from "@/lib/playground/preflight/types";
 
 const MAX_TERMINAL_ERRORS = 30;
 
@@ -414,10 +415,19 @@ async function runAnchorRunnerCommand(
   state: TerminalState,
   io: TerminalIo,
   request: {
-    jobType: "anchor_deploy" | "anchor_idl_build" | "anchor_idl_fetch";
+    jobType:
+      | "anchor_build"
+      | "anchor_test"
+      | "anchor_deploy"
+      | "anchor_idl_build"
+      | "anchor_idl_fetch"
+      | "cargo_build"
+      | "cargo_test";
     args: Record<string, string>;
     successCommand: string;
     successKey: string;
+    requireDevnet?: boolean;
+    requirePreflight?: boolean;
   }
 ): Promise<CommandExecutionResult> {
   if (!io.runRunnerJob) {
@@ -425,9 +435,32 @@ async function runAnchorRunnerCommand(
     return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
   }
 
-  if (state.solanaUrl !== "devnet") {
+  if (request.requireDevnet && state.solanaUrl !== "devnet") {
     const error = createTerminalError("NETWORK_MISMATCH", "Anchor deploy/IDL commands are restricted to devnet.");
     return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
+  }
+
+  if (request.requirePreflight && io.runPreflight) {
+    const report = await io.runPreflight();
+    if (!report.ready) {
+      const lines: TerminalOutputLine[] = [
+        { kind: "error", text: "Preflight check failed. Deploy/IDL command aborted." },
+        { kind: "system", text: "Run `preflight` to inspect full diagnostics." },
+      ];
+      report.checks
+        .filter((check) => check.severity === "fail")
+        .forEach((check) => {
+          lines.push({ kind: "error", text: `[${check.code}] ${check.message}` });
+          if (check.action) {
+            lines.push({ kind: "system", text: `Action: ${check.action}` });
+          }
+        });
+
+      return {
+        nextState: appendError(state, "UNKNOWN_COMMAND", "Preflight failed for deploy/IDL command."),
+        lines,
+      };
+    }
   }
 
   const streamedLines: TerminalOutputLine[] = [];
@@ -824,6 +857,15 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
   }
 
   if (sub === "build") {
+    if (io.runRunnerJob) {
+      return runAnchorRunnerCommand(state, io, {
+        jobType: "anchor_build",
+        args: {},
+        successCommand: "anchor build",
+        successKey: "anchor:build",
+      });
+    }
+
     const result = runAnchorBuildSimulation(io);
     if (!result.success) {
       const next = appendError(state, "UNKNOWN_COMMAND", "Anchor build failed checks.");
@@ -843,6 +885,15 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
   }
 
   if (sub === "test") {
+    if (io.runRunnerJob) {
+      return runAnchorRunnerCommand(state, io, {
+        jobType: "anchor_test",
+        args: {},
+        successCommand: "anchor test",
+        successKey: "anchor:test",
+      });
+    }
+
     return {
       nextState: {
         ...state,
@@ -864,6 +915,8 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
       args: {},
       successCommand: "anchor deploy",
       successKey: "anchor:deploy",
+      requireDevnet: true,
+      requirePreflight: true,
     });
   }
 
@@ -875,6 +928,8 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
         args: {},
         successCommand: "anchor idl build",
         successKey: "anchor:idl:build",
+        requireDevnet: true,
+        requirePreflight: true,
       });
     }
 
@@ -890,6 +945,8 @@ async function handleAnchor(parsed: ParsedCommand, state: TerminalState, io: Ter
         args: { programId },
         successCommand: "anchor idl fetch",
         successKey: "anchor:idl:fetch",
+        requireDevnet: true,
+        requirePreflight: true,
       });
     }
 
@@ -908,56 +965,12 @@ async function handleCargo(parsed: ParsedCommand, state: TerminalState, io: Term
     return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
   }
 
-  if (!io.runRunnerJob) {
-    const error = createTerminalError("UNKNOWN_COMMAND", "Runner integration is not available in this session.");
-    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
-  }
-
-  const streamedLines: TerminalOutputLine[] = [];
-  const response = await io.runRunnerJob({
+  return runAnchorRunnerCommand(state, io, {
     jobType: sub === "build" ? "cargo_build" : "cargo_test",
-    files: collectWorkspaceFiles(io),
-    args: {
-      cluster: "devnet",
-      rpcUrl: "https://api.devnet.solana.com",
-    },
-    onLog: (entry) => {
-      streamedLines.push({
-        kind: entry.stream === "stderr" ? "error" : entry.stream === "system" ? "system" : "output",
-        text: entry.line,
-      });
-    },
+    args: {},
+    successCommand: `cargo ${sub}`,
+    successKey: `cargo:${sub}`,
   });
-
-  if (!response.ok || !response.result) {
-    const message = response.error ?? "Cargo runner job failed";
-    const error = createTerminalError("UNKNOWN_COMMAND", message);
-    return { nextState: appendError(state, error.code, error.message), lines: outputError(error.message, error.hint) };
-  }
-
-  const nextState: TerminalState = {
-    ...state,
-    commandSuccesses:
-      response.result.exitCode === 0
-        ? [...state.commandSuccesses, `cargo:${sub}`]
-        : state.commandSuccesses,
-  };
-
-  const fallbackKind: TerminalOutputLine["kind"] = response.result.exitCode === 0 ? "output" : "error";
-  const lines = response.streamed
-    ? streamedLines.length > 0
-      ? streamedLines
-      : [{ kind: fallbackKind, text: response.result.exitCode === 0 ? "Command completed." : "Command failed." }]
-    : toOutputLines(response.result.stdout, response.result.stderr);
-
-  return {
-    nextState,
-    lines,
-    metadata:
-      response.result.exitCode === 0
-        ? { commandSucceeded: `cargo ${sub}` }
-        : undefined,
-  };
 }
 
 async function handleSplToken(parsed: ParsedCommand, state: TerminalState): Promise<CommandExecutionResult> {
@@ -1187,6 +1200,34 @@ async function handleConfirm(state: TerminalState, io: TerminalIo): Promise<Comm
   };
 }
 
+function formatPreflightReport(report: PreflightReport): TerminalOutputLine[] {
+  const lines: TerminalOutputLine[] = [];
+  lines.push({ kind: "system", text: `Preflight checked at ${report.checkedAt}` });
+  lines.push({ kind: "system", text: `Runner mode: ${report.mode}` });
+  lines.push({
+    kind: report.ready ? "output" : "error",
+    text: `Preflight status: ${report.ready ? "READY" : "NOT READY"} (${report.blockingCodes.length} blocking, ${report.warningCodes.length} warning)`,
+  });
+
+  report.checks.forEach((check) => {
+    const prefix = check.severity === "pass" ? "[PASS]" : check.severity === "warn" ? "[WARN]" : "[FAIL]";
+    const kind: TerminalOutputLine["kind"] =
+      check.severity === "pass" ? "output" : check.severity === "warn" ? "system" : "error";
+    lines.push({
+      kind,
+      text: `${prefix} ${check.title}: ${check.message}`,
+    });
+    if (check.action) {
+      lines.push({
+        kind: "system",
+        text: `  Action: ${check.action}`,
+      });
+    }
+  });
+
+  return lines;
+}
+
 export async function executeTerminalCommand(rawCommand: string, state: TerminalState, io: TerminalIo): Promise<CommandExecutionResult> {
   const parsed = parseCommandLine(rawCommand);
 
@@ -1212,6 +1253,32 @@ export async function executeTerminalCommand(rawCommand: string, state: Terminal
       lines: lines.map((line) => ({ kind: "output", text: line })),
       metadata: { commandSucceeded: "help" },
     };
+  }
+
+  if (parsed.command === "preflight") {
+    if (!io.runPreflight) {
+      const error = createTerminalError("UNKNOWN_COMMAND", "Preflight integration is not available in this session.");
+      return { nextState: appendError(nextStateWithHistory, error.code, error.message), lines: outputError(error.message, error.hint) };
+    }
+
+    try {
+      const report = await io.runPreflight();
+      return {
+        nextState: {
+          ...nextStateWithHistory,
+          commandSuccesses: [...nextStateWithHistory.commandSuccesses, "preflight"],
+        },
+        lines: formatPreflightReport(report),
+        metadata: { commandSucceeded: "preflight" },
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Preflight check failed.";
+      const terminalError = createTerminalError("UNKNOWN_COMMAND", message);
+      return {
+        nextState: appendError(nextStateWithHistory, terminalError.code, terminalError.message),
+        lines: outputError(terminalError.message, terminalError.hint),
+      };
+    }
   }
 
   if (parsed.command === "clear") {

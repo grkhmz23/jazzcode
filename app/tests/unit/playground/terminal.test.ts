@@ -102,6 +102,12 @@ describe("Terminal Commands", () => {
       expect(helpCmd?.description).toBe("List supported commands.");
     });
 
+    it("should include preflight command", () => {
+      const preflightCmd = COMMAND_DEFINITIONS.find((c: { name: string }) => c.name === "preflight");
+      expect(preflightCmd).toBeDefined();
+      expect(preflightCmd?.description).toBe("Run deploy readiness checks.");
+    });
+
     it("should include clear command", () => {
       const clearCmd = COMMAND_DEFINITIONS.find((c: { name: string }) => c.name === "clear");
       expect(clearCmd).toBeDefined();

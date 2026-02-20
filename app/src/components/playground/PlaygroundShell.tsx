@@ -67,6 +67,11 @@ import {
   WorkspaceMode,
 } from "@/lib/playground";
 import { useKeyboardShortcuts } from "@/lib/playground/hooks/use-keyboard-shortcuts";
+import {
+  createPreflightReport,
+  preflightReportSchema,
+  type PreflightCheck,
+} from "@/lib/playground/preflight/types";
 import { TaskResult } from "@/lib/playground/tasks/types";
 import { Workspace, WorkspaceFile } from "@/lib/playground/types";
 
@@ -178,6 +183,7 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
   const [gitPushBranch, setGitPushBranch] = useState("main");
   const [gitPushToken, setGitPushToken] = useState("");
   const [applyRunnerArtifacts, setApplyRunnerArtifacts] = useState(true);
+  const [preflightBusy, setPreflightBusy] = useState(false);
   const [runnerJobView, setRunnerJobView] = useState<RunnerJobViewState>(createInitialRunnerJobViewState);
   const gitTokenResolveRef = useRef<((token: string | null) => void) | null>(null);
   const queuedGitTokenRef = useRef<string | null>(null);
@@ -622,6 +628,8 @@ export default function Demo() {
         onLog,
       }: {
         jobType:
+          | "anchor_build"
+          | "anchor_test"
           | "anchor_deploy"
           | "anchor_idl_build"
           | "anchor_idl_fetch"
@@ -812,6 +820,83 @@ export default function Demo() {
             error: error instanceof Error ? error.message : "Runner request failed",
           };
         }
+      },
+      runPreflight: async () => {
+        const response = await fetch("/api/runner/preflight", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const payload = await response.json();
+        const baseReport = preflightReportSchema.parse(payload);
+
+        const walletAddress = walletMode === "external" ? publicKey?.toBase58() ?? null : burnerWallet?.publicKey ?? null;
+        const walletChecks: PreflightCheck[] = [];
+        if (!walletAddress) {
+          walletChecks.push({
+            code: "WALLET_CONNECTED",
+            title: "Wallet connection",
+            severity: "fail",
+            message: "No wallet is connected for deploy/IDL operations.",
+            action: "Connect an external wallet or create/select a burner wallet.",
+          });
+          walletChecks.push({
+            code: "WALLET_BALANCE_MINIMUM",
+            title: "Wallet deploy balance",
+            severity: "fail",
+            message: `Wallet balance is unavailable (minimum ${baseReport.minimumDeployBalanceSol} SOL required).`,
+            action: "Connect and fund a wallet on devnet before deploy/IDL commands.",
+          });
+        } else {
+          walletChecks.push({
+            code: "WALLET_CONNECTED",
+            title: "Wallet connection",
+            severity: "pass",
+            message: `Wallet connected: ${walletAddress}`,
+            details: { address: walletAddress, mode: walletMode },
+          });
+
+          try {
+            const lamports = await connection.getBalance(new PublicKey(walletAddress), "confirmed");
+            const balanceSol = lamports / LAMPORTS_PER_SOL;
+            const meetsMinimum = balanceSol >= baseReport.minimumDeployBalanceSol;
+            walletChecks.push({
+              code: "WALLET_BALANCE_MINIMUM",
+              title: "Wallet deploy balance",
+              severity: meetsMinimum ? "pass" : "fail",
+              message: meetsMinimum
+                ? `Wallet balance is sufficient (${balanceSol.toFixed(4)} SOL).`
+                : `Wallet balance is below minimum (${balanceSol.toFixed(4)} SOL < ${baseReport.minimumDeployBalanceSol} SOL).`,
+              action: meetsMinimum
+                ? undefined
+                : "Fund this wallet on devnet (for example with `solana airdrop`) before deploy/IDL commands.",
+              details: {
+                address: walletAddress,
+                balanceSol: balanceSol.toFixed(9),
+                minimumDeployBalanceSol: String(baseReport.minimumDeployBalanceSol),
+              },
+            });
+          } catch (error) {
+            walletChecks.push({
+              code: "WALLET_BALANCE_MINIMUM",
+              title: "Wallet deploy balance",
+              severity: "fail",
+              message: "Failed to read wallet balance from devnet RPC.",
+              action: "Verify devnet RPC connectivity and retry preflight.",
+              details: {
+                address: walletAddress,
+                error: error instanceof Error ? error.message : "unknown",
+              },
+            });
+          }
+        }
+
+        return createPreflightReport({
+          mode: baseReport.mode,
+          checkedAt: new Date(),
+          minimumDeployBalanceSol: baseReport.minimumDeployBalanceSol,
+          checks: [...baseReport.checks, ...walletChecks],
+        });
       },
       wallet: {
         mode: walletMode,
@@ -1065,6 +1150,18 @@ export default function Demo() {
     }
   };
 
+  const handleRunPreflight = async () => {
+    if (preflightBusy) {
+      return;
+    }
+    setPreflightBusy(true);
+    try {
+      await runCommand("preflight");
+    } finally {
+      setPreflightBusy(false);
+    }
+  };
+
   const runnerPanel = (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1078,6 +1175,15 @@ export default function Demo() {
           {t("applyArtifactsToWorkspace")}
         </label>
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void handleRunPreflight()}
+            disabled={preflightBusy}
+          >
+            {preflightBusy ? "Running preflight..." : "Run preflight"}
+          </Button>
           <Button type="button" size="sm" variant="outline" onClick={() => setGitPushDialogOpen(true)}>
             {t("githubPushPat")}
           </Button>
