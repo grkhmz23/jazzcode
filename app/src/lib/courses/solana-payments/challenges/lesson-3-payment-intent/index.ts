@@ -135,7 +135,7 @@ export const lesson3TestCases: TestCase[] = [
       amount: 1.5,
       currency: "SOL",
     }),
-    expectedOutput: '{"valid":true,"errors":[],"idempotencyKey":"key_1234567890_abc123"}',
+    expectedOutput: '{"valid":true,"errors":[],"idempotencyKey":"key_1700000000000_4fzzzxjy"}',
   },
   {
     name: "invalid amount",
@@ -144,7 +144,7 @@ export const lesson3TestCases: TestCase[] = [
       amount: 0,
       currency: "SOL",
     }),
-    expectedOutput: '{"valid":false,"errors":["Amount must be greater than 0"],"idempotencyKey":"key_1234567890_abc123"}',
+    expectedOutput: '{"valid":false,"errors":["Amount must be greater than 0"],"idempotencyKey":"key_1700000000000_4fzzzxjy"}',
   },
   {
     name: "invalid base58 address",
@@ -153,7 +153,7 @@ export const lesson3TestCases: TestCase[] = [
       amount: 1.0,
       currency: "SOL",
     }),
-    expectedOutput: '{"valid":false,"errors":["Invalid base58 address"],"idempotencyKey":"key_1234567890_abc123"}',
+    expectedOutput: '{"valid":false,"errors":["Invalid base58 address"],"idempotencyKey":"key_1700000000000_4fzzzxjy"}',
   },
   {
     name: "uses provided idempotency key",

@@ -97,4 +97,13 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '{"pda":"pda_Prog1111_Auth1111_283def7","bump":247,"programId":"Prog1111111111111111111111111111111111111","keyFlags":[[false,true],[true,false],[true,true],[false,false]],"data":[73,78,73,84,95,67,84,82,247]}',
   },
+  {
+    name: "derives deterministic pda when payer defaults to authority",
+    input: JSON.stringify({
+      programId: "Prog9999999999999999999999999999999999999",
+      authorityPubkey: "Auth9999999999999999999999999999999999999",
+    }),
+    expectedOutput:
+      '{"pda":"pda_Prog9999_Auth9999_3380ea1c","bump":28,"programId":"Prog9999999999999999999999999999999999999","keyFlags":[[false,true],[true,false],[true,true],[false,false]],"data":[73,78,73,84,95,67,84,82,28]}',
+  },
 ];

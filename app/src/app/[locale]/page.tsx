@@ -25,6 +25,8 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
   unstable_setRequestLocale(locale);
   const t = useTranslations("landing");
   const tc = useTranslations("common");
+  const tp = useTranslations("profile");
+  const tCourses = useTranslations("courses");
 
   const features = [
     { icon: Code2, title: t("featureEditor"), desc: t("featureEditorDesc") },
@@ -41,10 +43,10 @@ export default function LandingPage({ params: { locale } }: { params: { locale: 
   ];
 
   const paths = [
-    { title: "Solana Fundamentals", difficulty: tc("beginner"), lessons: 24, icon: BookOpen, color: "text-solana-green" },
-    { title: "DeFi Developer", difficulty: tc("intermediate"), lessons: 32, icon: Zap, color: "text-solana-purple" },
-    { title: "NFT & Metaplex", difficulty: tc("intermediate"), lessons: 18, icon: Star, color: "text-solana-blue" },
-    { title: "Security & Auditing", difficulty: tc("advanced"), lessons: 20, icon: Shield, color: "text-amber-500" },
+    { title: tp("skillsFundamentals"), difficulty: tc("beginner"), lessons: 24, icon: BookOpen, color: "text-solana-green" },
+    { title: tp("skillsDeFi"), difficulty: tc("intermediate"), lessons: 32, icon: Zap, color: "text-solana-purple" },
+    { title: tCourses("categoryNft"), difficulty: tc("intermediate"), lessons: 18, icon: Star, color: "text-solana-blue" },
+    { title: tp("skillsSecurity"), difficulty: tc("advanced"), lessons: 20, icon: Shield, color: "text-amber-500" },
   ];
 
   return (

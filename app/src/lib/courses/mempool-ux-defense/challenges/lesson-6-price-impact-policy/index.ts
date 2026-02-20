@@ -31,4 +31,9 @@ export const lesson6TestCases: TestCase[] = [
     input: JSON.stringify({ priceImpactBps: 180, slippageBps: 90 }),
     expectedOutput: '{"impactBps":180,"slippageBps":90,"ratio":2,"interpretation":"impact-dominant"}',
   },
+  {
+    name: "handles zero slippage without division errors",
+    input: JSON.stringify({ priceImpactBps: 50, slippageBps: 0 }),
+    expectedOutput: '{"impactBps":50,"slippageBps":0,"ratio":0,"interpretation":"impact-dominant"}',
+  },
 ];

@@ -28,4 +28,9 @@ export const lesson7TestCases: TestCase[] = [
     input: JSON.stringify({ releaseTag: "v1.3.0", totalBatches: 4, issueCount: 1 }),
     expectedOutput: "# Anchor Upgrade Summary\\n\\n- Release: v1.3.0\\n- Batches: 4\\n- Issues: 1",
   },
+  {
+    name: "formats markdown with zero issues",
+    input: JSON.stringify({ releaseTag: "v2.0.0", totalBatches: 8, issueCount: 0 }),
+    expectedOutput: "# Anchor Upgrade Summary\\n\\n- Release: v2.0.0\\n- Batches: 8\\n- Issues: 0",
+  },
 ];

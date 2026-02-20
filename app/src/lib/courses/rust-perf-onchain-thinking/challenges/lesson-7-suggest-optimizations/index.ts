@@ -29,4 +29,10 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       '["Avoid repeated map lookups in inner loops; cache lookups per account.","Pre-allocate vectors and reuse buffers to reduce allocation churn."]',
   },
+  {
+    name: "returns balanced guidance when thresholds are not exceeded",
+    input: JSON.stringify({ allocationsCost: 10, cloneCost: 10, mapLookupCost: 10, serializationCost: 10 }),
+    expectedOutput:
+      '["Current profile is balanced; keep regressions tracked with deterministic benchmarks."]',
+  },
 ];

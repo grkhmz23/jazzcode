@@ -74,4 +74,12 @@ export const lesson8TestCases: TestCase[] = [
     }),
     expectedOutput: '{"timestamp":1699900000,"totalEvents":3,"uniqueWallets":3,"wallets":[{"address":"WalletA1111111111111111111111111111111111","txCount":2,"volume":"1500000"},{"address":"WalletB1111111111111111111111111111111111","txCount":2,"volume":"1250000"},{"address":"WalletC1111111111111111111111111111111111","txCount":2,"volume":"750000"}],"generatedAt":1699900000}',
   },
+  {
+    name: "handles empty event stream deterministically",
+    input: JSON.stringify({
+      timestamp: 1699900100,
+      events: [],
+    }),
+    expectedOutput: '{"timestamp":1699900100,"totalEvents":0,"uniqueWallets":0,"wallets":[],"generatedAt":1699900100}',
+  },
 ];

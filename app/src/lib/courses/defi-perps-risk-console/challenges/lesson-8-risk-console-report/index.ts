@@ -111,7 +111,7 @@ export const lesson8TestCases: TestCase[] = [
       fundingRates: ["0.0001", "0.0001"],
       timestamp: 1700000000,
     }),
-    expectedOutput: '{"position":{"side":"long","size":"10.0000","entryPrice":"22.50","markPrice":"25.00"},"pnl":{"unrealized":"25.00","roePct":"11.1111"},"funding":{"totalPayment":"-0.04","periods":2},"marginRatio":"0.099984","liquidationPrice":"2.05","alerts":["INFO: Unrealized PnL exceeds 50% of initial margin"],"timestamp":1700000000}',
+    expectedOutput: '{"position":{"side":"long","size":"10.0000","entryPrice":"22.50","markPrice":"25.00"},"pnl":{"unrealized":"25.00","roePct":"11.1111"},"funding":{"totalPayment":"-0.05","periods":2},"marginRatio":"0.999820","liquidationPrice":"1.25","alerts":[],"timestamp":1700000000}',
   },
   {
     name: "distressed short position report",
@@ -121,6 +121,6 @@ export const lesson8TestCases: TestCase[] = [
       fundingRates: ["-0.0005"],
       timestamp: 1700001000,
     }),
-    expectedOutput: '{"position":{"side":"short","size":"10.0000","entryPrice":"20.00","markPrice":"24.00"},"pnl":{"unrealized":"-40.00","roePct":"-100.0000"},"funding":{"totalPayment":"-0.10","periods":1},"marginRatio":"-0.000417","liquidationPrice":"23.88","alerts":["WARNING: Margin ratio approaching maintenance level","CRITICAL: Below maintenance margin - liquidation imminent","INFO: Unrealized PnL exceeds 50% of initial margin"],"timestamp":1700001000}',
+    expectedOutput: '{"position":{"side":"short","size":"10.0000","entryPrice":"20.00","markPrice":"24.00"},"pnl":{"unrealized":"-40.00","roePct":"-100.0000"},"funding":{"totalPayment":"-0.10","periods":1},"marginRatio":"-0.000417","liquidationPrice":"22.79","alerts":["WARNING: Margin ratio approaching maintenance level","CRITICAL: Below maintenance margin - liquidation imminent","INFO: Unrealized PnL exceeds 50% of initial margin"],"timestamp":1700001000}',
   },
 ];

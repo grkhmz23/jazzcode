@@ -157,7 +157,7 @@ export function FileExplorer({
               aria-current={isActive ? "page" : undefined}
             >
               {iconForFile(node.path)}
-              <span className="truncate">{node.name}{isReadOnly ? " (ro)" : ""}</span>
+              <span className="truncate">{node.name}{isReadOnly ? ` (${t("readOnlyShort")})` : ""}</span>
             </button>
             <Button
               type="button"
@@ -166,7 +166,7 @@ export function FileExplorer({
               className="h-5 w-5 opacity-0 group-hover:opacity-100"
               disabled={isReadOnly}
               onClick={() => openRenameDialog(node.path)}
-              aria-label={`Rename ${node.path}`}
+              aria-label={t("renameFileAriaLabel", { path: node.path })}
             >
               <span className="text-[10px]">R</span>
             </Button>
@@ -177,7 +177,7 @@ export function FileExplorer({
               className="h-5 w-5 opacity-0 group-hover:opacity-100"
               disabled={isReadOnly}
               onClick={() => openDeleteDialog(node.path)}
-              aria-label={`Delete ${node.path}`}
+              aria-label={t("deleteFileAriaLabel", { path: node.path })}
             >
               <span className="text-[10px]">D</span>
             </Button>
@@ -196,7 +196,7 @@ export function FileExplorer({
       onDrop={(e) => void handleDrop(e)}
     >
       <div className="flex items-center justify-between border-b border-[#313131] px-3 py-2">
-        <p className="text-xs uppercase tracking-wide text-[#9d9d9d]">Explorer</p>
+        <p className="text-xs uppercase tracking-wide text-[#9d9d9d]">{t("explorer")}</p>
         <Button
           type="button"
           size="icon"
@@ -211,18 +211,18 @@ export function FileExplorer({
       <div className="min-h-0 flex-1 overflow-auto p-2">
         <ul className="space-y-1">{renderNodes(tree)}</ul>
       </div>
-      <div className="border-t border-[#313131] px-3 py-2 text-xs text-[#9d9d9d]">{paths.length} files</div>
+      <div className="border-t border-[#313131] px-3 py-2 text-xs text-[#9d9d9d]">{t("fileCount", { count: paths.length })}</div>
 
       <Dialog open={Boolean(dialog)} onOpenChange={(open) => (!open ? setDialog(null) : null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {dialog?.mode === "create" ? "Create file" : dialog?.mode === "rename" ? "Rename file" : "Delete file"}
+              {dialog?.mode === "create" ? t("createFileTitle") : dialog?.mode === "rename" ? t("renameFileTitle") : t("deleteFileTitle")}
             </DialogTitle>
             <DialogDescription>
               {dialog?.mode === "delete"
-                ? `Delete ${dialog.initialPath}? This action cannot be undone.`
-                : "Use slash-separated paths, for example src/utils/helpers.ts."}
+                ? t("deleteFileDescription", { path: dialog.initialPath })
+                : t("filePathHelp")}
             </DialogDescription>
           </DialogHeader>
 
@@ -230,20 +230,20 @@ export function FileExplorer({
             <Input
               value={nextPath}
               onChange={(event) => setNextPath(event.target.value)}
-              aria-label={dialog?.mode === "create" ? "New file path" : "Rename file path"}
+              aria-label={dialog?.mode === "create" ? t("newFilePathAriaLabel") : t("renameFilePathAriaLabel")}
             />
           ) : null}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setDialog(null)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="button"
               variant={dialog?.mode === "delete" ? "destructive" : "default"}
               onClick={submitDialog}
             >
-              {dialog?.mode === "create" ? "Create" : dialog?.mode === "rename" ? "Rename" : "Delete"}
+              {dialog?.mode === "create" ? t("create") : dialog?.mode === "rename" ? t("rename") : t("delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

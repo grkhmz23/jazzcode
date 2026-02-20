@@ -36,4 +36,9 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '[{"slot":100,"txSignature":"sig1","instructionIndex":0,"account":"alice","kind":"deposit","amount":20},{"slot":101,"txSignature":"sig2","instructionIndex":1,"account":"bob","kind":"withdraw","amount":5}]',
   },
+  {
+    name: "returns empty array when input has no events",
+    input: JSON.stringify({ events: [] }),
+    expectedOutput: "[]",
+  },
 ];

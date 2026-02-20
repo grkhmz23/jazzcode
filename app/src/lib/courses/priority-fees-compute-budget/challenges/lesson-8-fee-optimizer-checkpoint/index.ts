@@ -33,4 +33,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"course":"priority-fees-compute-budget","version":1,"plan":{"units":300000,"microLamports":2200,"confirmationLevel":"confirmed"},"warnings":["a","b"]}',
   },
+  {
+    name: "keeps warnings empty when no warnings are provided",
+    input: JSON.stringify({ units: 150000, microLamports: 1200, confirmationLevel: "processed", warnings: [] }),
+    expectedOutput:
+      '{"course":"priority-fees-compute-budget","version":1,"plan":{"units":150000,"microLamports":1200,"confirmationLevel":"processed"},"warnings":[]}',
+  },
 ];

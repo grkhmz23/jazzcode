@@ -47,4 +47,10 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       '{"total":3,"success":2,"error":1,"p50LatencyMs":120,"p95LatencyMs":600,"histogram":{"0-49":1,"50-99":0,"100-249":1,"250-499":0,"500+":1}}',
   },
+  {
+    name: "returns zeroed metrics for empty event list",
+    input: JSON.stringify({ events: [] }),
+    expectedOutput:
+      '{"total":0,"success":0,"error":0,"p50LatencyMs":0,"p95LatencyMs":0,"histogram":{"0-49":0,"50-99":0,"100-249":0,"250-499":0,"500+":0}}',
+  },
 ];

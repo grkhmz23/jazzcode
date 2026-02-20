@@ -29,4 +29,9 @@ export const lesson8TestCases: TestCase[] = [
     input: JSON.stringify({ steps: 4, issues: 1 }),
     expectedOutput: "# Flow Safety Report\\n\\n- Steps: 4\\n- Issues: 1\\n- Status: FAIL",
   },
+  {
+    name: "renders PASS when there are zero issues",
+    input: JSON.stringify({ steps: 3, issues: 0 }),
+    expectedOutput: "# Flow Safety Report\\n\\n- Steps: 3\\n- Issues: 0\\n- Status: PASS",
+  },
 ];

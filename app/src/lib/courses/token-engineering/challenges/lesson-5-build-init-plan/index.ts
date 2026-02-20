@@ -107,6 +107,20 @@ export const lesson5TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '[{"label":"create-mint-account","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjEiLCJsYWJlbCI6ImNyZWF0ZS1taW50LWFjY291bnQiLCJwYXJhbXMiOnsiYXV0aG9yaXR5IjoiQVVUSF9BIiwibWludCI6Ik1pbnRQc2V1ZG8xMTEifX0="},{"label":"init-mint-decimals-6","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjEiLCJsYWJlbCI6ImluaXQtbWludC1kZWNpbWFscy02IiwicGFyYW1zIjp7ImRlY2ltYWxzIjo2LCJmcmVlemVBdXRob3JpdHkiOiIiLCJtaW50QXV0aG9yaXR5IjoiQVVUSF9BIn19"},{"label":"extension-transfer-fee","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjEiLCJsYWJlbCI6ImV4dGVuc2lvbi10cmFuc2Zlci1mZWUiLCJwYXJhbXMiOnsiYXV0aG9yaXR5IjoiQVVUSF9BIiwiZmVlQnBzIjoyNTAsIm1heEZlZSI6IjUwMDAifX0="},{"label":"extension-permanent-delegate","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjEiLCJsYWJlbCI6ImV4dGVuc2lvbi1wZXJtYW5lbnQtZGVsZWdhdGUiLCJwYXJhbXMiOnsiZGVsZWdhdGUiOiJERUxFR0FURV9BIn19"}]',
+      '[{"label":"create-mint-account","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImNyZWF0ZS1taW50LWFjY291bnQiLCJwYXJhbXMiOnsiYXV0aG9yaXR5IjoiQVVUSF9BIiwibWludCI6Ik1pbnRQc2V1ZG8xMTEifX0="},{"label":"init-mint-decimals-6","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImluaXQtbWludC1kZWNpbWFscy02IiwicGFyYW1zIjp7ImRlY2ltYWxzIjo2LCJmcmVlemVBdXRob3JpdHkiOiIiLCJtaW50QXV0aG9yaXR5IjoiQVVUSF9BIn19"},{"label":"extension-transfer-fee","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImV4dGVuc2lvbi10cmFuc2Zlci1mZWUiLCJwYXJhbXMiOnsiYXV0aG9yaXR5IjoiQVVUSF9BIiwiZmVlQnBzIjoyNTAsIm1heEZlZSI6IjUwMDAifX0="},{"label":"extension-permanent-delegate","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImV4dGVuc2lvbi1wZXJtYW5lbnQtZGVsZWdhdGUiLCJwYXJhbXMiOnsiZGVsZWdhdGUiOiJERUxFR0FURV9BIn19"}]',
+  },
+  {
+    name: "builds base-only plan when no extensions are enabled",
+    input: JSON.stringify({
+      mint: "MintLite222",
+      config: {
+        decimals: 9,
+        mintAuthority: "AUTH_B",
+        freezeAuthority: "FREEZE_B",
+        extensions: {},
+      },
+    }),
+    expectedOutput:
+      '[{"label":"create-mint-account","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImNyZWF0ZS1taW50LWFjY291bnQiLCJwYXJhbXMiOnsiYXV0aG9yaXR5IjoiQVVUSF9CIiwibWludCI6Ik1pbnRMaXRlMjIyIn19"},{"label":"init-mint-decimals-9","programId":"Token2022OfflineProgram","keys":[{"pubkey":"mint","isSigner":false,"isWritable":true}],"dataBase64":"eyJ2ZXJzaW9uIjoidG9rZW4tbGF1bmNoLXBhY2stdjIiLCJsYWJlbCI6ImluaXQtbWludC1kZWNpbWFscy05IiwicGFyYW1zIjp7ImRlY2ltYWxzIjo5LCJmcmVlemVBdXRob3JpdHkiOiJGUkVFWkVfQiIsIm1pbnRBdXRob3JpdHkiOiJBVVRIX0IifX0="}]',
   },
 ];

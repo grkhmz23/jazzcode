@@ -62,7 +62,7 @@ export function TaskPanel({
     <aside className="flex h-full min-h-0 flex-col border-l border-[#2f2f2f] bg-[#1f1f1f] text-[#d4d4d4]" aria-label={t("taskPanelAriaLabel")}>
       <div className="space-y-2 border-b border-[#313131] p-3">
         <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
-          Quest
+          {t("quest")}
         </Badge>
         <h2 className="text-sm font-semibold">{quest.title}</h2>
         <p className="text-xs text-[#9d9d9d]">{quest.description}</p>
@@ -80,7 +80,7 @@ export function TaskPanel({
 
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase text-[#9d9d9d]">Speedrun</h3>
+            <h3 className="text-xs font-semibold uppercase text-[#9d9d9d]">{t("speedrun")}</h3>
             <Button
               type="button"
               variant={speedrunEnabled ? "default" : "outline"}
@@ -88,47 +88,47 @@ export function TaskPanel({
               onClick={() => onToggleSpeedrun(!speedrunEnabled)}
             >
               <Timer className="mr-1 h-3.5 w-3.5" />
-              {speedrunEnabled ? "On" : "Off"}
+              {speedrunEnabled ? t("enabled") : t("disabled")}
             </Button>
           </div>
           <p className="text-xs text-[#d4d4d4]">{speedrunLabel}</p>
         </div>
 
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">Wallet</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">{t("wallet")}</h3>
           <div className="mb-2 flex gap-2">
-            <Button size="sm" variant={walletMode === "burner" ? "default" : "outline"} onClick={() => onSetWalletMode("burner")}>Burner</Button>
-            <Button size="sm" variant={walletMode === "external" ? "default" : "outline"} onClick={() => onSetWalletMode("external")}>External</Button>
+            <Button size="sm" variant={walletMode === "burner" ? "default" : "outline"} onClick={() => onSetWalletMode("burner")}>{t("burnerWallet")}</Button>
+            <Button size="sm" variant={walletMode === "external" ? "default" : "outline"} onClick={() => onSetWalletMode("external")}>{t("externalWallet")}</Button>
           </div>
           {walletMode === "burner" ? (
             <div className="space-y-2">
-              <p className="text-xs text-[#9d9d9d]">{burnerAddress ? `Address: ${burnerAddress}` : "No burner wallet yet."}</p>
+              <p className="text-xs text-[#9d9d9d]">{burnerAddress ? t("addressValue", { address: burnerAddress }) : t("noBurnerWalletYet")}</p>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={onCreateBurner}>Create</Button>
-                <Button size="sm" variant="outline" onClick={onExportBurner} disabled={!burnerAddress}>Export</Button>
-                <Button size="sm" variant="outline" onClick={onResetBurner} disabled={!burnerAddress}>Reset</Button>
+                <Button size="sm" variant="outline" onClick={onCreateBurner}>{t("create")}</Button>
+                <Button size="sm" variant="outline" onClick={onExportBurner} disabled={!burnerAddress}>{t("export")}</Button>
+                <Button size="sm" variant="outline" onClick={onResetBurner} disabled={!burnerAddress}>{t("reset")}</Button>
               </div>
               <p className="text-[11px] text-amber-300">{t("burnerSecretNotice")}</p>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs text-[#9d9d9d]">{externalAddress ? `Address: ${externalAddress}` : "External wallet not connected."}</p>
+              <p className="text-xs text-[#9d9d9d]">{externalAddress ? t("addressValue", { address: externalAddress }) : t("externalWalletNotConnected")}</p>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={onConnectExternal} disabled={externalConnected}>Connect</Button>
-                <Button size="sm" variant="outline" onClick={onDisconnectExternal} disabled={!externalConnected}>Disconnect</Button>
+                <Button size="sm" variant="outline" onClick={onConnectExternal} disabled={externalConnected}>{t("connect")}</Button>
+                <Button size="sm" variant="outline" onClick={onDisconnectExternal} disabled={!externalConnected}>{t("disconnect")}</Button>
               </div>
             </div>
           )}
           <div className="mt-2 flex items-center justify-between">
             <p className="text-xs text-[#d4d4d4]">{balanceLabel}</p>
             <Button size="sm" variant="outline" onClick={onRefreshBalance}>
-              <Wallet className="mr-1 h-3.5 w-3.5" />Refresh
+              <Wallet className="mr-1 h-3.5 w-3.5" />{t("refresh")}
             </Button>
           </div>
         </div>
 
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">Tasks</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">{t("tasks")}</h3>
           <ul className="space-y-2">
             {quest.tasks.map((task) => {
               const result = results.find((item) => item.taskId === task.id);
@@ -169,7 +169,7 @@ export function TaskPanel({
         </div>
 
         <div className="rounded border border-[#313131] bg-[#252526] p-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">Achievements</h3>
+          <h3 className="mb-2 text-xs font-semibold uppercase text-[#9d9d9d]">{t("achievements")}</h3>
           {achievements.length === 0 ? (
             <p className="text-xs text-[#9d9d9d]">{t("noBadgesYet")}</p>
           ) : (

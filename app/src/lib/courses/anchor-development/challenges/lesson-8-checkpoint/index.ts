@@ -116,4 +116,13 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"authority":"Auth1111111111111111111111111111111111111","pda":"pda_Prog1111_Auth1111_283def7","initIxProgramId":"Prog1111111111111111111111111111111111111","initKeys":[{"pubkey":"pda_Prog1111_Auth1111_283def7","isSigner":false,"isWritable":true},{"pubkey":"Auth1111111111111111111111111111111111111","isSigner":true,"isWritable":false},{"pubkey":"Auth1111111111111111111111111111111111111","isSigner":true,"isWritable":true},{"pubkey":"11111111111111111111111111111111","isSigner":false,"isWritable":false}],"incrementKeys":[{"pubkey":"pda_Prog1111_Auth1111_283def7","isSigner":false,"isWritable":true},{"pubkey":"Auth1111111111111111111111111111111111111","isSigner":true,"isWritable":false}],"finalCount":2}',
   },
+  {
+    name: "checkpoint remains deterministic for alternate authority/program pair",
+    input: JSON.stringify({
+      programId: "Prog9999999999999999999999999999999999999",
+      authority: "Auth9999999999999999999999999999999999999",
+    }),
+    expectedOutput:
+      '{"authority":"Auth9999999999999999999999999999999999999","pda":"pda_Prog9999_Auth9999_3380ea1c","initIxProgramId":"Prog9999999999999999999999999999999999999","initKeys":[{"pubkey":"pda_Prog9999_Auth9999_3380ea1c","isSigner":false,"isWritable":true},{"pubkey":"Auth9999999999999999999999999999999999999","isSigner":true,"isWritable":false},{"pubkey":"Auth9999999999999999999999999999999999999","isSigner":true,"isWritable":true},{"pubkey":"11111111111111111111111111111111","isSigner":false,"isWritable":false}],"incrementKeys":[{"pubkey":"pda_Prog9999_Auth9999_3380ea1c","isSigner":false,"isWritable":true},{"pubkey":"Auth9999999999999999999999999999999999999","isSigner":true,"isWritable":false}],"finalCount":2}',
+  },
 ];

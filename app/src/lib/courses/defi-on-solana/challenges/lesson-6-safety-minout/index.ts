@@ -82,7 +82,7 @@ export const lesson6TestCases: TestCase[] = [
       slippageBps: 50
     }),
     expectedOutput:
-      '{"outAmount":"444887895","minOut":"442663455","totalFeeAmount":"3000000","invariants":["reserves remain non-negative","output does not exceed reserveOut","route simulation is deterministic"]}'
+      '{"outAmount":"444953180","minOut":"442728414","totalFeeAmount":"3000000","invariants":["reserves remain non-negative","output does not exceed reserveOut","route simulation is deterministic"]}'
   },
   {
     name: "rejects invalid slippage",

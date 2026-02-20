@@ -48,4 +48,16 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       '{"severity":"error","title":"High sandwich and execution risk","body":"Quote freshness, impact, or slippage policy indicates unacceptable risk. Refresh and reduce size."}',
   },
+  {
+    name: "renders medium warning banner",
+    input: JSON.stringify({ grade: "medium" }),
+    expectedOutput:
+      '{"severity":"warning","title":"Moderate risk","body":"Review route hops and price impact before signing."}',
+  },
+  {
+    name: "falls back to info banner for unknown grades",
+    input: JSON.stringify({ grade: "low" }),
+    expectedOutput:
+      '{"severity":"info","title":"Swap protections active","body":"Current route is within configured defensive limits."}',
+  },
 ];

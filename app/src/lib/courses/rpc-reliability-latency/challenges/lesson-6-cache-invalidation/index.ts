@@ -28,4 +28,10 @@ export const lesson6TestCases: TestCase[] = [
     expectedOutput:
       '{"staleKeys":["acct:a","acct:b"],"ttlMs":500,"strategy":"aggressive-invalidate"}',
   },
+  {
+    name: "uses standard refresh mode at low slot lag",
+    input: JSON.stringify({ changedAccounts: ["z", "m"], slotLag: 2 }),
+    expectedOutput:
+      '{"staleKeys":["acct:m","acct:z"],"ttlMs":2000,"strategy":"standard-refresh"}',
+  },
 ];

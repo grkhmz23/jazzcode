@@ -59,5 +59,19 @@ export const lesson6TestCases: TestCase[] = [
     }),
     expectedOutput:
       '{"owner":"OWNER","totalValueUsd":"7.000000","rows":[{"mint":"MINT_B","symbol":"USDC","amount":"5000000","valueUsd":"5.000000","recentTs":10},{"mint":"MINT_C","symbol":"USDT","amount":"2000000","valueUsd":"2.000000","recentTs":9}]}'
+  },
+  {
+    name: "supports empty search and balance sorting including zero balances",
+    input: JSON.stringify({
+      owner: "OWNER2",
+      query: { nonZeroOnly: false, search: "", sortBy: "balance" },
+      rows: [
+        { mint: "MINT_A", symbol: "SOL", amount: "0", valueUsd: "0.000000", recentTs: 1 },
+        { mint: "MINT_B", symbol: "USDC", amount: "3", valueUsd: "3.000000", recentTs: 2 },
+        { mint: "MINT_C", symbol: "USDT", amount: "2", valueUsd: "2.000000", recentTs: 3 }
+      ]
+    }),
+    expectedOutput:
+      '{"owner":"OWNER2","totalValueUsd":"5.000000","rows":[{"mint":"MINT_B","symbol":"USDC","amount":"3","valueUsd":"3.000000","recentTs":2},{"mint":"MINT_C","symbol":"USDT","amount":"2","valueUsd":"2.000000","recentTs":3},{"mint":"MINT_A","symbol":"SOL","amount":"0","valueUsd":"0.000000","recentTs":1}]}'
   }
 ];

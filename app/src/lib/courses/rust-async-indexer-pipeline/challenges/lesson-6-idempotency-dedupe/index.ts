@@ -29,4 +29,9 @@ export const lesson6TestCases: TestCase[] = [
     input: JSON.stringify({ events: [{ idempotencyKey: "k2" }, { idempotencyKey: "k1" }, { idempotencyKey: "k2" }] }),
     expectedOutput: '["k1","k2"]',
   },
+  {
+    name: "returns empty list when no events are present",
+    input: JSON.stringify({ events: [] }),
+    expectedOutput: "[]",
+  },
 ];

@@ -78,5 +78,31 @@ export const lesson8TestCases: TestCase[] = [
     }),
     expectedOutput:
       '{"swapPlan":{"inMint":"SOL_MINT","outMint":"JUP_MINT","inAmount":"10000000000","route":{"hops":[{"poolId":"pool-sol-usdc","inMint":"SOL_MINT","outMint":"USDC_MINT"},{"poolId":"pool-usdc-jup","inMint":"USDC_MINT","outMint":"JUP_MINT"}]},"quote":{"outAmount":"2882594665","minOut":"2868181691","feeBreakdown":[{"poolId":"pool-sol-usdc","feeAmount":"20000000"},{"poolId":"pool-usdc-jup","feeAmount":"5715381"}],"impactBps":267},"determinism":{"fixtureHash":"abc123","modelVersion":"defi-jupiter-offline-v2"}},"swapSummary":{"label":"Swap SOL -> USDC -> JUP for 2882594665 output units","path":["SOL","USDC","JUP"],"outAmount":"2882594665","minOut":"2868181691","totalFeeAmount":"25715381","totalImpactBps":267,"invariants":["all hop pools exist in universe","output is positive and bounded by reserves","fee amounts are non-negative"]}}'
+  },
+  {
+    name: "builds stable summary for single-hop route",
+    input: JSON.stringify({
+      inMint: "SOL_MINT",
+      outMint: "USDC_MINT",
+      inSymbol: "SOL",
+      inAmount: "500000000",
+      route: {
+        hops: [
+          { poolId: "pool-sol-usdc", inMint: "SOL_MINT", outMint: "USDC_MINT", outSymbol: "USDC" }
+        ]
+      },
+      quote: {
+        outAmount: "114950000",
+        minOut: "114375250",
+        feeBreakdown: [
+          { poolId: "pool-sol-usdc", feeAmount: "1000000" }
+        ],
+        totalFeeAmount: "1000000",
+        impactBps: 45
+      },
+      fixtureHash: "singlehop456"
+    }),
+    expectedOutput:
+      '{"swapPlan":{"inMint":"SOL_MINT","outMint":"USDC_MINT","inAmount":"500000000","route":{"hops":[{"poolId":"pool-sol-usdc","inMint":"SOL_MINT","outMint":"USDC_MINT"}]},"quote":{"outAmount":"114950000","minOut":"114375250","feeBreakdown":[{"poolId":"pool-sol-usdc","feeAmount":"1000000"}],"impactBps":45},"determinism":{"fixtureHash":"singlehop456","modelVersion":"defi-jupiter-offline-v2"}},"swapSummary":{"label":"Swap SOL -> USDC for 114950000 output units","path":["SOL","USDC"],"outAmount":"114950000","minOut":"114375250","totalFeeAmount":"1000000","totalImpactBps":45,"invariants":["all hop pools exist in universe","output is positive and bounded by reserves","fee amounts are non-negative"]}}'
   }
 ];

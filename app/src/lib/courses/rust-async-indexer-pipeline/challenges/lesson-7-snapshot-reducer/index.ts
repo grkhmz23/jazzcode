@@ -36,4 +36,20 @@ export const lesson7TestCases: TestCase[] = [
     input: JSON.stringify({ events: [{ key: "b", op: "upsert", value: 2 }, { key: "a", op: "upsert", value: 1 }] }),
     expectedOutput: '{"state":{"a":1,"b":2},"appliedKeys":["a","b"]}',
   },
+  {
+    name: "delete operations remove keys from final snapshot",
+    input: JSON.stringify({
+      events: [
+        { key: "a", op: "upsert", value: 1 },
+        { key: "a", op: "delete" },
+        { key: "b", op: "upsert", value: 2 },
+      ],
+    }),
+    expectedOutput: '{"state":{"b":2},"appliedKeys":["a","a","b"]}',
+  },
+  {
+    name: "handles empty event list without mutations",
+    input: JSON.stringify({ events: [] }),
+    expectedOutput: '{"state":{},"appliedKeys":[]}',
+  },
 ];

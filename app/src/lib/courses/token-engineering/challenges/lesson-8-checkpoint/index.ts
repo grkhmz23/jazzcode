@@ -132,6 +132,31 @@ export const lesson8TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '{"mint":"MintPseudo111","token":{"name":"Jazz Fee Token","symbol":"JFEE","decimals":6},"authorities":{"mintAuthority":"AUTH_A","freezeAuthority":null,"updateAuthority":"AUTH_A"},"extensions":{"metadataPointer":null,"transferFee":{"authority":"AUTH_A","feeBps":250,"maxFee":"5000000"},"defaultAccountState":{"state":"initialized"},"permanentDelegate":null},"supply":{"initialSupply":"50000000000","recipientsTotal":"20000000000","remaining":"30000000000"},"feeModel":{"feeBps":250,"maxFee":"5000000","examples":[{"amount":"1000000","fee":"25000"},{"amount":"250000000","fee":"5000000"}]},"plan":{"initSteps":4,"distributionSteps":2,"labels":["create-mint-account","init-mint-decimals-6","extension-transfer-fee","extension-default-account-state","mint-to:OWNER_1","mint-to:OWNER_2"]},"invariants":["initialSupply >= recipientsTotal","distribution has no negative balances","plan labels are deterministic","encoding version is pinned"],"determinism":{"fixturesHash":"de4946a5","encodingVersion":"token-launch-pack-v2"}}',
+      '{"mint":"MintPseudo111","token":{"name":"Jazz Fee Token","symbol":"JFEE","decimals":6},"authorities":{"mintAuthority":"AUTH_A","freezeAuthority":null,"updateAuthority":"AUTH_A"},"extensions":{"metadataPointer":null,"transferFee":{"authority":"AUTH_A","feeBps":250,"maxFee":"5000000"},"defaultAccountState":{"state":"initialized"},"permanentDelegate":null},"supply":{"initialSupply":"50000000000","recipientsTotal":"20000000000","remaining":"30000000000"},"feeModel":{"feeBps":250,"maxFee":"5000000","examples":[{"amount":"1000000","fee":"25000"},{"amount":"250000000","fee":"5000000"}]},"plan":{"initSteps":4,"distributionSteps":2,"labels":["create-mint-account","init-mint-decimals-6","extension-transfer-fee","extension-default-account-state","mint-to:OWNER_1","mint-to:OWNER_2"]},"invariants":["initialSupply >= recipientsTotal","distribution has no negative balances","plan labels are deterministic","encoding version is pinned"],"determinism":{"fixturesHash":"17163182","encodingVersion":"token-launch-pack-v2"}}',
+  },
+  {
+    name: "emits stable summary without transfer fee model",
+    input: JSON.stringify({
+      mint: "MintPseudo222",
+      fixture: { id: "fixture-b", version: 2 },
+      config: {
+        name: "Jazz Basic Token",
+        symbol: "JBSC",
+        decimals: 9,
+        mintAuthority: "AUTH_B",
+        freezeAuthority: "AUTH_B",
+        updateAuthority: null,
+        initialSupply: "1000000",
+        extensions: {
+          metadataPointer: null,
+          transferFee: null,
+          defaultAccountState: null,
+          permanentDelegate: { delegate: "DELEGATE_B" },
+        },
+        recipients: [],
+      },
+    }),
+    expectedOutput:
+      '{"mint":"MintPseudo222","token":{"name":"Jazz Basic Token","symbol":"JBSC","decimals":9},"authorities":{"mintAuthority":"AUTH_B","freezeAuthority":"AUTH_B","updateAuthority":null},"extensions":{"metadataPointer":null,"transferFee":null,"defaultAccountState":null,"permanentDelegate":{"delegate":"DELEGATE_B"}},"supply":{"initialSupply":"1000000","recipientsTotal":"0","remaining":"1000000"},"plan":{"initSteps":3,"distributionSteps":0,"labels":["create-mint-account","init-mint-decimals-9","extension-permanent-delegate"]},"invariants":["initialSupply >= recipientsTotal","distribution has no negative balances","plan labels are deterministic","encoding version is pinned"],"determinism":{"fixturesHash":"ba5d9f64","encodingVersion":"token-launch-pack-v2"}}',
   },
 ];

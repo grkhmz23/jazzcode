@@ -32,4 +32,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"course":"mempool-ux-defense","version":1,"policy":{"minBps":20,"maxBps":120,"staleQuoteMs":12000,"riskGrade":"high"}}',
   },
+  {
+    name: "exports deterministic config for low-risk profile",
+    input: JSON.stringify({ minBps: 10, maxBps: 40, staleQuoteMs: 5000, riskGrade: "low" }),
+    expectedOutput:
+      '{"course":"mempool-ux-defense","version":1,"policy":{"minBps":10,"maxBps":40,"staleQuoteMs":5000,"riskGrade":"low"}}',
+  },
 ];

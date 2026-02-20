@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { RunnerTestCase } from "@/lib/challenge-runner/worker-runner";
+import { validateCode } from "@/lib/challenge-runner";
 
 // The worker runner uses Web Worker API which is not available in Node.
 // We test the runner's interface contract and timeout behavior.
@@ -46,6 +47,24 @@ describe("ChallengeRunner types and contracts", () => {
 });
 
 describe("ChallengeRunner sandboxing requirements", () => {
+  it("client preflight allows static imports (server sandbox enforces execution safety)", () => {
+    const result = validateCode("import { PublicKey } from '@solana/web3.js'; function run(){ return true; }");
+    expect(result.valid).toBe(true);
+  });
+
+  it("client preflight blocks eval usage", () => {
+    const result = validateCode("function run(){ return eval('1 + 1'); }");
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain("eval");
+  });
+
+  it("client preflight allows lowercase function expressions", () => {
+    const result = validateCode(
+      "function run(input){ return input.items.map(function(item){ return item + 1; }); }"
+    );
+    expect(result.valid).toBe(true);
+  });
+
   it("worker code does not access window or document", () => {
     // The WORKER_CODE string should not reference window or document directly
     // This is a static analysis test

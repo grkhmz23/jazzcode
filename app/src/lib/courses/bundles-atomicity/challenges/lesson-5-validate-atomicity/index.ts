@@ -55,4 +55,17 @@ export const lesson5TestCases: TestCase[] = [
     expectedOutput:
       '[{"code":"missing-refund","stepId":"swap","detail":"swap flow has no deterministic refund step"},{"code":"non-idempotent","stepId":"swap","detail":"step is not idempotent; retries can duplicate side effects"},{"code":"partial-execution-risk","stepId":"swap","detail":"partial execution could leave user funds or approvals in unsafe state"}]',
   },
+  {
+    name: "returns no issues for idempotent swap flow with refund",
+    input: JSON.stringify({
+      flow: {
+        steps: [
+          { id: "approve", kind: "approval", dependsOn: [], idempotent: true },
+          { id: "swap", kind: "swap", dependsOn: ["approve"], idempotent: true },
+          { id: "refund", kind: "refund", dependsOn: ["swap"], idempotent: true },
+        ],
+      },
+    }),
+    expectedOutput: "[]",
+  },
 ];

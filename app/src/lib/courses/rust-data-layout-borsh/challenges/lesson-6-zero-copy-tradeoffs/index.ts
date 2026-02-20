@@ -28,4 +28,9 @@ export const lesson6TestCases: TestCase[] = [
     input: JSON.stringify({ reads: 100, schemaChanges: 20 }),
     expectedOutput: '{"zeroCopyScore":80,"borshScore":60,"recommendation":"zero-copy"}',
   },
+  {
+    name: "recommends borsh when zero-copy score underperforms",
+    input: JSON.stringify({ reads: 10, schemaChanges: 5 }),
+    expectedOutput: '{"zeroCopyScore":-10,"borshScore":0,"recommendation":"borsh"}',
+  },
 ];

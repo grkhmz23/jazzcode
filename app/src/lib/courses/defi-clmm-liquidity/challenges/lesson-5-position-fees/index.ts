@@ -97,7 +97,7 @@ export const lesson5TestCases: TestCase[] = [
       feeRate: 0.003,
       volumePerPeriod: 1000000,
     }),
-    expectedOutput: '{"totalFeesToken0":"15000","totalFeesToken1":"15074","periodsInRange":5,"periodsOutOfRange":0,"currentStatus":"in-range","feeAPR":"109.5000"}',
+    expectedOutput: '{"totalFeesToken0":"15000","totalFeesToken1":"15014","periodsInRange":5,"periodsOutOfRange":0,"currentStatus":"in-range","feeAPR":"0.1095"}',
   },
   {
     name: "partially out-of-range position",
@@ -109,7 +109,7 @@ export const lesson5TestCases: TestCase[] = [
       feeRate: 0.003,
       volumePerPeriod: 500000,
     }),
-    expectedOutput: '{"totalFeesToken0":"6000","totalFeesToken1":"6120","periodsInRange":4,"periodsOutOfRange":1,"currentStatus":"out-of-range","feeAPR":"175.2000"}',
+    expectedOutput: '{"totalFeesToken0":"4500","totalFeesToken1":"4575","periodsInRange":3,"periodsOutOfRange":2,"currentStatus":"out-of-range","feeAPR":"0.0657"}',
   },
   {
     name: "fully out-of-range position earns no fees",

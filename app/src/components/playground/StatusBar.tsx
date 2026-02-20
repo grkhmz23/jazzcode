@@ -43,34 +43,49 @@ export function StatusBar({
 }: StatusBarProps) {
   const t = useTranslations("playground");
   const tc = useTranslations("common");
+  const saveStateLabel =
+    saveState === "saving"
+      ? tc("loading")
+      : saveState === "saved"
+        ? tc("success")
+        : saveState === "error"
+          ? tc("error")
+          : tc("inactive");
+  const runnerStateLabel = runnerStatus === "connected" ? tc("active") : tc("inactive");
   return (
     <div className="flex h-9 items-center justify-between border-t border-[#2f2f2f] bg-[#007acc] px-2 text-xs text-white">
       <div className="flex items-center gap-1">
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleLeft}>
-          {leftCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Explorer
+          {leftCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
+          {t("fileExplorerAriaLabel")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleBottom}>
-          {bottomCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Terminal
+          {bottomCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
+          {t("terminalPanelAriaLabel")}
         </Button>
         {hasTasks && (
           <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onToggleRight}>
-            {rightCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}Tasks
+            {rightCollapsed ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
+            {t("taskPanelAriaLabel")}
           </Button>
         )}
       </div>
 
       <div className="flex items-center gap-1">
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onOpenTemplateGallery}>
-          <LayoutTemplate className="mr-1 h-3 w-3" />Templates
+          <LayoutTemplate className="mr-1 h-3 w-3" />
+          {t("templates")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onOpenGithubImport}>
-          <Upload className="mr-1 h-3 w-3" />Import
+          <Upload className="mr-1 h-3 w-3" />
+          {t("import")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onExportZip}>
           <Download className="mr-1 h-3 w-3" />{t("exportZip")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onShareSnapshot}>
-          <Share2 className="mr-1 h-3 w-3" />Share
+          <Share2 className="mr-1 h-3 w-3" />
+          {t("share")}
         </Button>
         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-white hover:bg-[#0d8ae5]" onClick={onCopyShareLink}>
           {t("copyLink")}
@@ -94,10 +109,11 @@ export function StatusBar({
           <RefreshCw className="mr-1 h-3 w-3" />{tc("reset")}
         </Button>
         <span className="inline-flex items-center rounded bg-[#0d8ae5] px-2 py-1 text-[11px]">
-          <Save className="mr-1 h-3 w-3" />{saveState}
+          <Save className="mr-1 h-3 w-3" />
+          {saveStateLabel}
         </span>
         <span className={`inline-flex items-center rounded px-2 py-1 text-[11px] ${runnerStatus === "connected" ? "bg-emerald-600" : "bg-red-600"}`}>
-          Runner: {runnerStatus}
+          {runnerStateLabel}
         </span>
       </div>
     </div>

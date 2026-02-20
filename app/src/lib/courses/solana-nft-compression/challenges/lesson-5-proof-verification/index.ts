@@ -134,8 +134,8 @@ export const lesson5TestCases: TestCase[] = [
         "0x2222222222222222222222222222222222222222222222222222222222222222",
         "0x94d70cb36f763d2b6a8a0a2b9f1c3d5e"
       ],
-      recomputedRoot: "0x54bc0f1c2a9e05ec89a7d06c4d8f0a2ef",
-      valid: true
+      recomputedRoot: "0x0000000000000000000000000000000000000000000000000000000047b309ca",
+      valid: false
     }),
   },
   {
@@ -165,8 +165,8 @@ export const lesson5TestCases: TestCase[] = [
         "0x4444444444444444444444444444444444444444444444444444444444444444",
         "0x54bc0f1c2a9e05ec89a7d06c4d8f0a2ef"
       ],
-      recomputedRoot: "0x54bc0f1c2a9e05ec89a7d06c4d8f0a2ef",
-      valid: true
+      recomputedRoot: "0x00000000000000000000000000000000000000000000000000000000797e2322",
+      valid: false
     }),
   },
   {

@@ -82,8 +82,11 @@ function shouldTrackEnglishLike(locale: Locale, text: string): boolean {
 }
 
 function shouldSkipPath(path: string): boolean {
-  return /\\.(id|slug|language|starterCode|solution|cmd|path|href|src|url|uri|mint|owner|address|programId|signature|hash|file|filename|ext|type|kind|label|name|key|value|testCases|input|output|expected|actual)$/.test(
-    path
+  return (
+    /\.(id|slug|language|starterCode|solution|cmd|path|href|src|url|uri|mint|owner|address|programId|signature|hash|file|filename|ext|type|kind|label|name|key|value|input|output|expected|actual|imageUrl)$/.test(
+      path
+    ) ||
+    /\.testCases(\[|$)/.test(path)
   );
 }
 

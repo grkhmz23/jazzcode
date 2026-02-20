@@ -138,7 +138,7 @@ export const lesson4TestCases: TestCase[] = [
       },
     }),
     expectedOutput:
-      '{"validated":{"name":"Jazz USD","symbol":"JUSD","decimals":6,"mintAuthority":"AUTH_A","initialSupply":"1000000","recipients":[{"owner":"OWNER_1","amount":"250000"},{"owner":"OWNER_2","amount":"100000"}],"extensions":{"transferFee":{"authority":"AUTH_A","feeBps":100,"maxFee":"2500"}}},"mint":"1111111111111111111111111163m8mc","atas":[{"owner":"OWNER_1","ata":"11111111111111111111111111A8d2w4"},{"owner":"OWNER_2","ata":"11111111111111111111111111A8d2w5"}]}',
+      '{"validated":{"name":"Jazz USD","symbol":"JUSD","decimals":6,"mintAuthority":"AUTH_A","initialSupply":"1000000","recipients":[{"owner":"OWNER_1","amount":"250000"},{"owner":"OWNER_2","amount":"100000"}],"extensions":{"transferFee":{"authority":"AUTH_A","feeBps":100,"maxFee":"2500"}}},"mint":"JJJJJJJJJJJJJJJJJJJJJJJJJJPieKQE","atas":[{"owner":"OWNER_1","ata":"JJJJJJJJJJJJJJJJJJJJJJJJJJMKFj1E"},{"owner":"OWNER_2","ata":"JJJJJJJJJJJJJJJJJJJJJJJJJJMLjiQX"}]}',
   },
   {
     name: "rejects decimals out of range",

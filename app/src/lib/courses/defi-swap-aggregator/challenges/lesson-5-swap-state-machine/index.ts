@@ -58,7 +58,7 @@ function processSwapStateMachine(input) {
       if (state === "error" && event.message) {
         errorMessage = event.message;
       }
-      if (state === "idle") {
+      if (state !== "error") {
         errorMessage = null;
       }
     } else {

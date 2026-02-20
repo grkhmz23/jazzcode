@@ -27,4 +27,16 @@ export const lesson6TestCases: TestCase[] = [
     expectedOutput:
       '{"matches":true,"generated":"require_signer(authority);","expected":"require_signer(authority);"}',
   },
+  {
+    name: "reports mismatch when generated output differs",
+    input: JSON.stringify({ generated: "require_mut(vault);", expected: "require_signer(vault);" }),
+    expectedOutput:
+      '{"matches":false,"generated":"require_mut(vault);","expected":"require_signer(vault);"}',
+  },
+  {
+    name: "matches on empty generated and expected outputs",
+    input: JSON.stringify({ generated: "", expected: "" }),
+    expectedOutput:
+      '{"matches":true,"generated":"","expected":""}',
+  },
 ];

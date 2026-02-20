@@ -33,4 +33,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"json":"{\\"error\\":1,\\"histogram\\":{\\"0-49\\":2,\\"50-99\\":3,\\"100-249\\":2,\\"250-499\\":1,\\"500+\\":0},\\"p50LatencyMs\\":90,\\"p95LatencyMs\\":320,\\"success\\":7,\\"total\\":8}","markdown":"# RPC Health Report\\n\\n- Total requests: 8\\n- Success: 7\\n- Errors: 1"}',
   },
+  {
+    name: "exports healthy report with zero errors",
+    input: JSON.stringify({ total: 3, success: 3, error: 0, p50LatencyMs: 40, p95LatencyMs: 80, histogram: { "0-49": 2, "50-99": 1, "100-249": 0, "250-499": 0, "500+": 0 } }),
+    expectedOutput:
+      '{"json":"{\\"error\\":0,\\"histogram\\":{\\"0-49\\":2,\\"50-99\\":1,\\"100-249\\":0,\\"250-499\\":0,\\"500+\\":0},\\"p50LatencyMs\\":40,\\"p95LatencyMs\\":80,\\"success\\":3,\\"total\\":3}","markdown":"# RPC Health Report\\n\\n- Total requests: 3\\n- Success: 3\\n- Errors: 0"}',
+  },
 ];

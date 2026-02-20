@@ -28,4 +28,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"json":"{\\"before\\":{\\"totalCost\\":200},\\"after\\":{\\"totalCost\\":150},\\"reduction\\":50,\\"reductionPct\\":25}","markdown":"# Compute Budget Profiler Report\\n\\n- Before total: 200\\n- After total: 150"}',
   },
+  {
+    name: "handles zero baseline without division errors",
+    input: JSON.stringify({ before: { totalCost: 0 }, after: { totalCost: 0 } }),
+    expectedOutput:
+      '{"json":"{\\"before\\":{\\"totalCost\\":0},\\"after\\":{\\"totalCost\\":0},\\"reduction\\":0,\\"reductionPct\\":0}","markdown":"# Compute Budget Profiler Report\\n\\n- Before total: 0\\n- After total: 0"}',
+  },
 ];

@@ -24,9 +24,37 @@ export interface SandboxRunResult {
   error: string | null;
 }
 
+function normalizeOutput(value: string): string {
+  return value.replace(/\r\n/g, "\n").trim();
+}
+
+function decodeEscapedControlSequences(value: string): string {
+  return value
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t");
+}
+
+function outputsMatch(actualOutput: string, expectedOutput: string): boolean {
+  const actualNormalized = normalizeOutput(actualOutput);
+  const expectedNormalized = normalizeOutput(expectedOutput);
+
+  if (actualNormalized === expectedNormalized) {
+    return true;
+  }
+
+  const expectedDecoded = normalizeOutput(decodeEscapedControlSequences(expectedNormalized));
+  if (actualNormalized === expectedDecoded) {
+    return true;
+  }
+
+  const actualDecoded = normalizeOutput(decodeEscapedControlSequences(actualNormalized));
+  return actualDecoded === expectedNormalized;
+}
+
 const BLOCKED_CODE_PATTERNS: Array<{ pattern: RegExp; message: string }> = [
   { pattern: /\beval\s*\(/i, message: "eval() is not allowed" },
-  { pattern: /\bFunction\s*\(/i, message: "Function constructor is not allowed" },
+  { pattern: /\bFunction\s*\(/, message: "Function constructor is not allowed" },
   { pattern: /\bfetch\s*\(/i, message: "fetch() is not allowed" },
   { pattern: /\bXMLHttpRequest\b/i, message: "XMLHttpRequest is not allowed" },
   { pattern: /\bimportScripts\s*\(/i, message: "importScripts is not allowed" },
@@ -69,10 +97,19 @@ function createContext(logs, deterministicNow) {
     }
   }
 
+  const textEncoder = typeof TextEncoder !== "undefined" ? TextEncoder : undefined;
+  const textDecoder = typeof TextDecoder !== "undefined" ? TextDecoder : undefined;
+  const btoaImpl = (value) => Buffer.from(String(value), "binary").toString("base64");
+  const atobImpl = (value) => Buffer.from(String(value), "base64").toString("binary");
+
   const sandbox = {
     console: safeConsole,
     Math: safeMath,
     Date: SafeDate,
+    TextEncoder: textEncoder,
+    TextDecoder: textDecoder,
+    btoa: btoaImpl,
+    atob: atobImpl,
     fetch: undefined,
     XMLHttpRequest: undefined,
     importScripts: undefined,
@@ -130,10 +167,33 @@ parentPort.on("message", async (payload) => {
       throw new Error("Runner misconfigured: callable challenge function was not found.");
     }
     context.__challengeInput = payload.input;
+    context.__challengeRawInput = payload.rawInput;
     context.__challengeFn = fn;
-    const invokeScript = new vm.Script(
-      "Array.isArray(__challengeInput) ? __challengeFn(...__challengeInput) : __challengeFn(__challengeInput)"
-    );
+    const invokeSource = [
+      "(() => {",
+      "  try {",
+      "    if (Array.isArray(__challengeInput) && __challengeFn.length > 1) {",
+      "      return __challengeFn(...__challengeInput);",
+      "    }",
+      "    return __challengeFn(__challengeInput);",
+      "  } catch (error) {",
+      "    const errorMessage = error && typeof error.message === 'string' ? error.message : '';",
+      "    const shouldRetryWithRawInput =",
+      "      __challengeInput &&",
+      "      typeof __challengeInput === 'object' &&",
+      "      typeof __challengeRawInput === 'string' &&",
+      "      errorMessage.includes('[object Object]') &&",
+      "      errorMessage.includes('valid JSON');",
+      "",
+      "    if (!shouldRetryWithRawInput) {",
+      "      throw error;",
+      "    }",
+      "",
+      "    return __challengeFn(__challengeRawInput);",
+      "  }",
+      "})()",
+    ].join(\"\\n\");
+    const invokeScript = new vm.Script(invokeSource);
     const value = invokeScript.runInContext(context, { timeout: timeoutMs });
     parentPort.postMessage({
       ok: true,
@@ -192,6 +252,7 @@ type WorkerExecutionResult = {
 async function runInIsolatedWorker(
   transpiledCode: string,
   input: unknown,
+  rawInput: string,
   timeoutMs: number
 ): Promise<WorkerExecutionResult> {
   return new Promise((resolve, reject) => {
@@ -221,7 +282,7 @@ async function runInIsolatedWorker(
       reject(error);
     });
 
-    worker.postMessage({ transpiledCode, input, timeoutMs });
+    worker.postMessage({ transpiledCode, input, rawInput, timeoutMs });
   });
 }
 
@@ -234,14 +295,14 @@ async function executeTestInSandbox(
   const expectedOutput = String(testCase.expectedOutput ?? "");
   try {
     const input = parseInput(testCase.input);
-    const execution = await runInIsolatedWorker(transpiledCode, input, timeoutMs);
+    const execution = await runInIsolatedWorker(transpiledCode, input, testCase.input, timeoutMs);
     if (!execution.ok) {
       throw new Error(execution.error ?? "Sandbox execution failed");
     }
     const actualOutput = execution.actualOutput ?? "";
     return {
       name: testCase.name,
-      passed: actualOutput.trim() === expectedOutput.trim(),
+      passed: outputsMatch(actualOutput, expectedOutput),
       actualOutput,
       expectedOutput,
       logs: execution.logs,
@@ -250,14 +311,17 @@ async function executeTestInSandbox(
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    const normalizedMessage = message.replace(/^Error:\s*/, "");
+    const actualOutput = `Error: ${normalizedMessage}`;
+    const passed = outputsMatch(actualOutput, expectedOutput);
     return {
       name: testCase.name,
-      passed: false,
-      actualOutput: `Error: ${message}`,
+      passed,
+      actualOutput,
       expectedOutput,
       logs: [],
       executionTime: Date.now() - start,
-      error: message,
+      error: passed ? null : normalizedMessage,
     };
   }
 }

@@ -27,4 +27,9 @@ export const lesson5TestCases: TestCase[] = [
     input: JSON.stringify({ ast: [{ kind: "signer", target: "authority" }, { kind: "owner", target: "vault", expected: "VaultProgram" }] }),
     expectedOutput: "require_signer(authority);\\nrequire_owner(vault, VaultProgram);",
   },
+  {
+    name: "supports mut and has_one forms",
+    input: JSON.stringify({ ast: [{ kind: "mut", target: "vault" }, { kind: "has_one", target: "vault", expected: "authority" }] }),
+    expectedOutput: "require_mut(vault);\\nrequire_has_one(vault, authority);",
+  },
 ];

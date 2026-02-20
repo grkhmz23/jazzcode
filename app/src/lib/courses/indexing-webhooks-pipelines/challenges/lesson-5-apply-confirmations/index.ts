@@ -61,4 +61,15 @@ export const lesson5TestCases: TestCase[] = [
     expectedOutput:
       '{"balances":{"alice":10},"appliedEventKeys":["115:sigA:0:deposit:alice"],"pendingEventKeys":["119:sigB:0:withdraw:alice"],"finalizedEventKeys":[],"headSlot":120}',
   },
+  {
+    name: "marks deep event as finalized when depth threshold is met",
+    input: JSON.stringify({
+      rules: { headSlot: 120, minConfirmedDepth: 3, minFinalizedDepth: 8 },
+      events: [
+        { slot: 110, txSignature: "sigZ", instructionIndex: 0, account: "bob", kind: "deposit", amount: 7 },
+      ],
+    }),
+    expectedOutput:
+      '{"balances":{"bob":7},"appliedEventKeys":["110:sigZ:0:deposit:bob"],"pendingEventKeys":[],"finalizedEventKeys":["110:sigZ:0:deposit:bob"],"headSlot":120}',
+  },
 ];

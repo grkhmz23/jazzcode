@@ -26,6 +26,7 @@ export function TerminalPane({
   topPanel,
 }: TerminalPaneProps) {
   const t = useTranslations("playground");
+  const tc = useTranslations("common");
   const [command, setCommand] = useState("");
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
@@ -102,7 +103,9 @@ export function TerminalPane({
 
   return (
     <section className="flex h-full min-h-0 flex-col bg-[#181818] text-[#d4d4d4]" aria-label={t("terminalPanelAriaLabel")}>
-      <div className="border-b border-[#313131] px-3 py-2 text-xs uppercase tracking-wide text-[#9d9d9d]">Terminal</div>
+      <div className="border-b border-[#313131] px-3 py-2 text-xs uppercase tracking-wide text-[#9d9d9d]">
+        {t("terminalPanelAriaLabel")}
+      </div>
       {topPanel ? <div className="border-b border-[#313131] bg-[#1b1b1b] p-3">{topPanel}</div> : null}
       <div className="min-h-0 flex-1 space-y-1 overflow-auto p-3 font-mono text-xs" role="log" aria-live="polite">
         {entries.map((entry) => (
@@ -125,7 +128,7 @@ export function TerminalPane({
       <div className="border-t border-[#313131] px-2 pt-1">
         {autocomplete.suggestions.length > 0 ? (
           <p className="truncate pb-1 font-mono text-[11px] text-[#9d9d9d]" aria-live="polite">
-            Suggestions: {autocomplete.suggestions.slice(0, 6).join("  ")}
+            {autocomplete.suggestions.slice(0, 6).join("  ")}
           </p>
         ) : null}
       </div>
@@ -146,7 +149,7 @@ export function TerminalPane({
           placeholder={t("terminalCommandInputPlaceholder")}
         />
         <Button type="submit" size="sm">
-          Run
+          {tc("run")}
         </Button>
       </form>
     </section>

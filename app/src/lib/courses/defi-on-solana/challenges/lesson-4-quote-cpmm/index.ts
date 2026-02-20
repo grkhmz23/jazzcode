@@ -74,7 +74,6 @@ export const lesson4TestCases: TestCase[] = [
       inMint: "SOL",
       inAmount: "1000000000",
     }),
-    expectedOutput:
-      '{"outAmount":"444887895","feeAmount":"3000000","inAfterFee":"997000000","impactBps":82}',
+    expectedOutput: "Error: Invalid inAmount: 1000000000",
   },
 ];

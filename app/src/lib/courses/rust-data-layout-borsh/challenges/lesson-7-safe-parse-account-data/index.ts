@@ -42,4 +42,12 @@ export const lesson7TestCases: TestCase[] = [
     }),
     expectedOutput: '{"ok":true,"parsed":{"active":true,"level":9}}',
   },
+  {
+    name: "returns out-of-bounds error for short buffers",
+    input: JSON.stringify({
+      bytes: [1],
+      layout: { totalSize: 2, fields: [{ name: "active", type: "bool", offset: 0 }, { name: "level", type: "u8", offset: 1 }] },
+    }),
+    expectedOutput: '{"ok":false,"error":{"code":"OUT_OF_BOUNDS","message":"insufficient bytes"}}',
+  },
 ];

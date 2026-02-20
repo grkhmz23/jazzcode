@@ -32,4 +32,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       "# Reorg-Safe Pipeline Report\\n\\n- Head slot: 200\\n- Applied events: 5\\n- Pending events: 2\\n- Finalized events: 4\\n- Integrity: PASS",
   },
+  {
+    name: "renders FAIL report for integrity issues",
+    input: JSON.stringify({ headSlot: 201, applied: 4, pending: 3, finalized: 2, ok: false }),
+    expectedOutput:
+      "# Reorg-Safe Pipeline Report\\n\\n- Head slot: 201\\n- Applied events: 4\\n- Pending events: 3\\n- Finalized events: 2\\n- Integrity: FAIL",
+  },
 ];

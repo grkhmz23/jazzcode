@@ -30,4 +30,10 @@ export const lesson6TestCases: TestCase[] = [
     expectedOutput:
       '{"idempotencyKey":"flow-1-u-9","retryMode":"safe-retry","refundPath":"enabled","status":"needs-compensation"}',
   },
+  {
+    name: "marks safe path when refund is not required",
+    input: JSON.stringify({ flowId: "flow-2", userId: "u-1", requiresRefund: false }),
+    expectedOutput:
+      '{"idempotencyKey":"flow-2-u-1","retryMode":"safe-retry","refundPath":"not-needed","status":"safe"}',
+  },
 ];

@@ -43,4 +43,16 @@ export const lesson5TestCases: TestCase[] = [
     expectedOutput:
       '{"chosen":{"id":"a","url":"https://a.example","region":"us-east","weight":2},"reasoning":"selected a score=92.60 success=0.96 p95=140ms"}',
   },
+  {
+    name: "uses defaults and deterministic id tie-break when samples are missing",
+    input: JSON.stringify({
+      endpoints: [
+        { id: "a", url: "https://a.example", region: "us-east", weight: 1 },
+        { id: "b", url: "https://b.example", region: "us-west", weight: 1 },
+      ],
+      healthSamples: [],
+    }),
+    expectedOutput:
+      '{"chosen":{"id":"a","url":"https://a.example","region":"us-east","weight":1},"reasoning":"selected a score=-48.00 success=0.50 p95=1000ms"}',
+  },
 ];

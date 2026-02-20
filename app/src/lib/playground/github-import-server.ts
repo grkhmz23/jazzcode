@@ -46,7 +46,7 @@ export async function importGitHubRepositoryServer(
 
   const normalized = normalizeRepoInput(repoUrl);
 
-  onProgress?.({ total: 1, completed: 0, currentFile: "Fetching repository..." });
+  onProgress?.({ total: 1, completed: 0 });
 
   const response = await fetch("/api/playground/import/github", {
     method: "POST",
@@ -73,14 +73,25 @@ export async function importGitHubRepositoryServer(
   onProgress?.({
     total: result.files.length,
     completed: result.files.length,
-    currentFile: "Import complete",
   });
 
-  // Parse owner/repo from URL for the template ID
-  const url = new URL(normalized);
-  const pathParts = url.pathname.split("/").filter(Boolean);
-  const owner = pathParts[0] || "unknown";
-  const repo = (pathParts[1] || "unknown").replace(/\.git$/, "");
+  // Parse owner/repo for template metadata.
+  // Prefer URL parsing, but gracefully fall back to shorthand parsing.
+  let owner = "unknown";
+  let repo = "unknown";
+  try {
+    const url = new URL(normalized);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    owner = pathParts[0] || owner;
+    repo = (pathParts[1] || repo).replace(/\.git$/, "");
+  } catch {
+    const cleaned = normalized
+      .replace(/^https?:\/\/github\.com\//i, "")
+      .replace(/\.git$/i, "");
+    const pathParts = cleaned.split("/").filter(Boolean);
+    owner = pathParts[0] || owner;
+    repo = pathParts[1] || repo;
+  }
 
   return {
     id: `github-${owner}-${repo}`,

@@ -28,4 +28,10 @@ export const lesson6TestCases: TestCase[] = [
     expectedOutput:
       '{"ranges":[{"from":8,"to":8},{"from":9,"to":9}],"idempotencyKey":"pipe-2-2","mode":"backfill-required"}',
   },
+  {
+    name: "returns up-to-date mode when no slots are missing",
+    input: JSON.stringify({ pipelineId: "pipe-2", missingSlots: [] }),
+    expectedOutput:
+      '{"ranges":[],"idempotencyKey":"pipe-2-0","mode":"up-to-date"}',
+  },
 ];

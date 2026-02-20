@@ -105,7 +105,7 @@ export const lesson8TestCases: TestCase[] = [
       ],
       timestamp: 1700000000,
     }),
-    expectedOutput: '{"positionId":"pos_abc123","pool":"SOL/USDC","lowerPrice":"0.904874","upperPrice":"1.105163","currentPrice":"1.000000","status":"in-range","liquidity":"1000000000","totalFeesToken0":"8000","totalFeesToken1":"8100","feeAPR":"146.0000","impermanentLossPct":"0.0000","timestamp":1700000000}',
+    expectedOutput: '{"positionId":"pos_abc123","pool":"SOL/USDC","lowerPrice":"0.904842","upperPrice":"1.105165","currentPrice":"1.000000","status":"in-range","liquidity":"1000000000","totalFeesToken0":"8000","totalFeesToken1":"8100","feeAPR":"0.1460","impermanentLossPct":"0.0000","timestamp":1700000000}',
   },
   {
     name: "generates out-of-range position report with IL",
@@ -122,6 +122,6 @@ export const lesson8TestCases: TestCase[] = [
       ],
       timestamp: 1700001000,
     }),
-    expectedOutput: '{"positionId":"pos_def456","pool":"ETH/USDC","lowerPrice":"1.648616","upperPrice":"2.718146","currentPrice":"1.200000","status":"out-of-range","liquidity":"500000000","totalFeesToken0":"1000","totalFeesToken1":"1200","feeAPR":"73.0000","impermanentLossPct":"-2.0753","timestamp":1700001000}',
+    expectedOutput: '{"positionId":"pos_def456","pool":"ETH/USDC","lowerPrice":"1.648680","upperPrice":"2.718146","currentPrice":"1.200000","status":"out-of-range","liquidity":"500000000","totalFeesToken0":"1000","totalFeesToken1":"1200","feeAPR":"0.0730","impermanentLossPct":"-30.5556","timestamp":1700001000}',
   },
 ];

@@ -48,5 +48,17 @@ export const lesson5TestCases: TestCase[] = [
     }),
     expectedOutput:
       '{"finalState":{"eventsApplied":3},"snapshots":[{"eventIndex":2,"eventId":"b"},{"eventIndex":3,"eventId":"c"}],"checksum":"snap_b|c"}'
+  },
+  {
+    name: "still emits final snapshot when interval exceeds event count",
+    input: JSON.stringify({
+      interval: 10,
+      events: [
+        { id: "z", ts: 1 },
+        { id: "z", ts: 1 }
+      ]
+    }),
+    expectedOutput:
+      '{"finalState":{"eventsApplied":1},"snapshots":[],"checksum":"snap_"}'
   }
 ];

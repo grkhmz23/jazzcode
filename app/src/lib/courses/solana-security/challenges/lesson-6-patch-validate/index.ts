@@ -55,4 +55,14 @@ export const lesson6TestCases: TestCase[] = [
     expectedOutput:
       '{"signerCheck":true,"ownerCheck":true,"pdaCheck":true,"safeMath":true,"blocked":true,"code":"ERR_BAD_PDA"}',
   },
+  {
+    name: "keeps code empty when exploit is not blocked",
+    input: JSON.stringify({
+      requiredChecks: ["signer", "owner"],
+      fixedBlockedExploit: false,
+      errorCode: "ERR_UNUSED",
+    }),
+    expectedOutput:
+      '{"signerCheck":true,"ownerCheck":true,"pdaCheck":false,"safeMath":false,"blocked":false,"code":""}',
+  },
 ];

@@ -100,7 +100,7 @@ function makeTerminalEntry(kind: "input" | "output" | "system" | "error", text: 
 }
 
 const DEFAULT_TERMINAL_ENTRIES = [
-  makeTerminalEntry("system", "Playground terminal v2 ready. Run `help` to list commands."),
+  makeTerminalEntry("system", "help"),
 ];
 
 function createInitialRunnerJobViewState(): RunnerJobViewState {
@@ -132,6 +132,18 @@ function downloadTarGzFromBase64(base64: string, filename: string): void {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function toSafeImportModulePath(path: string | null): string {
+  if (!path) {
+    return "./Component";
+  }
+  const withoutExt = path.replace(/\.tsx?$/i, "");
+  const sanitized = withoutExt
+    .replace(/\\/g, "/")
+    .replace(/^\.?\/*/, "")
+    .replace(/[^A-Za-z0-9/_-]/g, "_");
+  return `./${sanitized || "Component"}`;
 }
 
 export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
@@ -359,16 +371,8 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
             const saved = await loadWorkspaceFromIndexedDb(persistenceScope);
             if (saved && mounted) {
               dispatch({ type: "load", workspace: saved });
-              setTerminalEntries((previous) => [
-                ...previous,
-                makeTerminalEntry("system", "Loaded saved workspace from IndexedDB."),
-              ]);
             } else if (mounted) {
               dispatch({ type: "load_template", template: descriptor.template });
-              setTerminalEntries((previous) => [
-                ...previous,
-                makeTerminalEntry("system", `Mission loaded: ${descriptor.quest.title}`),
-              ]);
             }
 
             // Load quest progress
@@ -378,16 +382,13 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
               setBestTimeMs(progress.speedrunBestMs);
             }
           } else if (mounted) {
-            setTerminalEntries((previous) => [
-              ...previous,
-              makeTerminalEntry("error", `Unknown mission: ${missionParam}`),
-            ]);
+            setTerminalEntries((previous) => [...previous, makeTerminalEntry("error", tc("error"))]);
           }
         } else if (shareId) {
           // Load from share API
           const response = await fetch(`/api/playground/share/${shareId}`);
           if (!response.ok) {
-            throw new Error("Share not found or expired");
+            throw new Error(tc("error"));
           }
           const { bundle } = await response.json();
 
@@ -406,20 +407,33 @@ export function PlaygroundShell({ onQuestComplete }: PlaygroundShellProps) {
           // Add demo page if not present
           const demoPath = "page.tsx";
           if (!files[demoPath]) {
-            const importName = bundle.title.replace(/\s+/g, "");
             const firstFile = bundle.files[0];
-            const componentName = firstFile ? firstFile.path.replace(/\.tsx?$/, "").replace(/\//g, "_") : "Component";
+            const importPathLiteral = JSON.stringify(toSafeImportModulePath(firstFile?.path ?? null));
+            const demoTitleLiteral = JSON.stringify(`${bundle.title} Demo`);
+            const propsLiteral = JSON.stringify(bundle.defaultProps || {});
 
             files[demoPath] = {
               path: demoPath,
-              content: `import { ${importName} } from "./${componentName}";
+              content: `import * as ImportedModule from ${importPathLiteral};
+
+const ImportedComponent =
+  (ImportedModule as Record<string, unknown>).default ??
+  (ImportedModule as Record<string, unknown>)[Object.keys(ImportedModule)[0]];
+const RenderComponent = ImportedComponent as ((props: Record<string, unknown>) => JSX.Element) | null;
+const defaultProps = ${propsLiteral};
 
 export default function Demo() {
   return (
     <div className="min-h-screen bg-zinc-950 p-8">
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-8 text-2xl font-bold text-white">${bundle.title} Demo</h1>
-        <${importName} {...${JSON.stringify(bundle.defaultProps || {})}} />
+        <h1 className="mb-8 text-2xl font-bold text-white">{${demoTitleLiteral}}</h1>
+        {RenderComponent ? (
+          <RenderComponent {...defaultProps} />
+        ) : (
+          <div className="rounded border border-zinc-700 bg-zinc-900 p-4 text-zinc-300">
+            Unable to render imported component.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -430,40 +444,29 @@ export default function Demo() {
             };
           }
 
+          const openFiles = [demoPath in files ? demoPath : Object.keys(files).sort()[0]].filter(Boolean) as string[];
+          const activeFile = openFiles[0] || "";
           const workspaceFromShare: Workspace = {
             templateId: `share-${shareId}`,
             files,
-            openFiles: Object.keys(files),
-            activeFile: Object.keys(files)[0] || "",
+            openFiles,
+            activeFile,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           };
 
           if (mounted) {
             dispatch({ type: "load", workspace: workspaceFromShare });
-            setTerminalEntries((previous) => [
-              ...previous,
-              makeTerminalEntry("system", `Loaded component: ${bundle.title}`),
-              makeTerminalEntry("system", `Files: ${bundle.files.length}`),
-            ]);
           }
         } else if (snapshot) {
           const fromUrl = await deserializeSnapshot(snapshot);
           if (fromUrl && mounted) {
             dispatch({ type: "load", workspace: fromUrl });
-            setTerminalEntries((previous) => [
-              ...previous,
-              makeTerminalEntry("system", "Loaded workspace from share snapshot URL."),
-            ]);
           }
         } else {
           const saved = await loadWorkspaceFromIndexedDb(persistenceScope);
           if (saved && mounted) {
             dispatch({ type: "load", workspace: saved });
-            setTerminalEntries((previous) => [
-              ...previous,
-              makeTerminalEntry("system", "Loaded saved workspace from IndexedDB."),
-            ]);
           } else if (mounted) {
             // No saved workspace, no mission, no share — show welcome
             setShowWelcome(true);
@@ -479,7 +482,7 @@ export default function Demo() {
         }
       } catch (error) {
         if (mounted) {
-          const message = error instanceof Error ? error.message : "Failed to load persisted playground state.";
+          const message = error instanceof Error ? error.message : tc("error");
           setTerminalEntries((previous) => [...previous, makeTerminalEntry("error", message)]);
         }
       } finally {
@@ -948,7 +951,7 @@ export default function Demo() {
     const encoded = await serializeSnapshot(workspaceRef.current);
     const link = `${window.location.origin}${window.location.pathname}?w=${encoded}`;
     await navigator.clipboard.writeText(link);
-    toast.success("Share link copied");
+    toast.success(t("shareSuccess"));
   };
 
   const handleExportZip = () => {
@@ -956,7 +959,7 @@ export default function Demo() {
       downloadWorkspaceZip(workspaceRef.current);
       toast.success("Workspace exported as zip");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Export failed";
+      const message = error instanceof Error ? error.message : tc("error");
       toast.error(message);
     }
   };
@@ -968,10 +971,6 @@ export default function Demo() {
     }
 
     dispatch({ type: "load_template", template });
-    setTerminalEntries((previous) => [
-      ...previous,
-      makeTerminalEntry("system", `Template loaded: ${template.title}`),
-    ]);
   };
 
   const resetWorkspace = () => {
@@ -987,7 +986,7 @@ export default function Demo() {
 
   const handleImportGithub = async () => {
     setImportBusy(true);
-    setImportProgress({ total: 1, completed: 0, currentFile: "Starting import..." });
+    setImportProgress({ total: 1, completed: 0, currentFile: t("importing") });
     try {
       const template = await importGitHubRepositoryServer(importRepo, importBranch || undefined, {
         onProgress: (progress) => setImportProgress(progress),
@@ -997,9 +996,9 @@ export default function Demo() {
       setImportRepo("");
       setImportBranch("");
       setShowWelcome(false);
-      toast.success(`GitHub repository imported: ${template.files.length} files`);
+      toast.success(tc("success"));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "GitHub import failed";
+      const message = error instanceof Error ? error.message : tc("error");
       toast.error(message);
     } finally {
       setImportBusy(false);
@@ -1033,7 +1032,7 @@ export default function Demo() {
   const handleGitPushWithPat = async () => {
     const token = gitPushToken.trim();
     if (!token) {
-      toast.error("GitHub token is required");
+      toast.error(tc("error"));
       return;
     }
 
@@ -1042,10 +1041,10 @@ export default function Demo() {
       try {
         const parsed = new URL(remoteUrl);
         if (parsed.protocol !== "https:" || parsed.hostname !== "github.com" || parsed.username || parsed.password) {
-          throw new Error("Only https://github.com remotes are allowed");
+          throw new Error(tc("error"));
         }
       } catch {
-        toast.error("Invalid GitHub remote URL");
+        toast.error(tc("error"));
         return;
       }
     }
@@ -1093,7 +1092,7 @@ export default function Demo() {
                 ...previous,
                 gitAuth: { token: null },
               }));
-              toast.success("Cleared cached PAT from session");
+              toast.success(tc("success"));
             }}
           >
             {t("clearCachedPat")}
@@ -1113,15 +1112,15 @@ export default function Demo() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-[#c8c8c8] xl:grid-cols-4">
-        <div>Status: {runnerJobView.status}</div>
-        <div>Job: {runnerJobView.jobType ?? "--"}</div>
-        <div>Exit: {runnerJobView.exitCode ?? "--"}</div>
-        <div>Duration: {runnerJobView.durationMs !== null ? `${runnerJobView.durationMs}ms` : "--"}</div>
+        <div>{t("runnerStatusValue", { value: runnerJobView.status })}</div>
+        <div>{t("runnerJobValue", { value: runnerJobView.jobType ?? "--" })}</div>
+        <div>{t("runnerExitValue", { value: runnerJobView.exitCode ?? "--" })}</div>
+        <div>{t("runnerDurationValue", { value: runnerJobView.durationMs !== null ? `${runnerJobView.durationMs}ms` : "--" })}</div>
       </div>
       <div className="max-h-20 overflow-auto rounded border border-[#333] bg-[#171717] p-2 font-mono text-[11px] text-[#a7a7a7]">
         {runnerJobView.outputFiles.length > 0
           ? runnerJobView.outputFiles.map((path) => <p key={path}>{path}</p>)
-          : "No output files from last runner job."}
+          : t("runnerNoOutputFiles")}
       </div>
       {runnerJobView.error ? <p className="text-xs text-[#f48771]">{runnerJobView.error}</p> : null}
     </div>
@@ -1326,7 +1325,11 @@ export default function Demo() {
                 }))
               }
               speedrunEnabled={speedrunState.enabled}
-              speedrunLabel={`Timer: ${formatDuration(speedrunTimeMs)}${bestTimeMs ? ` (best ${formatDuration(bestTimeMs)})` : ""}`}
+              speedrunLabel={
+                bestTimeMs
+                  ? t("timerWithBest", { current: formatDuration(speedrunTimeMs), best: formatDuration(bestTimeMs) })
+                  : t("timerOnly", { current: formatDuration(speedrunTimeMs) })
+              }
               onToggleSpeedrun={(enabled) => {
                 setSpeedrunState((previous) => toggleSpeedrun(previous, enabled));
                 emittedQuestRef.current = false;
@@ -1420,7 +1423,7 @@ export default function Demo() {
                 }))
               }
               speedrunEnabled={speedrunState.enabled}
-              speedrunLabel={`Timer: ${formatDuration(speedrunTimeMs)}`}
+              speedrunLabel={t("timerOnly", { current: formatDuration(speedrunTimeMs) })}
               onToggleSpeedrun={(enabled) => setSpeedrunState((previous) => toggleSpeedrun(previous, enabled))}
               achievements={achievements}
               walletMode={walletMode}
@@ -1444,19 +1447,19 @@ export default function Demo() {
       <Dialog open={Boolean(confirmAction)} onOpenChange={(open) => (!open ? setConfirmAction(null) : null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{confirmAction === "reset" ? "Reset workspace" : "Load active template"}</DialogTitle>
+            <DialogTitle>{confirmAction === "reset" ? t("resetWorkspaceTitle") : t("loadActiveTemplateTitle")}</DialogTitle>
             <DialogDescription>
               {confirmAction === "reset"
-                ? "Reset the workspace and terminal state."
-                : "Reload files from the active template and replace current workspace."}
+                ? t("resetWorkspaceDescription")
+                : t("loadActiveTemplateDescription")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setConfirmAction(null)}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={onConfirmAction}>
-              Confirm
+              {tc("confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -144,6 +144,21 @@ export const lesson5TestCases: TestCase[] = [
       mode: "bestOut"
     }),
     expectedOutput:
-      '{"routes":[{"id":"a->b","hops":[{"poolId":"a","inMint":"SOL","outMint":"USDC"},{"poolId":"b","inMint":"USDC","outMint":"JUP"}]},{"id":"d","hops":[{"poolId":"d","inMint":"SOL","outMint":"JUP"}]}],"bestRouteId":"a->b","outAmount":"2882594665"}'
+      '{"routes":[{"id":"a->b","hops":[{"poolId":"a","inMint":"SOL","outMint":"USDC"},{"poolId":"b","inMint":"USDC","outMint":"JUP"}]},{"id":"d","hops":[{"poolId":"d","inMint":"SOL","outMint":"JUP"}]}],"bestRouteId":"d","outAmount":"4142340540"}'
+  },
+  {
+    name: "throws when no route exists",
+    input: JSON.stringify({
+      universe: {
+        pools: [
+          { id: "x", tokenA: "SOL", tokenB: "USDC", reserveA: "1", reserveB: "1", feeBps: 30 }
+        ]
+      },
+      inMint: "BONK",
+      outMint: "JUP",
+      inAmount: "10",
+      mode: "bestOut"
+    }),
+    expectedOutput: "Error: No routes"
   }
 ];

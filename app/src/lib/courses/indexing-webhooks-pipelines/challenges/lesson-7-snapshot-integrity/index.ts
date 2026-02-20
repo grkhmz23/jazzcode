@@ -37,4 +37,16 @@ export const lesson7TestCases: TestCase[] = [
     input: JSON.stringify({ snapshot: { balances: { alice: -4 }, appliedEventKeys: ["a"], finalizedEventKeys: ["a"] } }),
     expectedOutput: '{"ok":false,"issues":["negative balance for alice"]}',
   },
+  {
+    name: "flags finalized key missing from applied set",
+    input: JSON.stringify({
+      snapshot: {
+        balances: { alice: 1 },
+        appliedEventKeys: ["a"],
+        finalizedEventKeys: ["b"],
+      },
+    }),
+    expectedOutput:
+      '{"ok":false,"issues":["finalized event b missing from applied set"]}',
+  },
 ];

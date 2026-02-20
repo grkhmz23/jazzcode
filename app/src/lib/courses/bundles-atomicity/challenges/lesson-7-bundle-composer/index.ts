@@ -32,4 +32,10 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       '{"bundleId":"bundle-2-steps","transactions":[{"index":0,"stepIds":["approve"]},{"index":1,"stepIds":["swap"]}],"invariants":["all transactions are intended for one logical user action","bundle execution must preserve all-or-nothing user expectations","refund branch must be available if swap leg fails"]}',
   },
+  {
+    name: "composes deterministic empty bundle shape",
+    input: JSON.stringify({ flow: { steps: [] } }),
+    expectedOutput:
+      '{"bundleId":"bundle-0-steps","transactions":[],"invariants":["all transactions are intended for one logical user action","bundle execution must preserve all-or-nothing user expectations","refund branch must be available if swap leg fails"]}',
+  },
 ];

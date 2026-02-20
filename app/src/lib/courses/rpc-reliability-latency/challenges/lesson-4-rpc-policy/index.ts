@@ -35,4 +35,10 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '[{"attempt":0,"timeoutMs":900,"delayBeforeAttemptMs":0},{"attempt":1,"timeoutMs":900,"delayBeforeAttemptMs":100},{"attempt":2,"timeoutMs":900,"delayBeforeAttemptMs":200}]',
   },
+  {
+    name: "caps linear backoff delay at maxDelayMs",
+    input: JSON.stringify({ timeoutMs: 1000, maxRetries: 3, backoff: { kind: "linear", baseDelayMs: 250, maxDelayMs: 400 } }),
+    expectedOutput:
+      '[{"attempt":0,"timeoutMs":1000,"delayBeforeAttemptMs":0},{"attempt":1,"timeoutMs":1000,"delayBeforeAttemptMs":250},{"attempt":2,"timeoutMs":1000,"delayBeforeAttemptMs":400},{"attempt":3,"timeoutMs":1000,"delayBeforeAttemptMs":400}]',
+  },
 ];

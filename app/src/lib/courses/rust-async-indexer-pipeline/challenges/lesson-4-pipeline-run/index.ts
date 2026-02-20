@@ -40,4 +40,16 @@ export const lesson4TestCases: TestCase[] = [
     input: JSON.stringify({ tasks: [{ id: "a", durationTicks: 2 }, { id: "b", durationTicks: 1 }], concurrency: 1 }),
     expectedOutput: '{"totalTicks":3,"completedOrder":["a","b"]}',
   },
+  {
+    name: "parallel scheduling preserves deterministic completion order",
+    input: JSON.stringify({
+      tasks: [
+        { id: "a", durationTicks: 2 },
+        { id: "b", durationTicks: 1 },
+        { id: "c", durationTicks: 1 },
+      ],
+      concurrency: 2,
+    }),
+    expectedOutput: '{"totalTicks":2,"completedOrder":["b","c","a"]}',
+  },
 ];

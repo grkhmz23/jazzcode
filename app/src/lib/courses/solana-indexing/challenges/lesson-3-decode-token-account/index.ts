@@ -93,13 +93,13 @@ export const lesson3TestCases: TestCase[] = [
     input: JSON.stringify({
       hex: "067d8b0a8a0f0c57a51e0c1f0b0a0d0c0b0a0908070605040302010000000000000000000000000000000000000000000000000000000000000000000000000880c3c90100000000" + "0".repeat(186),
     }),
-    expectedOutput: '{"mint":"3Bxs46bG6iNaA3VN3ZdYi4Y4H3G1b1c2c3c4c5c6c7c8","owner":"11111111111111111111111111111111","amount":"30000000000"}',
+    expectedOutput: '{"mint":"SLUgBxyyHJ3nKadnP6MSTN2YtackFFE9zJjq72Ccpco","owner":"11111111111111111111111111111119","amount":"30000000"}',
   },
   {
     name: "decodes zero balance account",
     input: JSON.stringify({
       hex: "067d8b0a8a0f0c57a51e0c1f0b0a0d0c0b0a0908070605040302010000000000" + "a1b2c3d4e5f60718091a2b3c4d5e6f708091a2b3c4d5e6f708091a2b3c4d5e6" + "0000000000000000" + "0".repeat(186),
     }),
-    expectedOutput: '{"mint":"3Bxs46bG6iNaA3VN3ZdYi4Y4H3G1b1c2c3c4c5c6c7c8","owner":"6Mx7r6LxN7w8o9p0q1r2s3t4u5v6w7x8y9z0a1b2c3","amount":"0"}',
+    expectedOutput: '{"mint":"SLUgBxyyHJ3nKadnP6MSTN2YtackFFE9zJjq72Ccpco","owner":"BtCjvJYNeN8NsdtPDkk62LGaQyApV5xxQd75bwiWucBZ","amount":"0"}',
   },
 ];

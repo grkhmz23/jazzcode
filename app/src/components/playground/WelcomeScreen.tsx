@@ -68,7 +68,7 @@ export function WelcomeScreen({
         {templates.length > 0 && (
           <div className="space-y-3">
             <h2 className="text-sm font-medium uppercase tracking-wide text-[#9d9d9d]">
-              Templates
+              {t("templates")}
             </h2>
             <div className="grid gap-2 sm:grid-cols-2">
               {templates.map((template) => (

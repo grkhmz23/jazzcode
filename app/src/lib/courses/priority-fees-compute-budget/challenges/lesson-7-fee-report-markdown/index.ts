@@ -32,4 +32,10 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       "# Fee Strategy\\n\\n- Confirmation: confirmed\\n- Compute units: 220000\\n- Priority fee: 1800 micro-lamports/CU\\n- Confidence: medium",
   },
+  {
+    name: "renders markdown for conservative policy",
+    input: JSON.stringify({ confirmationLevel: "finalized", units: 140000, microLamports: 900, confidence: "high" }),
+    expectedOutput:
+      "# Fee Strategy\\n\\n- Confirmation: finalized\\n- Compute units: 140000\\n- Priority fee: 900 micro-lamports/CU\\n- Confidence: high",
+  },
 ];

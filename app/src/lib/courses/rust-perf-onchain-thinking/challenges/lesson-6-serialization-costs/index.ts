@@ -28,4 +28,9 @@ export const lesson6TestCases: TestCase[] = [
     input: JSON.stringify({ passes: 4, encodeBytes: 30, decodeBytes: 20 }),
     expectedOutput: '{"repeatedBytes":200,"optimizedBytes":50,"bytesSaved":150}',
   },
+  {
+    name: "shows zero savings when only one pass runs",
+    input: JSON.stringify({ passes: 1, encodeBytes: 10, decodeBytes: 5 }),
+    expectedOutput: '{"repeatedBytes":15,"optimizedBytes":15,"bytesSaved":0}',
+  },
 ];

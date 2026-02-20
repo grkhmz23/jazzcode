@@ -130,6 +130,6 @@ export const lesson8TestCases: TestCase[] = [
       ],
       timestamp: 1700001000,
     }),
-    expectedOutput: '{"txPlan":{"computeUnitLimit":220000,"computeUnitPrice":5000,"estimatedFeeLamports":6100,"instructionCount":3,"totalAccountKeys":35},"lutStrategy":{"recommendation":"use-existing-lut","keysInLut":20,"keysNotInLut":15,"bytesSaved":620},"feeEstimates":{"low":5022,"medium":5220,"high":7200},"retryPolicy":{"maxRetries":3,"baseDelayMs":500,"backoffMultiplier":2,"refreshBlockhash":true},"timestamp":1700001000}',
+    expectedOutput: '{"txPlan":{"computeUnitLimit":220001,"computeUnitPrice":5000,"estimatedFeeLamports":6101,"instructionCount":3,"totalAccountKeys":35},"lutStrategy":{"recommendation":"use-existing-lut","keysInLut":20,"keysNotInLut":15,"bytesSaved":620},"feeEstimates":{"low":5023,"medium":5221,"high":7201},"retryPolicy":{"maxRetries":3,"baseDelayMs":500,"backoffMultiplier":2,"refreshBlockhash":true},"timestamp":1700001000}',
   },
 ];

@@ -92,25 +92,16 @@ export async function runChallengeTests(
  * Basic static analysis for common attack vectors
  */
 export function validateCode(code: string): { valid: boolean; error?: string } {
-  // Check for import statements that could try to load external scripts
+  // Keep client-side preflight aligned with server-side sandbox validation.
   const dangerousPatterns = [
-    { pattern: /import\s*\(/, message: "Dynamic imports are not allowed" },
-    { pattern: /import\s+.*\s+from\s+['"]/, message: "Module imports are not allowed" },
-    { pattern: /require\s*\(/, message: "CommonJS requires are not allowed" },
-    { pattern: /eval\s*\(/, message: "eval() is not allowed" },
-    { pattern: /Function\s*\(/, message: "Function constructor is not allowed" },
-    { pattern: /setInterval\s*\(/, message: "setInterval is not allowed (use setTimeout instead)" },
-    { pattern: /Worker\s*\(/, message: "Creating Workers is not allowed" },
-    { pattern: /fetch\s*\(/, message: "fetch() is not allowed" },
-    { pattern: /XMLHttpRequest/, message: "XMLHttpRequest is not allowed" },
-    { pattern: /WebSocket\s*\(/, message: "WebSocket is not allowed" },
-    { pattern: /\.\s*constructor\s*\(/, message: "Constructor escape patterns are not allowed" },
-    { pattern: /\[\s*["']constructor["']\s*\]\s*\(/, message: "Constructor escape patterns are not allowed" },
-    { pattern: /localStorage/, message: "localStorage access is not allowed" },
-    { pattern: /sessionStorage/, message: "sessionStorage access is not allowed" },
-    { pattern: /indexedDB/, message: "indexedDB access is not allowed" },
-    { pattern: /document\./, message: "DOM access is not allowed" },
-    { pattern: /window\./, message: "Window access is not allowed" },
+    { pattern: /\beval\s*\(/i, message: "eval() is not allowed" },
+    { pattern: /\bFunction\s*\(/, message: "Function constructor is not allowed" },
+    { pattern: /\bfetch\s*\(/i, message: "fetch() is not allowed" },
+    { pattern: /\bXMLHttpRequest\b/i, message: "XMLHttpRequest is not allowed" },
+    { pattern: /\bimportScripts\s*\(/i, message: "importScripts is not allowed" },
+    { pattern: /\bWebSocket\s*\(/i, message: "WebSocket is not allowed" },
+    { pattern: /\.\s*constructor\s*\(/i, message: "Constructor escape pattern is not allowed" },
+    { pattern: /\[\s*["']constructor["']\s*\]\s*\(/i, message: "Constructor escape pattern is not allowed" },
   ];
 
   for (const { pattern, message } of dangerousPatterns) {

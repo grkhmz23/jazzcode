@@ -26,4 +26,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"json":"{\\"totalTicks\\":6,\\"completedOrder\\":[\\"a\\",\\"b\\"]}","markdown":"# Async Pipeline Run Report\\n\\n- Total ticks: 6\\n- Completed tasks: a, b"}',
   },
+  {
+    name: "exports report for empty completion list",
+    input: JSON.stringify({ totalTicks: 0, completedOrder: [] }),
+    expectedOutput:
+      '{"json":"{\\"totalTicks\\":0,\\"completedOrder\\":[]}","markdown":"# Async Pipeline Run Report\\n\\n- Total ticks: 0\\n- Completed tasks: "}',
+  },
 ];

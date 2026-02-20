@@ -54,4 +54,60 @@ describe("course translation quality gates", () => {
       expect(titleDiffCount).toBeGreaterThanOrEqual(Math.ceil(courses.length * 0.5));
     }
   });
+
+  it("keeps most lesson content localized away from raw English", () => {
+    for (const locale of nonDefaultLocales) {
+      const localizedMap = courseTranslationsByLocale[locale];
+      let lessonContentTotal = 0;
+      let lessonContentDiffCount = 0;
+
+      for (const course of courses) {
+        const localizedCourse = localizedMap[course.slug];
+        for (const moduleItem of course.modules) {
+          const localizedModule = localizedCourse?.modules?.[moduleItem.id];
+          for (const lesson of moduleItem.lessons) {
+            lessonContentTotal += 1;
+            const localizedLesson =
+              localizedModule?.lessons?.[lesson.id] ?? localizedModule?.lessons?.[lesson.slug];
+            const localizedContent = normalize(localizedLesson?.content ?? "");
+            const englishContent = normalize(lesson.content);
+
+            if (localizedContent !== "" && localizedContent !== englishContent) {
+              lessonContentDiffCount += 1;
+            }
+          }
+        }
+      }
+
+      expect(lessonContentDiffCount).toBeGreaterThanOrEqual(Math.ceil(lessonContentTotal * 0.85));
+    }
+  });
+
+  it("keeps a minimum localized lesson-title baseline per locale", () => {
+    for (const locale of nonDefaultLocales) {
+      const localizedMap = courseTranslationsByLocale[locale];
+      let lessonTitleTotal = 0;
+      let lessonTitleDiffCount = 0;
+
+      for (const course of courses) {
+        const localizedCourse = localizedMap[course.slug];
+        for (const moduleItem of course.modules) {
+          const localizedModule = localizedCourse?.modules?.[moduleItem.id];
+          for (const lesson of moduleItem.lessons) {
+            lessonTitleTotal += 1;
+            const localizedLesson =
+              localizedModule?.lessons?.[lesson.id] ?? localizedModule?.lessons?.[lesson.slug];
+            const localizedTitle = normalize(localizedLesson?.title ?? "");
+            const englishTitle = normalize(lesson.title);
+
+            if (localizedTitle !== "" && localizedTitle !== englishTitle) {
+              lessonTitleDiffCount += 1;
+            }
+          }
+        }
+      }
+
+      expect(lessonTitleDiffCount).toBeGreaterThanOrEqual(Math.ceil(lessonTitleTotal * 0.35));
+    }
+  });
 });

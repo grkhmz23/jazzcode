@@ -219,29 +219,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       return <EditorLoading height={height} />;
     }
 
-    if (editorFailed && !editorReady) {
-      return (
-        <div className="relative h-full w-full overflow-hidden rounded-md border">
-          <div className="border-b bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            {t("monacoFailedFallback")}
-          </div>
-          <textarea
-            className="h-[calc(100%-2.25rem)] w-full resize-none bg-background p-3 font-mono text-sm outline-none"
-            value={fallbackValue}
-            onChange={(event) => {
-              const next = event.target.value;
-              setFallbackValue(next);
-              currentValueRef.current = next;
-              onChange?.(next);
-            }}
-            readOnly={readOnly}
-            spellCheck={false}
-            aria-label={t("fallbackCodeEditorAriaLabel")}
-          />
-        </div>
-      );
-    }
-
     return (
       <div className="relative h-full w-full overflow-hidden rounded-md border">
         <MonacoEditor
@@ -255,6 +232,26 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           onMount={handleEditorDidMount}
           loading={<EditorLoading height={height} />}
         />
+        {editorFailed && !editorReady && (
+          <div className="absolute inset-0 z-10 bg-background">
+            <div className="border-b bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              {t("monacoFailedFallback")}
+            </div>
+            <textarea
+              className="h-[calc(100%-2.25rem)] w-full resize-none bg-background p-3 font-mono text-sm outline-none"
+              value={fallbackValue}
+              onChange={(event) => {
+                const next = event.target.value;
+                setFallbackValue(next);
+                currentValueRef.current = next;
+                onChange?.(next);
+              }}
+              readOnly={readOnly}
+              spellCheck={false}
+              aria-label={t("fallbackCodeEditorAriaLabel")}
+            />
+          </div>
+        )}
       </div>
     );
   }

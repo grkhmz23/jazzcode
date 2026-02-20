@@ -34,4 +34,17 @@ export const lesson7TestCases: TestCase[] = [
     expectedOutput:
       "# Invariant Evidence Report\\n\\n- Total steps: 1\\n- Failures: 0\\n- Status: PASS\\n- [pass] s1 @100: check -> ok",
   },
+  {
+    name: "formats FAIL report when at least one step fails",
+    input: JSON.stringify({
+      chain: {
+        steps: [
+          { id: "s1", atMs: 100, action: "check", status: "pass", detail: "ok" },
+          { id: "s2", atMs: 120, action: "check", status: "fail", detail: "overflow" },
+        ],
+      },
+    }),
+    expectedOutput:
+      "# Invariant Evidence Report\\n\\n- Total steps: 2\\n- Failures: 1\\n- Status: FAIL\\n- [pass] s1 @100: check -> ok\\n- [fail] s2 @120: check -> overflow",
+  },
 ];

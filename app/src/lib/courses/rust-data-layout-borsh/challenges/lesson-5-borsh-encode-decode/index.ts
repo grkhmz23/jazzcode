@@ -34,4 +34,9 @@ export const lesson5TestCases: TestCase[] = [
     input: JSON.stringify({ value: { name: "sol", level: 7 } }),
     expectedOutput: '{"bytes":[3,0,0,0,115,111,108,7],"decoded":{"name":"sol","level":7}}',
   },
+  {
+    name: "supports empty string payloads",
+    input: JSON.stringify({ value: { name: "", level: 5 } }),
+    expectedOutput: '{"bytes":[0,0,0,0,5],"decoded":{"name":"","level":5}}',
+  },
 ];

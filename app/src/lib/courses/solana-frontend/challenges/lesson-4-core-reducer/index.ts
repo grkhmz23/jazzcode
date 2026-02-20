@@ -105,6 +105,16 @@ export const lesson4TestCases: TestCase[] = [
       ]
     }),
     expectedOutput:
-      '{"owners":{"OWNER":{"lamports":"0","balances":{"MINT_A":"100"},"atas":{"MINT_A":"ATA_A"}}},"mints":{"MINT_A":{"symbol":"TOK","decimals":6}},"eventsApplied":{"m1":true,"a1":true,"x1":true,"c1":true},"eventsCorrected":{"x1":true},"history":[{"id":"m1","ts":1,"type":"CreateMint","summary":"Created mint TOK"},{"id":"a1","ts":2,"type":"CreateAta","summary":"Created ATA ATA_A"},{"id":"x1","ts":3,"type":"MintTo","summary":"Minted 100 to OWNER"},{"id":"c1","ts":4,"type":"Correction","summary":"Correction for x1"}]}'
+      '{"owners":{"OWNER":{"lamports":"0","balances":{"MINT_A":"0"},"atas":{"MINT_A":"ATA_A"}}},"mints":{"MINT_A":{"symbol":"TOK","decimals":6}},"eventsApplied":{"m1":true,"a1":true,"x1":true,"c1":true},"eventsCorrected":{"x1":true},"history":[{"id":"m1","ts":1,"type":"CreateMint","summary":"Created mint TOK"},{"id":"a1","ts":2,"type":"CreateAta","summary":"Created ATA ATA_A"},{"id":"x1","ts":3,"type":"MintTo","summary":"Corrected event skipped: x1"},{"id":"c1","ts":4,"type":"Correction","summary":"Correction for x1"}]}'
+  },
+  {
+    name: "unknown events are no-ops but remain idempotently tracked",
+    input: JSON.stringify({
+      events: [
+        { type: "Unknown", id: "u1", ts: 10 }
+      ]
+    }),
+    expectedOutput:
+      '{"owners":{},"mints":{},"eventsApplied":{"u1":true},"eventsCorrected":{},"history":[]}'
   }
 ];

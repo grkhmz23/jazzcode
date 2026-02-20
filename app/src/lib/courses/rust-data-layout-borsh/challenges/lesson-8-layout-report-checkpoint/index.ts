@@ -25,4 +25,10 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"json":"{\\"fields\\":[{\\"name\\":\\"flag\\",\\"offset\\":0}],\\"totalSize\\":16,\\"structAlign\\":8,\\"trailingPadding\\":0}","markdown":"# Account Layout Report\\n\\n- Total size: 16\\n- Struct align: 8"}',
   },
+  {
+    name: "exports deterministic report for alternate layout",
+    input: JSON.stringify({ fields: [{ name: "tag", offset: 0 }, { name: "amount", offset: 8 }], totalSize: 24, structAlign: 8, trailingPadding: 0 }),
+    expectedOutput:
+      '{"json":"{\\"fields\\":[{\\"name\\":\\"tag\\",\\"offset\\":0},{\\"name\\":\\"amount\\",\\"offset\\":8}],\\"totalSize\\":24,\\"structAlign\\":8,\\"trailingPadding\\":0}","markdown":"# Account Layout Report\\n\\n- Total size: 24\\n- Struct align: 8"}',
+  },
 ];

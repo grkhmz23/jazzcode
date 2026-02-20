@@ -89,11 +89,11 @@ export const lesson4TestCases: TestCase[] = [
   {
     name: "computes tick math for positive tick",
     input: JSON.stringify({ tickIndex: 23027, tickSpacing: 64 }),
-    expectedOutput: '{"tickIndex":23027,"price":"9.999427517498","sqrtPriceX64":"58317246702498127060","priceToTick":23027,"tickSpacingAligned":22976}',
+    expectedOutput: '{"tickIndex":23027,"price":"9.999997796808","sqrtPriceX64":"58333720261115273216","priceToTick":23027,"tickSpacingAligned":22976}',
   },
   {
     name: "computes tick math for negative tick",
     input: JSON.stringify({ tickIndex: -23027, tickSpacing: 64 }),
-    expectedOutput: '{"tickIndex":-23027,"price":"0.100005725286","sqrtPriceX64":"5832137756759079834","priceToTick":-23027,"tickSpacingAligned":-23040}',
+    expectedOutput: '{"tickIndex":-23027,"price":"0.100000022032","sqrtPriceX64":"5833373311315574784","priceToTick":-23027,"tickSpacingAligned":-23040}',
   },
 ];

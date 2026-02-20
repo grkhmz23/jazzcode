@@ -46,4 +46,9 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '{"steps":[{"id":"approve","kind":"approval","dependsOn":[],"idempotent":true},{"id":"swap","kind":"swap","dependsOn":["approve"],"idempotent":true}],"edges":[{"from":"approve","to":"swap"}]}',
   },
+  {
+    name: "handles empty flow input deterministically",
+    input: JSON.stringify({ steps: [] }),
+    expectedOutput: '{"steps":[],"edges":[]}',
+  },
 ];

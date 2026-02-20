@@ -44,4 +44,13 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       '{"course":"solana-security","version":"v2","scenarios":["signer-missing","owner-missing","pda-spoof"],"findings":3}',
   },
+  {
+    name: "builds empty checkpoint payload with zero findings",
+    input: JSON.stringify({
+      scenarioIds: [],
+      findingsCount: 0,
+    }),
+    expectedOutput:
+      '{"course":"solana-security","version":"v2","scenarios":[],"findings":0}',
+  },
 ];

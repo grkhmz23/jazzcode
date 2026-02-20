@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Download, FolderUp, Github, Upload, FileDown, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -129,9 +130,7 @@ export function PlaygroundTopBar({
       }
       
       if (errors.length > 0) {
-        console.error("Import errors:", errors);
-        // Show the first error to the user
-        alert(`Import errors:\n${errors.slice(0, 3).join("\n")}${errors.length > 3 ? `\n... and ${errors.length - 3} more` : ""}`);
+        toast.error(`${errors.slice(0, 3).join(" | ")}${errors.length > 3 ? ` | +${errors.length - 3} more` : ""}`);
       }
       
       if (entries.length > 0) {
@@ -164,7 +163,7 @@ export function PlaygroundTopBar({
       }
 
       if (errors.length > 0) {
-        console.error("Folder import errors:", errors);
+        toast.error(`${errors.slice(0, 3).join(" | ")}${errors.length > 3 ? ` | +${errors.length - 3} more` : ""}`);
       }
 
       if (entries.length > 0) {

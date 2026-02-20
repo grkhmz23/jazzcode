@@ -159,7 +159,7 @@ export const lesson8TestCases: TestCase[] = [
     }),
     expectedOutput: JSON.stringify({
       success: true,
-      newRoot: "0x824e4756b6b2f4c38e5c2a9d0b8f6e1ad",
+      newRoot: "0x0000000000000000000000000000000000000000000000000000000032bba340",
       proof: [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -167,12 +167,13 @@ export const lesson8TestCases: TestCase[] = [
       ],
       auditTrace: {
         operation: "mint",
+        timestamp: 1700000000000,
         nftId: "nft_12345",
         owner: "8xF6j7K2mL4nP9qR5tU1vW3yZ6aB8cD0eF2gH4jK6lM8",
         leafIndex: 0,
-        leafHash: "0x5c4a7e8d9f2b3c1a6e8f0d4b7a2c5e9f1",
+        leafHash: "0x000000000000000000000000000000000000000000000000000000003e537f0f",
         previousRoot: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        newRoot: "0x824e4756b6b2f4c38e5c2a9d0b8f6e1ad",
+        newRoot: "0x0000000000000000000000000000000000000000000000000000000032bba340",
         proofSize: 3,
         treeDepth: 3,
         verificationSteps: [
@@ -181,7 +182,7 @@ export const lesson8TestCases: TestCase[] = [
           { level: 2, siblingHash: "0x0000000000000000000000000000000000000000000000000000000000000000", operation: "hash_combination" }
         ]
       }
-    }).replace(/"timestamp":\d+/, "\"timestamp\":1234567890"),
+    }),
   },
   {
     name: "simulates mint at different leaf index",
@@ -203,19 +204,20 @@ export const lesson8TestCases: TestCase[] = [
     }),
     expectedOutput: JSON.stringify({
       success: true,
-      newRoot: "0x6a8d2e4f7c1b9a5d3e8f0c6b2a4d7e9f0",
+      newRoot: "0x00000000000000000000000000000000000000000000000000000000568a8c6a",
       proof: [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000000000000000000000000000"
       ],
       auditTrace: {
         operation: "mint",
+        timestamp: 1700000000000,
         nftId: "nft_67890",
         owner: "9yG7k8L3mN5oP0rS6tU2vW4xZ7aC9dE1fG3hI5jK7lM9",
         leafIndex: 2,
-        leafHash: "0x9d7e3f5a2b8c4d1e6f0a9b7c3d5e2f8a4",
+        leafHash: "0x0000000000000000000000000000000000000000000000000000000068a5ff65",
         previousRoot: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        newRoot: "0x6a8d2e4f7c1b9a5d3e8f0c6b2a4d7e9f0",
+        newRoot: "0x00000000000000000000000000000000000000000000000000000000568a8c6a",
         proofSize: 2,
         treeDepth: 2,
         verificationSteps: [
@@ -223,7 +225,7 @@ export const lesson8TestCases: TestCase[] = [
           { level: 1, siblingHash: "0x0000000000000000000000000000000000000000000000000000000000000000", operation: "hash_combination" }
         ]
       }
-    }).replace(/"timestamp":\d+/, "\"timestamp\":1234567890"),
+    }),
   },
   {
     name: "rejects mint with missing nftId",

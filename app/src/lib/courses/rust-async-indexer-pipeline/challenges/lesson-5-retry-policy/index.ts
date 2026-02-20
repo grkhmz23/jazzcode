@@ -27,4 +27,9 @@ export const lesson5TestCases: TestCase[] = [
     input: JSON.stringify({ maxRetries: 3, baseDelayTicks: 2, backoff: "exponential", maxDelayTicks: 10 }),
     expectedOutput: '[2,4,8]',
   },
+  {
+    name: "builds capped linear retry schedule",
+    input: JSON.stringify({ maxRetries: 4, baseDelayTicks: 3, backoff: "linear", maxDelayTicks: 7 }),
+    expectedOutput: '[3,6,7,7]',
+  },
 ];

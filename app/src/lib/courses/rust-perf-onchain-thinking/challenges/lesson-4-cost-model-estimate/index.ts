@@ -30,4 +30,10 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '{"allocationsCost":36,"cloneCost":24,"hashCost":22,"loopCost":20,"mapLookupCost":20,"serializationCost":21,"totalCost":143}',
   },
+  {
+    name: "returns zero cost for empty workload",
+    input: JSON.stringify({ allocations: 0, clones: 0, hashBytes: 0, loopIterations: 0, mapLookups: 0, encodeBytes: 0, decodeBytes: 0 }),
+    expectedOutput:
+      '{"allocationsCost":0,"cloneCost":0,"hashCost":0,"loopCost":0,"mapLookupCost":0,"serializationCost":0,"totalCost":0}',
+  },
 ];

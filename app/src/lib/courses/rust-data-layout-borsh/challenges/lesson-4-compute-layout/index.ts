@@ -46,4 +46,9 @@ export const lesson4TestCases: TestCase[] = [
     expectedOutput:
       '{"fields":[{"name":"flag","offset":0,"size":1,"align":1,"paddingBefore":0},{"name":"amount","offset":8,"size":8,"align":8,"paddingBefore":7}],"totalSize":16,"structAlign":8,"trailingPadding":0}',
   },
+  {
+    name: "throws on unsupported field type",
+    input: JSON.stringify({ fields: [{ name: "memo", type: "string" }] }),
+    expectedOutput: "Error: unsupported type",
+  },
 ];

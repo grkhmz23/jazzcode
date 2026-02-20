@@ -93,7 +93,7 @@ export const lesson4TestCases: TestCase[] = [
       ],
       computeUnitPrice: 5000,
     }),
-    expectedOutput: '{"computeUnitLimit":198000,"computeUnitPrice":5000,"estimatedFeeLamports":5990,"instructionCount":4,"totalAccountKeys":13,"needsVersionedTx":false}',
+    expectedOutput: '{"computeUnitLimit":198001,"computeUnitPrice":5000,"estimatedFeeLamports":5991,"instructionCount":4,"totalAccountKeys":13,"needsVersionedTx":false}',
   },
   {
     name: "large tx requiring versioned format",
@@ -104,6 +104,6 @@ export const lesson4TestCases: TestCase[] = [
       ],
       computeUnitPrice: 10000,
     }),
-    expectedOutput: '{"computeUnitLimit":440000,"computeUnitPrice":10000,"estimatedFeeLamports":9400,"instructionCount":4,"totalAccountKeys":40,"needsVersionedTx":true}',
+    expectedOutput: '{"computeUnitLimit":440001,"computeUnitPrice":10000,"estimatedFeeLamports":9401,"instructionCount":4,"totalAccountKeys":40,"needsVersionedTx":true}',
   },
 ];

@@ -32,4 +32,9 @@ export const lesson8TestCases: TestCase[] = [
     expectedOutput:
       "# Generated Safety Report\\n\\n- Status: FAIL\\n- Failure count: 1\\n- [owner] vault: owner mismatch",
   },
+  {
+    name: "renders PASS report with no failures",
+    input: JSON.stringify({ result: { ok: true, failures: [] } }),
+    expectedOutput: "# Generated Safety Report\\n\\n- Status: PASS\\n- Failure count: 0",
+  },
 ];

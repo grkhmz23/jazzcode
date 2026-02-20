@@ -226,7 +226,7 @@ export function generateStructuralChecks(solution: string): StructuralCheck[] {
       name: `Function "${fnName}" defined`,
       description: `Your code should define a function called "${fnName}"`,
       check: (code) => {
-        const regex = new RegExp(`\\bfn\\s+${fnName}\\s*\\(`, "i");
+        const regex = new RegExp(`\\bfn\\s+${fnName}(?:\\s*<[^>]*>)?\\s*\\(`, "i");
         return regex.test(code);
       },
     });
