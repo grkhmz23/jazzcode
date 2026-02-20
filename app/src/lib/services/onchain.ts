@@ -1,5 +1,6 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
+import { logger } from "@/lib/logging/logger";
 
 // These are exported for testing purposes
 export const SOLANA_RPC =
@@ -65,7 +66,10 @@ export async function getOnChainXP(
       };
     }
   } catch (error) {
-    console.error("Failed to fetch on-chain XP:", error);
+    logger.error("Failed to fetch on-chain XP", {
+      walletAddress,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
@@ -139,7 +143,7 @@ export async function getCredentials(
   }
 
   if (!isValidWalletAddress(walletAddress)) {
-    console.error("Invalid wallet address format:", walletAddress);
+    logger.warn("Invalid wallet address format", { walletAddress });
     return [];
   }
 
@@ -167,7 +171,11 @@ export async function getCredentials(
     );
 
     if (!response.ok) {
-      console.error("Helius API error:", response.status, response.statusText);
+      logger.error("Helius API error", {
+        status: response.status,
+        statusText: response.statusText,
+        operation: "getAssetsByOwner",
+      });
       return [];
     }
 
@@ -226,7 +234,10 @@ export async function getCredentials(
 
     return credentials;
   } catch (error) {
-    console.error("Failed to fetch credentials:", error);
+    logger.error("Failed to fetch credentials", {
+      walletAddress,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }
@@ -285,7 +296,11 @@ export async function getOnChainLeaderboard(): Promise<OnChainLeaderboardEntry[]
     );
 
     if (!response.ok) {
-      console.error("Helius API error:", response.status, response.statusText);
+      logger.error("Helius API error", {
+        status: response.status,
+        statusText: response.statusText,
+        operation: "getTokenAccounts",
+      });
       return [];
     }
 
@@ -302,7 +317,9 @@ export async function getOnChainLeaderboard(): Promise<OnChainLeaderboardEntry[]
       }))
       .sort((a, b) => b.xpBalance - a.xpBalance);
   } catch (error) {
-    console.error("Failed to fetch on-chain leaderboard:", error);
+    logger.error("Failed to fetch on-chain leaderboard", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }
@@ -339,6 +356,10 @@ export async function verifyCredentialOwnership(
     return { verified: false, currentOwner: null };
   }
 
+  if (!isValidWalletAddress(assetId) || !isValidWalletAddress(expectedOwner)) {
+    return { verified: false, currentOwner: null };
+  }
+
   try {
     const response = await fetch(
       `https://devnet.helius-rpc.com/?api-key=${heliusApiKey}`,
@@ -355,7 +376,11 @@ export async function verifyCredentialOwnership(
     );
 
     if (!response.ok) {
-      console.error("Helius API error:", response.status, response.statusText);
+      logger.error("Helius API error", {
+        status: response.status,
+        statusText: response.statusText,
+        operation: "getAsset",
+      });
       return { verified: false, currentOwner: null };
     }
 
@@ -367,7 +392,11 @@ export async function verifyCredentialOwnership(
       currentOwner,
     };
   } catch (error) {
-    console.error("Failed to verify credential:", error);
+    logger.error("Failed to verify credential", {
+      assetId,
+      expectedOwner,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return { verified: false, currentOwner: null };
   }
 }

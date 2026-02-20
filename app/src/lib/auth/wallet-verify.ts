@@ -2,6 +2,7 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { prisma } from "@/lib/db/client";
 import { createWalletSignInMessage } from "@/lib/auth/wallet-message";
+import { logger } from "@/lib/logging/logger";
 
 /**
  * Verify an ed25519 signature for wallet authentication
@@ -45,7 +46,9 @@ export function verifyWalletSignature(
     return isValid;
   } catch (error) {
     // Any error (malformed address, invalid signature, etc.) returns false
-    console.error("Wallet signature verification error:", error);
+    logger.warn("Wallet signature verification error", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return false;
   }
 }

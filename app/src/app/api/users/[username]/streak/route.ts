@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { getProgressService } from "@/lib/services/progress-factory";
-import { logger } from "@/lib/logging/logger";
+import { Errors, handleApiError } from "@/lib/api/errors";
 
 interface StreakResponse {
   currentStreak: number;
@@ -29,18 +29,12 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      throw Errors.notFound("User not found");
     }
 
     // Only show streak for public profiles
     if (!user.isPublic) {
-      return NextResponse.json(
-        { error: "User profile is private" },
-        { status: 403 }
-      );
+      throw Errors.forbidden("User profile is private");
     }
 
     // Get streak data using progress service
@@ -56,10 +50,6 @@ export async function GET(
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    logger.error("Failed to get user streak", { username: params.username, error });
-    return NextResponse.json(
-      { error: "Failed to fetch streak data" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

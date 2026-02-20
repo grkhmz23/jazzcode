@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { AchievementEngine } from "@/lib/services/achievements";
 import { getCredentials } from "@/lib/services/onchain";
+import { Errors, handleApiError } from "@/lib/api/errors";
 
 interface RouteContext {
   params: { username: string };
@@ -28,7 +29,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      throw Errors.notFound("Profile not found");
     }
 
     const [wallets, achievements, xpRecord] = await Promise.all([
@@ -75,10 +76,6 @@ export async function GET(
       })),
     });
   } catch (error) {
-    console.error("Failed to load public profile", error);
-    return NextResponse.json(
-      { error: "Failed to load public profile" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -400,7 +400,7 @@ export function handleSolanaKeygen(
 export function handleSolanaCommand(
   parsed: ParsedCommand,
   state: SimulationState,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line no-unused-vars
   _fs: DirectoryNode
 ): CommandExecutionResult {
   const subcommand = parsed.positional[0];

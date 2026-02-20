@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { retrieveBundle } from "@/lib/playground/share-store";
+import { Errors, handleApiError } from "@/lib/api/errors";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -15,28 +16,19 @@ export async function GET(request: Request, { params }: RouteParams) {
     const { id } = await params;
 
     if (!id || id.length > 100) {
-      return NextResponse.json(
-        { error: "Invalid share ID" },
-        { status: 400 }
-      );
+      throw Errors.badRequest("Invalid share ID");
     }
 
     // Sanitize ID
     const sanitizedId = id.replace(/[^a-zA-Z0-9_\-]/g, "");
     if (sanitizedId !== id) {
-      return NextResponse.json(
-        { error: "Invalid share ID format" },
-        { status: 400 }
-      );
+      throw Errors.badRequest("Invalid share ID format");
     }
 
     const result = await retrieveBundle(sanitizedId);
 
     if (!result) {
-      return NextResponse.json(
-        { error: "Share not found or expired" },
-        { status: 404 }
-      );
+      throw Errors.notFound("Share not found or expired");
     }
 
     return NextResponse.json({
@@ -44,11 +36,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       expiresAt: result.expiresAt.toISOString(),
     });
   } catch (error) {
-    console.error("Failed to retrieve share:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

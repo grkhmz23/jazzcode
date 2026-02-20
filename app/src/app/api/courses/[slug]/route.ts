@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getContentService } from '@/lib/services/content-factory';
 import { defaultLocale, locales, type Locale } from '@/lib/i18n/routing';
+import { Errors, handleApiError } from "@/lib/api/errors";
+
+export const dynamic = "force-dynamic";
 
 interface RouteParams {
   params: {
@@ -27,18 +30,11 @@ export async function GET(
     const course = await service.getCourse(params.slug, locale);
 
     if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      );
+      throw Errors.notFound("Course not found");
     }
 
     return NextResponse.json({ course });
   } catch (error) {
-    console.error('Failed to fetch course:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch course' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

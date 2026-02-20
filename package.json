@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "lint": "pnpm -C app lint",
+    "lint:console-guard": "pnpm -C app lint:console-guard",
     "typecheck": "pnpm -C app typecheck",
     "test": "pnpm -C app test",
     "build": "pnpm -C app build",

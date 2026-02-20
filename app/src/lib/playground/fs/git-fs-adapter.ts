@@ -129,12 +129,12 @@ export function createGitFsAdapter(
         return Array.from(entries).sort();
       },
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line no-unused-vars
       async mkdir(filepath: string): Promise<void> {
         // No-op for virtual FS — directories are implicit
       },
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line no-unused-vars
       async rmdir(filepath: string): Promise<void> {
         // No-op for virtual FS
       },

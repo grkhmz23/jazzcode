@@ -21,9 +21,7 @@ function getAsyncStorage() {
   if (typeof window !== "undefined") return undefined;
   if (!asyncStorage) {
     // Only import in Node.js environment
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { AsyncLocalStorage } = require("async_hooks");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     asyncStorage = new (AsyncLocalStorage as any)();
   }
   return asyncStorage;

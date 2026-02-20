@@ -1,6 +1,21 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "next/typescript"
+  "extends": ["next/core-web-vitals"],
+  "overrides": [
+    {
+      "files": ["src/app/api/**/*.ts", "src/lib/**/*.{ts,tsx}"],
+      "excludedFiles": [
+        "src/lib/analytics/**",
+        "src/lib/courses/**",
+        "src/lib/data/**",
+        "src/lib/devlab/**",
+        "src/lib/env.ts",
+        "src/lib/playground/**",
+        "src/lib/workbench/**",
+        "src/lib/workspace/**"
+      ],
+      "rules": {
+        "no-console": "error"
+      }
+    }
   ]
 }

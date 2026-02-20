@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getContentService } from '@/lib/services/content-factory';
 import { defaultLocale, locales, type Locale } from '@/lib/i18n/routing';
+import { handleApiError } from "@/lib/api/errors";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/courses
@@ -18,10 +21,6 @@ export async function GET(request: Request): Promise<Response> {
     const courses = await service.getCourses(locale);
     return NextResponse.json({ courses });
   } catch (error) {
-    console.error('Failed to fetch courses:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch courses' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
