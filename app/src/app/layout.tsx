@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     description: "Interactive Solana Developer Education Platform",
     type: "website",
   },
+  icons: {
+    icon: "/jazzcode-logo.png",
+    shortcut: "/jazzcode-logo.png",
+    apple: "/jazzcode-logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -4,7 +4,8 @@ import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Code2, Menu, X, LogOut, User, Settings, LayoutDashboard, Globe } from "lucide-react";
+import { Menu, X, LogOut, User, Settings, LayoutDashboard, Globe } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { WalletButton } from "@/components/auth/WalletButton";
@@ -51,9 +52,15 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Code2 className="h-6 w-6 text-solana-purple" />
-            <span className="font-bold ltr-isolate">{tc("appName")}</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/jazzcode-logo.png"
+              alt={tc("appName")}
+              width={170}
+              height={44}
+              priority
+              className="h-9 w-auto"
+            />
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             {navItems.map((item) => (
