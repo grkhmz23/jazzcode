@@ -497,7 +497,7 @@ export default function Demo() {
     return () => {
       mounted = false;
     };
-  }, [persistenceScope]);
+  }, [persistenceScope, tc]);
 
   useEffect(() => {
     if (!ready) {

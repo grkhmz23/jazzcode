@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { courses } from "@/lib/data/courses";
 import { runChallengeInSandbox } from "@/lib/challenge-runner/sandbox";
 import { runStructuralChecks, validateRustCode } from "@/lib/structural-checker";
+import type { Challenge, Lesson } from "@/types/content";
 
 type Failure = {
   courseSlug: string;
@@ -24,6 +25,17 @@ type CourseFailure = {
   }>;
 };
 
+function isChallengeLesson(lesson: Lesson): lesson is Challenge {
+  return (
+    (lesson.type === "challenge" ||
+      lesson.type === "multi-file-challenge" ||
+      lesson.type === "devnet-challenge") &&
+    "solution" in lesson &&
+    "testCases" in lesson &&
+    "language" in lesson
+  );
+}
+
 async function main() {
   const startedAt = Date.now();
   let totalChallenges = 0;
@@ -36,7 +48,7 @@ async function main() {
   for (const course of courses) {
     for (const moduleItem of course.modules) {
       for (const lesson of moduleItem.lessons) {
-        if (lesson.type !== "challenge") {
+        if (!isChallengeLesson(lesson)) {
           continue;
         }
 
