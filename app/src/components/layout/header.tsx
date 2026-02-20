@@ -8,7 +8,6 @@ import { Menu, X, LogOut, User, Settings, LayoutDashboard, Globe } from "lucide-
 import Image from "next/image";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { WalletButton } from "@/components/auth/WalletButton";
 import { localeOptions } from "@/lib/i18n/locales";
 import type { Locale } from "@/lib/i18n/routing";
 
@@ -91,7 +90,6 @@ export function Header() {
                 ))}
               </select>
             </div>
-            <WalletButton />
             {isAuthenticated && session?.user ? (
               <div className="relative">
                 {showUserMenu ? (
@@ -162,7 +160,6 @@ export function Header() {
             )}
           </nav>
           <div className="flex md:hidden items-center gap-2">
-            <WalletButton />
             <button
               className="p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
