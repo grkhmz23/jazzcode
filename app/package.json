@@ -66,6 +66,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "fflate": "^0.8.2",
+    "framer-motion": "^12.34.3",
     "idb-keyval": "^6.2.2",
     "isomorphic-git": "^1.37.1",
     "lucide-react": "^0.460.0",

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { Link } from "@/lib/i18n/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { useAllProgress } from "@/lib/hooks/use-progress";
 import { useLeaderboard } from "@/lib/hooks/use-leaderboard";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AchievementBadge } from "@/components/achievements";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 import {
   BookOpen,
@@ -25,6 +27,11 @@ import {
   Loader2,
   Star,
   Wallet,
+  LayoutDashboard,
+  Code2,
+  SlidersHorizontal,
+  Medal,
+  UserCog,
 } from "lucide-react";
 import type { AchievementWithStatus } from "@/types/achievements";
 
@@ -60,6 +67,7 @@ function DashboardContent() {
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [achievements, setAchievements] = useState<AchievementWithStatus[]>([]);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // On-chain XP state
   const [onChainXP, setOnChainXP] = useState<OnChainXPData | null>(null);
@@ -147,18 +155,94 @@ function DashboardContent() {
   }
 
   const userName = session?.user?.name;
+  const navLinks = [
+    {
+      label: t("title"),
+      href: "/dashboard",
+      icon: (
+        <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: t("currentCourses"),
+      href: "/courses",
+      icon: (
+        <BookOpen className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "Playground",
+      href: "/playground",
+      icon: (
+        <Code2 className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: tc("settings"),
+      href: "/settings",
+      icon: (
+        <SlidersHorizontal className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: t("yourRank"),
+      href: "/leaderboard",
+      icon: (
+        <Medal className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+  ];
 
   return (
     <div className="container py-8 md:py-12">
-      {/* Welcome */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {userName ? t("welcome", { name: userName }) : t("welcomeDefault")}
-        </h1>
-      </div>
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-7xl overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
+        <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
+          <SidebarBody className="justify-between gap-10 border-r border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800">
+            <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+              <Link href="/" className="flex items-center gap-2 py-1">
+                <Image
+                  src="/jazzcode-logo.png"
+                  alt={tc("appName")}
+                  width={132}
+                  height={24}
+                  className="h-6 w-auto flex-shrink-0"
+                />
+              </Link>
+              <div className="mt-8 flex flex-col gap-2">
+                {navLinks.map((link, idx) => (
+                  <SidebarLink key={idx} link={link} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <SidebarLink
+                link={{
+                  label: userName ?? "JazzCode User",
+                  href: "/profile",
+                  icon: session?.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 flex-shrink-0 rounded-full object-cover"
+                      alt={userName ?? "User"}
+                    />
+                  ) : (
+                    <UserCog className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
+                  ),
+                }}
+              />
+            </div>
+          </SidebarBody>
+        </Sidebar>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {userName ? t("welcome", { name: userName }) : t("welcomeDefault")}
+            </h1>
+          </div>
 
-      {/* Stats Grid */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* XP Card */}
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
@@ -248,9 +332,9 @@ function DashboardContent() {
             </div>
           </CardContent>
         </Card>
-      </div>
+          </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Active Courses */}
@@ -406,6 +490,8 @@ function DashboardContent() {
               </div>
             </CardContent>
           </Card>
+        </div>
+          </div>
         </div>
       </div>
     </div>
