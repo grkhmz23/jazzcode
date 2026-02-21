@@ -755,7 +755,104 @@ const pdaTrack: Quest = {
   ],
 };
 
-export const devlabQuests: Quest[] = [foundationTrack, builderTrack, tokenTrack, opsTrack, securityTrack, pdaTrack];
+const clientTrack: Quest = {
+  id: "client-track",
+  track: "client",
+  title: "Client Development",
+  description: "Build TypeScript clients to interact with Solana programs.",
+  missions: [
+    {
+      id: "client-1",
+      title: "Connect to Solana",
+      difficulty: "easy",
+      description: "Set up a connection to devnet and check network status.",
+      xpReward: 80,
+      objectives: [
+        { id: "c1-o1", text: "Read connection guide: Run cat ~/client-setup.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/client-setup\.md$" }, completed: false },
+        { id: "c1-o2", text: "Check devnet status: Run solana ping", type: "command", validation: { type: "command_match", pattern: "^solana\s+ping$" }, completed: false },
+        { id: "c1-o3", text: "View cluster info: Run solana cluster-version", type: "command", validation: { type: "command_match", pattern: "^solana\s+cluster-version$" }, completed: false },
+      ],
+      hints: ["Connection needs RPC endpoint", "Devnet is for testing", "Check network health before building"],
+      requiredFiles: {
+        "client-setup.md": "# Solana Client Setup\n\n## Connection\n```typescript\nimport { Connection, clusterApiUrl } from '@solana/web3.js';\n\nconst connection = new Connection(\n  clusterApiUrl('devnet'),\n  'confirmed'\n);\n```\n\n## Key Points\n- Use clusterApiUrl() for public RPC\n- Commitment: processed, confirmed, finalized\n- Devnet for testing, mainnet-beta for production\n\n## Best Practices\n- Reuse connection objects\n- Handle rate limits\n- Cache cluster version",
+      },
+      successMessage: "Connection setup understood!",
+    },
+    {
+      id: "client-2",
+      title: "Generate Keypairs",
+      difficulty: "easy",
+      description: "Create and manage Solana keypairs for signing transactions.",
+      xpReward: 100,
+      objectives: [
+        { id: "c2-o1", text: "View keypair example: Run cat ~/keypair-example.ts", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/keypair-example\.ts$" }, completed: false },
+        { id: "c2-o2", text: "Generate new keypair: Run solana-keygen new --no-passphrase", type: "command", validation: { type: "command_match", pattern: "^solana-keygen\s+new\s+--no-passphrase$" }, completed: false },
+        { id: "c2-o3", text: "Check your public key: Run solana address", type: "command", validation: { type: "command_match", pattern: "^solana\s+address$" }, completed: false },
+      ],
+      hints: ["Keypairs have public and secret keys", "Never share your secret key", "Public key is your address on-chain"],
+      requiredFiles: {
+        "keypair-example.ts": "// Keypair Management Example\nimport { Keypair } from '@solana/web3.js';\n\n// Generate new random keypair\nconst keypair = Keypair.generate();\nconsole.log('Public Key:', keypair.publicKey.toBase58());\nconsole.log('Secret Key:', keypair.secretKey);\n\n// From secret key (Uint8Array)\nconst fromSecret = Keypair.fromSecretKey(\n  new Uint8Array([/* 64 bytes */])\n);\n\n// Save to localStorage (browser only)\nlocalStorage.setItem('secret', \n  JSON.stringify(Array.from(keypair.secretKey))\n);",
+      },
+      successMessage: "Keypair management mastered!",
+    },
+    {
+      id: "client-3",
+      title: "Read Account Data",
+      difficulty: "medium",
+      description: "Fetch and parse on-chain account data using the client SDK.",
+      xpReward: 120,
+      objectives: [
+        { id: "c3-o1", text: "Read account fetch guide: Run cat ~/fetch-account.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/fetch-account\.md$" }, completed: false },
+        { id: "c3-o2", text: "Get your account info: Run solana account $(solana address)", type: "command", validation: { type: "command_match", pattern: "^solana\s+account\s+\$\(solana\s+address\)$" }, completed: false },
+        { id: "c3-o3", text: "Check account balance: Run solana balance", type: "command", validation: { type: "command_match", pattern: "^solana\s+balance$" }, completed: false },
+      ],
+      hints: ["Use getAccountInfo() to fetch data", "Account data is binary (Buffer)", "Deserialize with your program's IDL"],
+      requiredFiles: {
+        "fetch-account.md": "# Fetching Account Data\n\n## Basic Fetch\n```typescript\nconst accountInfo = await connection.getAccountInfo(publicKey);\n\nif (accountInfo) {\n  console.log('Owner:', accountInfo.owner.toBase58());\n  console.log('Lamports:', accountInfo.lamports);\n  console.log('Data size:', accountInfo.data.length);\n}\n```\n\n## Multiple Accounts\n```typescript\nconst accounts = await connection.getMultipleAccountsInfo(pubkeys);\n```\n\n## With Anchor\n```typescript\nconst account = await program.account.myAccount.fetch(address);\n// Automatically deserializes based on IDL\n```",
+      },
+      successMessage: "Account fetching mastered!",
+    },
+    {
+      id: "client-4",
+      title: "Send Transactions",
+      difficulty: "medium",
+      description: "Build, sign, and send transactions to modify on-chain state.",
+      xpReward: 150,
+      objectives: [
+        { id: "c4-o1", text: "Read transaction guide: Run cat ~/transaction-guide.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/transaction-guide\.md$" }, completed: false },
+        { id: "c4-o2", text: "Request airdrop: Run solana airdrop 1", type: "command", validation: { type: "command_match", pattern: "^solana\s+airdrop\s+1$" }, completed: false },
+        { id: "c4-o3", text: "Transfer SOL: Run solana transfer G5gV...X9kL 0.1", type: "command", validation: { type: "command_match", pattern: "^solana\s+transfer\s+[1-9A-HJ-NP-Za-km-z]{20,}\s+0\.1$" }, completed: false },
+        { id: "c4-o4", text: "Check transaction: Run solana confirm <signature>", type: "command", validation: { type: "command_match", pattern: "^solana\s+confirm\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Transactions need fee payer", "Sign with sender's keypair", "Confirm transaction after sending"],
+      requiredFiles: {
+        "transaction-guide.md": "# Building Transactions\n\n## Transfer SOL\n```typescript\nimport { Transaction, SystemProgram } from '@solana/web3.js';\n\nconst transaction = new Transaction().add(\n  SystemProgram.transfer({\n    fromPubkey: sender.publicKey,\n    toPubkey: recipient,\n    lamports: 0.001 * LAMPORTS_PER_SOL,\n  })\n);\n\nconst signature = await connection.sendTransaction(\n  transaction,\n  [sender] // signers\n);\n```\n\n## Confirm Transaction\n```typescript\nawait connection.confirmTransaction(signature, 'confirmed');\n```\n\n## Key Points\n- Transaction has one or more instructions\n- Each signer must sign the transaction\n- Pay for computation with lamports",
+      },
+      successMessage: "Transaction sending mastered!",
+    },
+    {
+      id: "client-5",
+      title: "Build a Token Balance Viewer",
+      difficulty: "hard",
+      description: "Create a client app that displays token balances for any address.",
+      xpReward: 200,
+      objectives: [
+        { id: "c5-o1", text: "Read SPL token guide: Run cat ~/spl-token-client.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/spl-token-client\.md$" }, completed: false },
+        { id: "c5-o2", text: "Create token: Run spl-token create-token", type: "command", validation: { type: "command_match", pattern: "^spl-token\s+create-token$" }, completed: false },
+        { id: "c5-o3", text: "Create token account: Run spl-token create-account <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\s+create-account\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+        { id: "c5-o4", text: "Mint tokens: Run spl-token mint <mint> 1000", type: "command", validation: { type: "command_match", pattern: "^spl-token\s+mint\s+[1-9A-HJ-NP-Za-km-z]{20,}\s+1000$" }, completed: false },
+        { id: "c5-o5", text: "Check balance: Run spl-token balance <mint>", type: "command", validation: { type: "command_match", pattern: "^spl-token\s+balance\s+[1-9A-HJ-NP-Za-km-z]{20,}$" }, completed: false },
+      ],
+      hints: ["Use @solana/spl-token for token operations", "Get associated token account address", "Parse token account data for balances"],
+      requiredFiles: {
+        "spl-token-client.md": "# SPL Token Client Development\n\n## Get Associated Token Address\n```typescript\nimport { getAssociatedTokenAddress } from '@solana/spl-token';\n\nconst ata = await getAssociatedTokenAddress(\n  mint,      // token mint\n  owner      // wallet address\n);\n```\n\n## Fetch Token Balance\n```typescript\nimport { getAccount } from '@solana/spl-token';\n\nconst tokenAccount = await getAccount(connection, ata);\nconsole.log('Balance:', tokenAccount.amount.toString());\n```\n\n## Get All Token Accounts\n```typescript\nconst accounts = await connection.getParsedTokenAccountsByOwner(\n  owner,\n  { programId: TOKEN_PROGRAM_ID }\n);\n\naccounts.value.forEach(({ account }) => {\n  const { mint, tokenAmount } = account.data.parsed.info;\n  console.log(mint, tokenAmount.uiAmount);\n});\n```",
+      },
+      successMessage: "Client development complete!",
+    },
+  ],
+};
+
+export const devlabQuests: Quest[] = [foundationTrack, builderTrack, tokenTrack, opsTrack, securityTrack, pdaTrack, clientTrack];
 
 export function getQuestByTrack(track: Quest["track"]): Quest {
   const quest = devlabQuests.find((item) => item.track === track);

@@ -2,7 +2,7 @@
 
 import { MouseEvent as ReactMouseEvent, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock, Shield, TerminalSquare, Wrench, Coins, BookOpen, Key } from "lucide-react";
+import { Lock, Shield, TerminalSquare, Wrench, Coins, BookOpen, Key, Monitor } from "lucide-react";
 import { devlabQuests } from "@/lib/data/devlab-quests";
 import { useDevLabStore } from "@/lib/devlab/store";
 import { DevLabEditor } from "@/components/devlab/DevLabEditor";
@@ -17,6 +17,7 @@ function TrackIcon({ track }: { track: string }) {
   if (track === "token") return <Coins className="h-10 w-10 text-[#d7ba7d]" />;
   if (track === "ops") return <TerminalSquare className="h-10 w-10 text-[#4ec9b0]" />;
   if (track === "pda") return <Key className="h-10 w-10 text-[#c586c0]" />;
+  if (track === "client") return <Monitor className="h-10 w-10 text-[#b5cea8]" />;
   return <Shield className="h-10 w-10 text-[#f48771]" />;
 }
 
