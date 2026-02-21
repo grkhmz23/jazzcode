@@ -21,7 +21,10 @@ export default function DevLabPage() {
   }, [loadProgress]);
 
   return (
-    <main className="h-screen bg-[#1e1e1e]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+    <main
+      className="academy-pop-in min-h-[75vh] overflow-hidden rounded-3xl border border-white/10 bg-[#11131d]"
+      style={{ fontFamily: "JetBrains Mono, monospace" }}
+    >
       <DevLabLayout />
     </main>
   );

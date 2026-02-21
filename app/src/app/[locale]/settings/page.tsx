@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { GlassCard, LuxuryBadge } from "@/components/luxury/primitives";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import {
   User,
@@ -244,32 +245,35 @@ function SettingsContent() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     );
   }
 
   return (
-    <div className="container max-w-2xl py-8 md:py-12">
-      <h1 className="mb-8 text-3xl font-bold tracking-tight">{t("title")}</h1>
+    <div className="academy-fade-up container max-w-4xl py-8 md:py-10">
+      <GlassCard className="mb-8 p-6 md:p-8" glowColor="purple">
+        <LuxuryBadge color="purple">{t("title")}</LuxuryBadge>
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-white">{t("title")}</h1>
+      </GlassCard>
 
       {/* Status Messages */}
       {saveMessage && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-solana-green/30 bg-solana-green/10 p-3">
-          <Check className="h-4 w-4 text-solana-green" />
-          <span className="text-sm text-solana-green">{saveMessage}</span>
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+          <Check className="h-4 w-4 text-emerald-300" />
+          <span className="text-sm text-emerald-200">{saveMessage}</span>
         </div>
       )}
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
-          <AlertCircle className="h-4 w-4 text-destructive" />
-          <span className="text-sm text-destructive">{error}</span>
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+          <AlertCircle className="h-4 w-4 text-red-300" />
+          <span className="text-sm text-red-200">{error}</span>
         </div>
       )}
 
       <div className="space-y-6">
         {/* Profile Section */}
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <User className="h-4 w-4" />
@@ -278,24 +282,24 @@ function SettingsContent() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">{t("username")}</label>
-              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t("usernamePlaceholder")} />
+              <label className="mb-1 block text-sm font-medium text-slate-300">{t("username")}</label>
+              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t("usernamePlaceholder")} className="border-white/10 bg-[#05070D]/70 text-slate-200 placeholder:text-slate-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">{t("displayName")}</label>
-              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("displayNamePlaceholder")} />
+              <label className="mb-1 block text-sm font-medium text-slate-300">{t("displayName")}</label>
+              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("displayNamePlaceholder")} className="border-white/10 bg-[#05070D]/70 text-slate-200 placeholder:text-slate-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">{t("bio")}</label>
+              <label className="mb-1 block text-sm font-medium text-slate-300">{t("bio")}</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-[#05070D]/70 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40"
                 placeholder={t("bioPlaceholder")}
                 maxLength={280}
               />
             </div>
-            <Button onClick={handleSave} disabled={isSaving} variant="solana">
+            <Button onClick={handleSave} disabled={isSaving} variant="ghost" className="border border-purple-500/30 bg-purple-500/20 text-purple-200 hover:bg-purple-500/30">
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {tc("save")}
             </Button>
@@ -303,7 +307,7 @@ function SettingsContent() {
         </Card>
 
         {/* Connected Accounts */}
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Link2 className="h-4 w-4" />
@@ -314,10 +318,10 @@ function SettingsContent() {
             {/* Google */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg border">G</div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10">G</div>
                 <div>
                   <p className="text-sm font-medium">Google</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-slate-500">
                     {settings?.linkedProviders.includes("google") ? t("linked") : t("notLinked")}
                   </p>
                 </div>
@@ -325,19 +329,19 @@ function SettingsContent() {
               {settings?.linkedProviders.includes("google") ? (
                 <Badge variant="success">{t("linked")}</Badge>
               ) : (
-                <Button variant="outline" size="sm">{t("linkGoogle")}</Button>
+                <Button variant="ghost" size="sm" className="border border-white/10 text-slate-300 hover:bg-white/5">{t("linkGoogle")}</Button>
               )}
             </div>
 
-            <Separator />
+            <Separator className="bg-white/10" />
 
             {/* GitHub */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg border">GH</div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10">GH</div>
                 <div>
                   <p className="text-sm font-medium">GitHub</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-slate-500">
                     {settings?.linkedProviders.includes("github") ? t("linked") : t("notLinked")}
                   </p>
                 </div>
@@ -345,22 +349,22 @@ function SettingsContent() {
               {settings?.linkedProviders.includes("github") ? (
                 <Badge variant="success">{t("linked")}</Badge>
               ) : (
-                <Button variant="outline" size="sm">{t("linkGitHub")}</Button>
+                <Button variant="ghost" size="sm" className="border border-white/10 text-slate-300 hover:bg-white/5">{t("linkGitHub")}</Button>
               )}
             </div>
 
-            <Separator />
+            <Separator className="bg-white/10" />
 
             {/* Wallets */}
             <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10">
                     <Wallet className="h-4 w-4" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{t("solanaWallet")}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-500">
                       {settings?.linkedWallets && settings.linkedWallets.length > 0
                         ? `${settings.linkedWallets[0].slice(0, 6)}...${settings.linkedWallets[0].slice(-4)}`
                         : t("walletLinkDesc")}
@@ -369,26 +373,28 @@ function SettingsContent() {
                 </div>
                 {settings?.linkedWallets && settings.linkedWallets.length > 0 ? (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={handleUnlinkWallet}
                     disabled={isLinkingWallet}
+                    className="border border-white/10 text-slate-300 hover:bg-white/5"
                   >
                     {isLinkingWallet ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
                     {t("unlink")}
                   </Button>
                 ) : connected ? (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={handleLinkWallet}
                     disabled={isLinkingWallet}
+                    className="border border-white/10 text-slate-300 hover:bg-white/5"
                   >
                     {isLinkingWallet ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
                     {t("linkWallet")}
                   </Button>
                 ) : (
-                  <Badge variant="secondary">{t("notLinked")}</Badge>
+                  <Badge variant="secondary" className="bg-slate-500/20 text-slate-300">{t("notLinked")}</Badge>
                 )}
               </div>
             </div>
@@ -396,7 +402,7 @@ function SettingsContent() {
         </Card>
 
         {/* Preferences */}
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Globe className="h-4 w-4" />
@@ -406,15 +412,15 @@ function SettingsContent() {
           <CardContent className="space-y-4">
             {/* Language */}
             <div>
-              <label className="mb-2 block text-sm font-medium">{t("language")}</label>
+              <label className="mb-2 block text-sm font-medium text-slate-300">{t("language")}</label>
               <div className="flex flex-wrap gap-2">
                 {localeOptions.map((loc) => (
                   <Button
                     key={loc.code}
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => switchLocale(loc.code)}
-                    className="gap-1"
+                    className="gap-1 border border-white/10 text-slate-300 hover:bg-white/5"
                   >
                     {loc.flag} {loc.label}
                   </Button>
@@ -422,11 +428,11 @@ function SettingsContent() {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-white/10" />
 
             {/* Theme */}
             <div>
-              <label className="mb-2 block text-sm font-medium">{t("theme")}</label>
+              <label className="mb-2 block text-sm font-medium text-slate-300">{t("theme")}</label>
               <div className="flex gap-2">
                 {[
                   { value: "dark", label: t("themeDark"), icon: Moon },
@@ -435,10 +441,14 @@ function SettingsContent() {
                 ].map((th) => (
                   <Button
                     key={th.value}
-                    variant={currentTheme === th.value ? "default" : "outline"}
+                    variant="ghost"
                     size="sm"
                     onClick={() => setTheme(th.value)}
-                    className="gap-1"
+                    className={
+                      currentTheme === th.value
+                        ? "gap-1 border border-purple-500/40 bg-purple-500/20 text-purple-200"
+                        : "gap-1 border border-white/10 text-slate-300 hover:bg-white/5"
+                    }
                   >
                     <th.icon className="h-3.5 w-3.5" />
                     {th.label}
@@ -450,7 +460,7 @@ function SettingsContent() {
         </Card>
 
         {/* Privacy */}
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Shield className="h-4 w-4" />
@@ -461,27 +471,28 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{t("profileVisibility")}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-slate-500">
                   {isPublic ? t("publicDesc") : t("privateDesc")}
                 </p>
               </div>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setIsPublic(!isPublic)}
+                className="border border-white/10 text-slate-300 hover:bg-white/5"
               >
                 {isPublic ? t("publicProfile") : t("privateProfile")}
               </Button>
             </div>
 
-            <Separator />
+            <Separator className="bg-white/10" />
 
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{t("exportData")}</p>
-                <p className="text-xs text-muted-foreground">{t("exportDesc")}</p>
+                <p className="text-xs text-slate-500">{t("exportDesc")}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={handleExportData} className="gap-1">
+              <Button variant="ghost" size="sm" onClick={handleExportData} className="gap-1 border border-white/10 text-slate-300 hover:bg-white/5">
                 <Download className="h-3.5 w-3.5" />
                 {t("exportData")}
               </Button>

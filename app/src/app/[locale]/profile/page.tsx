@@ -13,6 +13,7 @@ import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AchievementGrid } from "@/components/achievements";
 import { StreakCalendar } from "@/components/dashboard";
 import { CredentialGrid } from "@/components/credentials";
+import { GlassCard, LuxuryBadge } from "@/components/luxury/primitives";
 import { useXP } from "@/lib/hooks/use-xp";
 import { useStreak } from "@/lib/hooks/use-streak";
 import { useAllProgress } from "@/lib/hooks/use-progress";
@@ -161,7 +162,7 @@ function ProfileContent() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     );
   }
@@ -173,9 +174,10 @@ function ProfileContent() {
     t("defaultName");
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="academy-fade-up container py-8 md:py-10">
       {/* Profile Header */}
-      <div className="mb-8 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+      <GlassCard className="mb-8 p-6 md:p-8" glowColor="amber">
+      <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
         <Avatar className="h-24 w-24">
           <AvatarImage
             src={profileData?.avatarUrl ?? session?.user?.image ?? undefined}
@@ -187,15 +189,15 @@ function ProfileContent() {
         </Avatar>
         <div className="flex-1 text-center sm:text-left">
           <div className="flex flex-col items-center gap-3 sm:flex-row">
-            <h1 className="text-2xl font-bold">{name}</h1>
-            <Badge variant="outline">
+            <h1 className="text-2xl font-bold text-white">{name}</h1>
+            <Badge variant="outline" className="border-white/20 text-slate-200">
               {tc("level")} {level}
             </Badge>
           </div>
           {profileData?.bio && (
-            <p className="mt-2 text-muted-foreground">{profileData.bio}</p>
+            <p className="mt-2 text-slate-400">{profileData.bio}</p>
           )}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground sm:justify-start">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-sm text-slate-500 sm:justify-start">
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
               {t("joined", {
@@ -209,7 +211,7 @@ function ProfileContent() {
                 href={`https://explorer.solana.com/address/${walletAddress}?cluster=devnet`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-mono text-xs hover:text-primary"
+                className="inline-flex items-center gap-1 font-mono text-xs text-slate-400 hover:text-purple-300"
               >
                 {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
                 <ExternalLink className="h-3 w-3" />
@@ -218,26 +220,31 @@ function ProfileContent() {
           </div>
         </div>
         <Link href="/settings">
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 border border-white/15 bg-white/5 text-slate-200 hover:bg-white/10"
+          >
             <Settings className="h-4 w-4" />
             {t("editProfile")}
           </Button>
         </Link>
       </div>
+      </GlassCard>
 
       {/* Stats Row */}
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{xp.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">{tc("xp")}</p>
+            <p className="text-xs text-slate-500">{tc("xp")}</p>
             {/* On-chain XP display */}
             {!isLoadingOnChain && (
               <div className="mt-1">
                 {walletAddress ? (
                   onChainXP?.onChainAvailable ? (
                     <div className="space-y-1">
-                      <p className="text-xs text-solana-green">
+                      <p className="text-xs text-emerald-300">
                         {t("onChainXPLabel", {
                           amount: (onChainXP.balance ?? 0).toLocaleString(),
                         })}
@@ -247,7 +254,7 @@ function ProfileContent() {
                           href={`https://explorer.solana.com/address/${onChainXP.tokenAccount}?cluster=devnet`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-purple-300 hover:underline"
                         >
                           {t("viewTokenAccount")}
                           <ExternalLink className="h-3 w-3" />
@@ -255,14 +262,14 @@ function ProfileContent() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-500">
                       {t("onChainPending")}
                     </p>
                   )
                 ) : (
                   <Link
                     href="/settings"
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                    className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-purple-300"
                   >
                     <Wallet className="h-3 w-3" />
                     {t("linkWalletPromptShort")}
@@ -272,51 +279,53 @@ function ProfileContent() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{level}</p>
-            <p className="text-xs text-muted-foreground">{tc("level")}</p>
+            <p className="text-xs text-slate-500">{tc("level")}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardContent className="p-4 text-center">
             <div className="flex items-center justify-center gap-1">
               <Flame className="h-5 w-5 text-orange-500" />
               <p className="text-2xl font-bold">{streak.currentStreak}</p>
             </div>
-            <p className="text-xs text-muted-foreground">{t("dayStreak")}</p>
+            <p className="text-xs text-slate-500">{t("dayStreak")}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">
               {userRank ? `#${userRank}` : "—"}
             </p>
-            <p className="text-xs text-muted-foreground">{tc("rank")}</p>
+            <p className="text-xs text-slate-500">{tc("rank")}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Level Progress */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-white/10 bg-[#0F1322]/70 text-slate-200">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-solana-purple" />
               <span className="font-medium">{tc("level")} {level}</span>
             </div>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-slate-500">
               {Math.round(levelProgress.current)} / {levelProgress.required} {tc("xp")} · {t("xpToLevel", { level: level + 1 })}
             </span>
           </div>
-          <Progress value={levelProgress.percent} className="mt-2 h-2" />
+          <Progress value={levelProgress.percent} className="mt-2 h-2 bg-white/10" />
         </CardContent>
       </Card>
 
       {/* Skills Section */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-white/10 bg-[#0F1322]/70 text-slate-200">
         <CardHeader>
-          <CardTitle className="text-base">{t("skills")}</CardTitle>
+          <CardTitle className="text-base">
+            <LuxuryBadge color="purple">{t("skills")}</LuxuryBadge>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -331,7 +340,7 @@ function ProfileContent() {
       </Card>
 
       {/* Streak Section */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-white/10 bg-[#0F1322]/70 text-slate-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Calendar className="h-4 w-4" />
@@ -349,7 +358,7 @@ function ProfileContent() {
 
       {/* Tabs */}
       <Tabs defaultValue="courses">
-        <TabsList>
+        <TabsList className="border border-white/10 bg-[#0F1322]/70">
           <TabsTrigger value="courses">{t("completedCourses")}</TabsTrigger>
           <TabsTrigger value="badges">{t("badges")}</TabsTrigger>
           <TabsTrigger value="credentials">{t("credentials")}</TabsTrigger>
@@ -358,12 +367,16 @@ function ProfileContent() {
         {/* Completed Courses */}
         <TabsContent value="courses" className="mt-6">
           {progressList.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-12 text-center text-muted-foreground">
-                <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/30" />
+            <Card className="border-white/10 bg-[#0F1322]/70 text-slate-300">
+              <CardContent className="flex flex-col items-center py-12 text-center text-slate-400">
+                <BookOpen className="mb-4 h-12 w-12 text-slate-600" />
                 <p>{t("noCoursesStarted")}</p>
                 <Link href="/courses" className="mt-4">
-                  <Button variant="solana" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="border border-purple-500/30 bg-purple-500/20 text-purple-200 hover:bg-purple-500/30"
+                  >
                     {tc("exploreCourses")}
                   </Button>
                 </Link>
@@ -373,21 +386,21 @@ function ProfileContent() {
             <div className="space-y-3">
               {progressList.map((cp) => (
                 <Card key={cp.courseSlug}>
-                  <CardContent className="flex items-center gap-4 p-4">
+                  <CardContent className="flex items-center gap-4 border-white/10 bg-[#0F1322]/70 p-4">
                     {cp.completionPercent === 100 ? (
                       <Trophy className="h-5 w-5 text-solana-green" />
                     ) : (
-                      <BookOpen className="h-5 w-5 text-muted-foreground" />
+                      <BookOpen className="h-5 w-5 text-slate-500" />
                     )}
                     <div className="flex-1">
-                      <p className="font-medium">{cp.courseSlug}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-medium text-slate-200">{cp.courseSlug}</p>
+                      <p className="text-xs text-slate-500">
                         {cp.completedLessons.length} / {cp.totalLessons} {tc("lessons")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Progress value={cp.completionPercent} className="w-24 h-1.5" />
-                      <span className="text-xs text-muted-foreground w-10 text-right">
+                      <Progress value={cp.completionPercent} className="h-1.5 w-24 bg-white/10" />
+                      <span className="w-10 text-right text-xs text-slate-500">
                         {cp.completionPercent}%
                       </span>
                     </div>
@@ -395,7 +408,7 @@ function ProfileContent() {
                       <Badge variant="success">{tc("completed")}</Badge>
                     ) : (
                       <Link href={`/courses/${cp.courseSlug}`}>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="text-purple-300 hover:bg-white/5">
                           Continue
                         </Button>
                       </Link>
@@ -415,13 +428,13 @@ function ProfileContent() {
         {/* Credentials - Updated with CredentialGrid */}
         <TabsContent value="credentials" className="mt-6">
           {!walletAddress ? (
-            <Card className="border-dashed">
+            <Card className="border-dashed border-white/20 bg-[#0F1322]/70">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <Shield className="mb-4 h-12 w-12 text-muted-foreground/30" />
-                <p className="text-muted-foreground">
+                <Shield className="mb-4 h-12 w-12 text-slate-600" />
+                <p className="text-slate-400">
                   {t("linkWalletPrompt", { link: t("settingsLink") })}
                 </p>
-                <Link href="/settings" className="mt-3 text-sm text-primary hover:underline">
+                <Link href="/settings" className="mt-3 text-sm text-purple-300 hover:underline">
                   {t("settingsLink")}
                 </Link>
               </CardContent>
@@ -440,10 +453,10 @@ function SkillBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-xs text-muted-foreground">{value}%</span>
+        <span className="text-sm font-medium text-slate-300">{label}</span>
+        <span className="text-xs text-slate-500">{value}%</span>
       </div>
-      <Progress value={value} className="h-1.5" />
+      <Progress value={value} className="h-1.5 bg-white/10" />
     </div>
   );
 }

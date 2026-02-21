@@ -4,10 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { GlassCard, LuxuryBadge } from "@/components/luxury/primitives";
 import { Search, Clock, BookOpen, Zap, Filter, Loader2 } from "lucide-react";
 import type { Course, CourseDifficulty } from "@/types/content";
 
@@ -185,89 +185,106 @@ export default function CourseCatalogPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     );
   }
 
   return (
-    <div className="container py-8 md:py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{t("title")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
+    <div className="academy-fade-up container py-8 md:py-10">
+      <div className="mb-8 rounded-3xl border border-white/10 bg-gradient-to-r from-[#0F1322] to-[#161230] p-8 md:p-10">
+        <LuxuryBadge color="amber">{t("title")}</LuxuryBadge>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+          {t("subtitle")}
+        </h1>
       </div>
 
-      <div className="mb-8 flex flex-col gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+      <GlassCard className="mb-8 p-5 md:p-6" glowColor="purple">
+        <div className="flex flex-col gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Input
+              placeholder={t("searchPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border-white/10 bg-[#05070D]/70 pl-10 text-slate-200 placeholder:text-slate-500"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {difficultyFilters.map((f) => (
+              <Button
+                key={f.value}
+                variant="ghost"
+                size="sm"
+                onClick={() => setDifficulty(f.value)}
+                className={
+                  difficulty === f.value
+                    ? "border border-purple-500/40 bg-purple-500/20 text-purple-200"
+                    : "border border-white/10 bg-transparent text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                }
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categoryFilters.map((f) => (
+              <Button
+                key={f.value}
+                variant="ghost"
+                size="sm"
+                onClick={() => setCategory(f.value)}
+                className={
+                  category === f.value
+                    ? "border border-amber-500/40 bg-amber-500/15 text-amber-200"
+                    : "border border-white/10 bg-transparent text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                }
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {difficultyFilters.map((f) => (
-            <Button
-              key={f.value}
-              variant={difficulty === f.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setDifficulty(f.value)}
-            >
-              {f.label}
-            </Button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {categoryFilters.map((f) => (
-            <Button
-              key={f.value}
-              variant={category === f.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCategory(f.value)}
-            >
-              {f.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      </GlassCard>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Filter className="h-12 w-12 text-muted-foreground/50" />
-          <p className="mt-4 text-lg font-medium">{tc("noResults")}</p>
-        </div>
+        <GlassCard className="py-16 text-center" glowColor="slate">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Filter className="h-12 w-12 text-slate-600" />
+            <p className="mt-4 text-lg font-medium text-slate-200">{tc("noResults")}</p>
+          </div>
+        </GlassCard>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((course) => (
             <Link key={course.id} href={`/courses/${course.slug}`}>
-              <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
-                <CardContent className="flex h-full flex-col p-6">
-                  <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-muted">
-                    <BookOpen className="h-12 w-12 text-muted-foreground/30" />
+              <GlassCard
+                className="group h-full cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/30"
+                glowColor="indigo"
+              >
+                <div className="flex h-full flex-col p-6">
+                  <div className="mb-4 flex h-32 items-center justify-center rounded-xl border border-white/10 bg-black/20">
+                    <BookOpen className="h-12 w-12 text-slate-600" />
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge className={`text-xs ${difficultyColor(course.difficulty)}`}>
                       {tc(course.difficulty)}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="border-white/20 text-xs text-slate-300">
                       {categoryLabel(inferCourseCategory(course), t)}
                     </Badge>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1 text-xs text-slate-500">
                       <Clock className="h-3 w-3" />
                       {course.duration}
                     </span>
                   </div>
-                  <h3 className="mt-3 font-semibold transition-colors group-hover:text-primary">
+                  <h3 className="mt-3 font-semibold text-white transition-colors group-hover:text-purple-200">
                     {course.title}
                   </h3>
-                  <p className="mt-1 flex-1 text-sm text-muted-foreground line-clamp-2">
-                    {course.description}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                  <p className="mt-1 flex-1 line-clamp-2 text-sm text-slate-400">{course.description}</p>
+                  <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
                     <span className="flex items-center gap-1">
-                      <Zap className="h-3 w-3 text-solana-green" />
+                      <Zap className="h-3 w-3 text-amber-400" />
                       {t("xpReward", { xp: course.totalXP })}
                     </span>
                     <span>
@@ -275,10 +292,10 @@ export default function CourseCatalogPage() {
                     </span>
                   </div>
                   <div className="mt-3">
-                    <Progress value={0} className="h-1.5" />
+                    <Progress value={0} className="h-1.5 bg-white/10" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </GlassCard>
             </Link>
           ))}
         </div>
