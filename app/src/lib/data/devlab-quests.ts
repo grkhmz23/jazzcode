@@ -665,7 +665,97 @@ const securityTrack: Quest = {
   ],
 };
 
-export const devlabQuests: Quest[] = [foundationTrack, builderTrack, tokenTrack, opsTrack, securityTrack];
+const pdaTrack: Quest = {
+  id: "pda-track",
+  track: "pda",
+  title: "PDA Mastery",
+  description: "Master Program Derived Addresses for deterministic state management.",
+  missions: [
+    {
+      id: "pda-1",
+      title: "What are PDAs?",
+      difficulty: "easy",
+      description: "Understand Program Derived Addresses and why they have no private key.",
+      xpReward: 80,
+      objectives: [
+        { id: "pda1-o1", text: "Read PDA explanation: Run cat ~/pda-basics.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/pda-basics\\.md$" }, completed: false },
+        { id: "pda1-o2", text: "Run solana address to see a normal keypair address", type: "command", validation: { type: "command_match", pattern: "^solana\s+address$" }, completed: false },
+      ],
+      hints: ["PDAs are off-curve (no private key)", "Derived from seeds + program ID", "Programs can sign for PDAs"],
+      requiredFiles: {
+        "pda-basics.md": "# Program Derived Addresses (PDAs)\n\n## What are PDAs?\n- Deterministic addresses derived from seeds\n- Off-curve (not a valid Ed25519 point)\n- No private key exists\n\n## Why Use PDAs?\n- Deterministic: same seeds = same address\n- Program can sign via invoke_signed\n- Store state per user/entity\n\n## Key Properties\n- Bump seed ensures off-curve\n- Seeds can be: strings, pubkeys, numbers\n- Only the deriving program can sign\n",
+      },
+      successMessage: "PDA concept understood!",
+    },
+    {
+      id: "pda-2",
+      title: "Finding PDAs",
+      difficulty: "easy",
+      description: "Use find_program_address to derive PDAs from seeds.",
+      xpReward: 100,
+      objectives: [
+        { id: "pda2-o1", text: "View PDA derivation example: Run cat ~/pda-derive.rs", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/pda-derive\\.rs$" }, completed: false },
+        { id: "pda2-o2", text: "Open programs/my_program/src/lib.rs to find PDA usage", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "find_program_address|seeds" }, completed: false },
+      ],
+      hints: ["find_program_address returns (pubkey, bump)", "Seeds are byte arrays", "Same seeds always give same PDA"],
+      requiredFiles: {
+        "pda-derive.rs": "// PDA Derivation Example\nuse anchor_lang::prelude::*;\n\n// Find a PDA for user state\nlet (pda, bump) = Pubkey::find_program_address(\n    &[\n        b\"user_state\",\n        user.key().as_ref(),\n    ],\n    program_id,\n);\n\n// pda is the derived address\n// bump is the seed making it off-curve\n",
+      },
+      successMessage: "PDA derivation understood!",
+    },
+    {
+      id: "pda-3",
+      title: "PDA as Signer",
+      difficulty: "medium",
+      description: "Learn how programs sign for PDAs using invoke_signed.",
+      xpReward: 140,
+      objectives: [
+        { id: "pda3-o1", text: "View invoke_signed example: Run cat ~/invoke-signed.rs", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/invoke-signed\\.rs$" }, completed: false },
+        { id: "pda3-o2", text: "Find invoke_signed in lib.rs", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "invoke_signed|signer_seeds" }, completed: false },
+        { id: "pda3-o3", text: "Run anchor build to verify signer logic", type: "command", validation: { type: "command_match", pattern: "^anchor\s+build$" }, completed: false },
+      ],
+      hints: ["invoke_signed lets program sign for PDA", "Must pass same seeds used to derive", "Runtime verifies derivation proof"],
+      requiredFiles: {
+        "invoke-signed.rs": "// PDA Signing Example\nlet seeds = &[\n    b\"token_vault\",\n    mint.key().as_ref(),\n    &[bump],\n];\n\nlet signer_seeds = &[&seeds[..]];\n\n// Transfer from PDA-owned account\ntoken::transfer(\n    CpiContext::new_with_signer(\n        token_program.to_account_info(),\n        Transfer {\n            from: vault.to_account_info(),\n            to: recipient.to_account_info(),\n            authority: vault_authority.to_account_info(),\n        },\n        signer_seeds,\n    ),\n    amount,\n)?;\n",
+      },
+      successMessage: "PDA signing mastered!",
+    },
+    {
+      id: "pda-4",
+      title: "PDA Best Practices",
+      difficulty: "medium",
+      description: "Security considerations and patterns for PDA usage.",
+      xpReward: 130,
+      objectives: [
+        { id: "pda4-o1", text: "Read PDA security guide: Run cat ~/pda-security.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/pda-security\\.md$" }, completed: false },
+        { id: "pda4-o2", text: "Verify seed validation in lib.rs", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "seeds\\s*=|seed\\s*=" }, completed: false },
+      ],
+      hints: ["Always verify PDA derivation on-chain", "Include unique identifiers in seeds", "Document seed structure clearly"],
+      requiredFiles: {
+        "pda-security.md": "# PDA Security Best Practices\n\n## Seed Validation\n- Always re-derive PDA in program\n- Verify address matches expected\n- Include unique identifiers (user pubkey)\n\n## Common Patterns\n- user_state: [\"user\", user_pubkey]\n- token_account: [\"token\", mint, user]\n- vault: [\"vault\", mint, program_id]\n\n## Anti-Patterns\n- Using predictable seeds only\n- Not bumping when collision\n- Passing PDA without verification\n\n## Security\n- Anyone can derive PDAs client-side\n- Only program can verify and sign\n- Document your seed schema\n",
+      },
+      successMessage: "PDA security understood!",
+    },
+    {
+      id: "pda-5",
+      title: "Build a Counter with PDA",
+      difficulty: "hard",
+      description: "Create a counter program that stores state in a PDA per user.",
+      xpReward: 200,
+      objectives: [
+        { id: "pda5-o1", text: "Add Counter state struct to lib.rs", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "struct\\s+Counter|pub\s+count:" }, completed: false },
+        { id: "pda5-o2", text: "Add initialize instruction with PDA", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "pub\s+fn\s+initialize" }, completed: false },
+        { id: "pda5-o3", text: "Add increment instruction", type: "edit", validation: { type: "file_contains", path: "my-solana-project/programs/my_program/src/lib.rs", pattern: "pub\s+fn\s+increment" }, completed: false },
+        { id: "pda5-o4", text: "Run anchor build", type: "command", validation: { type: "command_match", pattern: "^anchor\s+build$" }, completed: false },
+        { id: "pda5-o5", text: "Run anchor test", type: "command", validation: { type: "command_match", pattern: "^anchor\s+test$" }, completed: false },
+      ],
+      hints: ["Store counter in account data", "Derive PDA from user pubkey", "Initialize if needed, increment if exists", "Test with multiple users"],
+      successMessage: "PDA counter complete!",
+    },
+  ],
+};
+
+export const devlabQuests: Quest[] = [foundationTrack, builderTrack, tokenTrack, opsTrack, securityTrack, pdaTrack];
 
 export function getQuestByTrack(track: Quest["track"]): Quest {
   const quest = devlabQuests.find((item) => item.track === track);

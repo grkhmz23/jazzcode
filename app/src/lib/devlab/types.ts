@@ -90,7 +90,7 @@ export type Mission = {
 
 export type Quest = {
   id: string;
-  track: "foundation" | "builder" | "token" | "ops" | "security";
+  track: "foundation" | "builder" | "token" | "ops" | "security" | "pda";
   title: string;
   description: string;
   missions: Mission[];
