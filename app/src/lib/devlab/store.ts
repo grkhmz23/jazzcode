@@ -136,7 +136,7 @@ function initialState(): Omit<
     activeFile: "my-solana-project/programs/my_program/src/lib.rs",
     chainState: chain,
     trackSelected: false,
-    currentTrack: "builder",
+    currentTrack: "foundation",
     currentMissionIndex: 0,
     completedMissions: {},
     objectiveStatus: {},

@@ -1,5 +1,103 @@
 import { Quest } from "@/lib/devlab/types";
 
+const foundationTrack: Quest = {
+  id: "foundation-track",
+  track: "foundation",
+  title: "Terminal & Solana Basics",
+  description: "Learn terminal navigation and Solana core concepts before building.",
+  missions: [
+    {
+      id: "foundation-1",
+      title: "Navigate the Terminal",
+      difficulty: "easy",
+      description: "Learn basic filesystem navigation commands: pwd, ls, cd, and mkdir.",
+      xpReward: 25,
+      objectives: [
+        { id: "f1-o1", text: "Run pwd to see current directory", type: "command", validation: { type: "command_match", pattern: "^pwd$" }, completed: false },
+        { id: "f1-o2", text: "Run ls to list files", type: "command", validation: { type: "command_match", pattern: "^ls$" }, completed: false },
+        { id: "f1-o3", text: "Run ls -la for detailed listing", type: "command", validation: { type: "command_match", pattern: "^ls\s+-la$" }, completed: false },
+        { id: "f1-o4", text: "Run mkdir my-folder to create a directory", type: "command", validation: { type: "command_match", pattern: "^mkdir\s+my-folder$" }, completed: false },
+        { id: "f1-o5", text: "Run cd my-folder to enter the directory", type: "command", validation: { type: "command_match", pattern: "^cd\s+my-folder$" }, completed: false },
+      ],
+      hints: ["pwd = print working directory", "ls lists files, -la shows hidden files", "mkdir creates folders, cd changes into them"],
+      successMessage: "Navigation mastered!",
+    },
+    {
+      id: "foundation-2",
+      title: "File Operations",
+      difficulty: "easy",
+      description: "Create, view, and manage files with cat, touch, echo, and rm.",
+      xpReward: 30,
+      objectives: [
+        { id: "f2-o1", text: "Run touch hello.txt to create a file", type: "command", validation: { type: "command_match", pattern: "^touch\s+hello\\.txt$" }, completed: false },
+        { id: "f2-o2", text: "Run echo 'Hello Solana' > hello.txt to write content", type: "command", validation: { type: "command_match", pattern: "^echo\s+['\"]Hello Solana['\"]\s+>\s+hello\\.txt$" }, completed: false },
+        { id: "f2-o3", text: "Run cat hello.txt to view contents", type: "command", validation: { type: "command_match", pattern: "^cat\s+hello\\.txt$" }, completed: false },
+        { id: "f2-o4", text: "Run rm hello.txt to delete the file", type: "command", validation: { type: "command_match", pattern: "^rm\s+hello\\.txt$" }, completed: false },
+      ],
+      hints: ["touch creates empty files", "echo with > writes to files", "cat displays file contents", "rm deletes files permanently"],
+      chaosVariants: [
+        {
+          trigger: "rm\s+-rf\s+/",
+          condition: "always",
+          errorOutput: "Error: Permission denied. This would delete system files!",
+          hint: "Never run rm -rf / or rm -rf ~",
+        },
+      ],
+      successMessage: "File operations mastered!",
+    },
+    {
+      id: "foundation-3",
+      title: "Understanding Paths",
+      difficulty: "easy",
+      description: "Learn absolute vs relative paths and navigation shortcuts.",
+      xpReward: 35,
+      objectives: [
+        { id: "f3-o1", text: "Run cd .. to go up one directory", type: "command", validation: { type: "command_match", pattern: "^cd\s+\\.\\.$" }, completed: false },
+        { id: "f3-o2", text: "Run cd ~ to go to home directory", type: "command", validation: { type: "command_match", pattern: "^cd\s+~$" }, completed: false },
+        { id: "f3-o3", text: "Run cd - to go to previous directory", type: "command", validation: { type: "command_match", pattern: "^cd\s+-$" }, completed: false },
+        { id: "f3-o4", text: "Run pwd to confirm your location", type: "command", validation: { type: "command_match", pattern: "^pwd$" }, completed: false },
+      ],
+      hints: [".. means parent directory", "~ is your home folder", "- toggles between last two directories", "pwd shows full absolute path"],
+      successMessage: "Path navigation mastered!",
+    },
+    {
+      id: "foundation-4",
+      title: "What is Solana?",
+      difficulty: "easy",
+      description: "Understand Solana's account model, programs, and state storage.",
+      xpReward: 40,
+      objectives: [
+        { id: "f4-o1", text: "Run solana --help to see available commands", type: "command", validation: { type: "command_match", pattern: "^solana\s+--help$" }, completed: false },
+        { id: "f4-o2", text: "Run solana config get to view current config", type: "command", validation: { type: "command_match", pattern: "^solana\s+config\s+get$" }, completed: false },
+        { id: "f4-o3", text: "Read about accounts: Run cat ~/solana-basics.md", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/solana-basics\\.md$" }, completed: false },
+      ],
+      hints: ["Solana has accounts, not contracts", "Programs are stateless logic", "Data lives in accounts", "Read the basics file to learn more"],
+      requiredFiles: {
+        "solana-basics.md": "# Solana Basics\n\n## Accounts\nEverything on Solana is an account. Accounts store:\n- Lamports (SOL balance)\n- Data (program state)\n- Owner (the program that can modify it)\n\n## Programs\n- Programs are executable code\n- They are stateless (no internal storage)\n- They operate on accounts passed to them\n\n## Key Concepts\n- Rent: Accounts need minimum SOL to exist\n- Rent-exemption: Deposit enough SOL to never pay rent\n- PDAs: Program-derived addresses for deterministic state\n",
+      },
+      successMessage: "Solana fundamentals understood!",
+    },
+    {
+      id: "foundation-5",
+      title: "Rent and Lamports",
+      difficulty: "medium",
+      description: "Learn about account costs, rent exemption, and lamports (smallest SOL unit).",
+      xpReward: 50,
+      objectives: [
+        { id: "f5-o1", text: "Run cat ~/rent-explanation.md to read about rent", type: "command", validation: { type: "command_match", pattern: "^cat\s+~/rent-explanation\\.md$" }, completed: false },
+        { id: "f5-o2", text: "Run solana airdrop 1 to get test SOL", type: "command", validation: { type: "command_match", pattern: "^solana\s+airdrop\s+1$" }, completed: false },
+        { id: "f5-o3", text: "Run solana balance to check your lamports", type: "command", validation: { type: "command_match", pattern: "^solana\s+balance$" }, completed: false },
+        { id: "f5-o4", text: "Run solana rent 100 to calculate rent for 100 bytes", type: "command", validation: { type: "command_match", pattern: "^solana\s+rent\s+100$" }, completed: false },
+      ],
+      hints: ["1 SOL = 1,000,000,000 lamports", "Accounts need rent to exist", "Rent-exempt accounts never pay ongoing rent", "Use solana rent <bytes> to calculate costs"],
+      requiredFiles: {
+        "rent-explanation.md": "# Rent on Solana\n\n## Lamports\n- Smallest unit of SOL (like cents to dollars)\n- 1 SOL = 1,000,000,000 lamports\n- All operations cost lamports\n\n## Rent\n- Accounts pay rent based on data size\n- Two states: Rent-paying or Rent-exempt\n\n## Rent-Exemption\n- Deposit enough SOL to cover 2 years of rent\n- Account becomes rent-exempt\n- No ongoing rent charges\n\n## Why It Matters\n- Creating accounts costs SOL\n- Bigger accounts = more SOL needed\n- Always aim for rent-exemption\n",
+      },
+      successMessage: "Rent and lamports understood!",
+    },
+  ],
+};
+
 const builderTrack: Quest = {
   id: "builder-track",
   track: "builder",
@@ -485,7 +583,7 @@ const securityTrack: Quest = {
   ],
 };
 
-export const devlabQuests: Quest[] = [builderTrack, tokenTrack, opsTrack, securityTrack];
+export const devlabQuests: Quest[] = [foundationTrack, builderTrack, tokenTrack, opsTrack, securityTrack];
 
 export function getQuestByTrack(track: Quest["track"]): Quest {
   const quest = devlabQuests.find((item) => item.track === track);

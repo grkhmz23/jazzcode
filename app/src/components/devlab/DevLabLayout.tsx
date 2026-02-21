@@ -2,7 +2,7 @@
 
 import { MouseEvent as ReactMouseEvent, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Lock, Shield, TerminalSquare, Wrench, Coins } from "lucide-react";
+import { Lock, Shield, TerminalSquare, Wrench, Coins, BookOpen } from "lucide-react";
 import { devlabQuests } from "@/lib/data/devlab-quests";
 import { useDevLabStore } from "@/lib/devlab/store";
 import { DevLabEditor } from "@/components/devlab/DevLabEditor";
@@ -12,10 +12,11 @@ import { SimulatedTerminal } from "@/components/devlab/SimulatedTerminal";
 import { TaskPanel } from "@/components/devlab/TaskPanel";
 
 function TrackIcon({ track }: { track: string }) {
-  if (track === "builder") return <Wrench className="h-5 w-5 text-[#9cdcfe]" />;
-  if (track === "token") return <Coins className="h-5 w-5 text-[#d7ba7d]" />;
-  if (track === "ops") return <TerminalSquare className="h-5 w-5 text-[#4ec9b0]" />;
-  return <Shield className="h-5 w-5 text-[#f48771]" />;
+  if (track === "foundation") return <BookOpen className="h-10 w-10 text-[#ce9178]" />;
+  if (track === "builder") return <Wrench className="h-10 w-10 text-[#9cdcfe]" />;
+  if (track === "token") return <Coins className="h-10 w-10 text-[#d7ba7d]" />;
+  if (track === "ops") return <TerminalSquare className="h-10 w-10 text-[#4ec9b0]" />;
+  return <Shield className="h-10 w-10 text-[#f48771]" />;
 }
 
 export function DevLabLayout() {
