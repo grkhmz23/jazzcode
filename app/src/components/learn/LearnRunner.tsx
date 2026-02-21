@@ -32,7 +32,15 @@ import {
   WorkspaceDocument,
 } from "@/lib/workspace";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+import { configureMonacoLoader } from "@/lib/monaco-loader";
+
+const MonacoEditor = dynamic(
+  () => {
+    configureMonacoLoader();
+    return import("@monaco-editor/react");
+  },
+  { ssr: false }
+);
 
 type LearnProgress = {
   currentLessonId: string;

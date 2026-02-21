@@ -6,7 +6,15 @@ import type { OnMount } from "@monaco-editor/react";
 import { X } from "lucide-react";
 import { getActiveMissionFromStore, readActiveFileContent, useDevLabStore } from "@/lib/devlab/store";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+import { configureMonacoLoader } from "@/lib/monaco-loader";
+
+const MonacoEditor = dynamic(
+  () => {
+    configureMonacoLoader();
+    return import("@monaco-editor/react");
+  },
+  { ssr: false }
+);
 
 function languageFor(path: string): string {
   if (path.endsWith(".rs")) return "rust";

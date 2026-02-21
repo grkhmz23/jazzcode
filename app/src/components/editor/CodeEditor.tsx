@@ -16,11 +16,16 @@ import type { editor } from "monaco-editor";
 import dynamic from "next/dynamic";
 import { EditorLoading } from "./EditorLoading";
 
+import { configureMonacoLoader } from "@/lib/monaco-loader";
+
 // Dynamically import Monaco Editor with SSR disabled.
-// Uses the default CDN loader from @monaco-editor/react which handles
-// workers, CSS, and module loading automatically.
+// configureMonacoLoader() points @monaco-editor/react at local public/ files
+// so the editor works under the strict CSP (script-src 'self').
 const MonacoEditor = dynamic(
-  () => import("@monaco-editor/react").then((mod) => mod.Editor),
+  () => {
+    configureMonacoLoader();
+    return import("@monaco-editor/react").then((mod) => mod.Editor);
+  },
   {
     ssr: false,
     loading: () => <EditorLoading />,

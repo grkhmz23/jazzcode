@@ -25,7 +25,7 @@
     "i18n:course-template": "tsx scripts/generate-course-translation-template.ts",
     "i18n:generate-course-pack": "node --import tsx scripts/generate-course-pack.ts",
     "i18n:generate-es-courses": "node --import tsx scripts/generate-course-pack.ts es",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && node -e \"const fs=require('fs');const src='node_modules/monaco-editor/min';const dst='public/monaco-editor/min';if(fs.existsSync(src)){fs.cpSync(src,dst,{recursive:true});console.log('Copied monaco-editor/min to public/')}\"",
     "i18n:curation-report": "node --import tsx scripts/curation-coverage-report.ts",
     "i18n:smoke-audit": "node --import tsx scripts/localization-smoke-audit.ts"
   },

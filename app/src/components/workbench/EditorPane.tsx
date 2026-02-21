@@ -9,13 +9,19 @@ import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { XIcon, CircleIcon } from "lucide-react";
 
+import { configureMonacoLoader } from "@/lib/monaco-loader";
+
 // Dynamically import Monaco Editor to avoid SSR issues
-const MonacoEditor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.Editor), {
-  ssr: false,
-  loading: () => (
-    <div className="h-full" />
-  ),
-});
+const MonacoEditor = dynamic(
+  () => {
+    configureMonacoLoader();
+    return import("@monaco-editor/react").then((mod) => mod.Editor);
+  },
+  {
+    ssr: false,
+    loading: () => <div className="h-full" />,
+  }
+);
 
 interface EditorPaneProps {
   workspace: WorkspaceState;
