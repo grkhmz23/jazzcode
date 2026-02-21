@@ -74,6 +74,7 @@
     "settings": "Settings",
     "theme": "Toggle theme",
     "language": "Language",
+    "selectLanguage": "Select Language",
     "signIn": "Sign In",
     "signOut": "Sign Out"
   },

@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Flame, Sparkles, Wallet } from "lucide-react";
+import { Flame, Sparkles, Wallet, Globe } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { usePathname, Link } from "@/lib/i18n/navigation";
 import { useStreak } from "@/lib/hooks/use-streak";
 import { useXP } from "@/lib/hooks/use-xp";
+import { LanguageSelector } from "./language-selector";
 
 function pageLabel(pathname: string, t: ReturnType<typeof useTranslations>): string {
   if (pathname.includes("/courses")) return t("courses");
@@ -37,7 +38,8 @@ export function AcademyTopBar() {
         {title}
       </h2>
 
-      <div className="hidden items-center gap-4 md:flex">
+      <div className="hidden items-center gap-3 md:flex">
+        <LanguageSelector />
         <div className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-2.5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Flame className="h-4 w-4 text-amber-500" />

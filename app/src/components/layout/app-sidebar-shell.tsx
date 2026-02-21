@@ -8,6 +8,7 @@ import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { AcademyTopBar } from "@/components/layout/academy-topbar";
+import { LanguageSelector } from "@/components/layout/language-selector";
 import {
   BookOpen,
   Code2,
@@ -101,24 +102,29 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-muted/50 to-transparent p-4">
-            <SidebarLink
-              link={{
-                label: session?.user?.name ?? tc("signIn"),
-                href: session?.user ? "/profile" : "/auth/signin",
-                icon: session?.user?.image ? (
-                  <Image
-                    src={session.user.image}
-                    width={28}
-                    height={28}
-                    className="h-7 w-7 rounded-full object-cover"
-                    alt={session.user.name ?? "User"}
-                  />
-                ) : (
-                  <UserCog className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                ),
-              }}
-            />
+          <div className="space-y-2">
+            <div className="rounded-xl border border-border bg-muted/50 px-3 py-2">
+              <LanguageSelector variant="minimal" />
+            </div>
+            <div className="rounded-2xl border border-border bg-gradient-to-br from-muted/50 to-transparent p-4">
+              <SidebarLink
+                link={{
+                  label: session?.user?.name ?? tc("signIn"),
+                  href: session?.user ? "/profile" : "/auth/signin",
+                  icon: session?.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 rounded-full object-cover"
+                      alt={session.user.name ?? "User"}
+                    />
+                  ) : (
+                    <UserCog className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                  ),
+                }}
+              />
+            </div>
           </div>
         </SidebarBody>
       </Sidebar>

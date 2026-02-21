@@ -74,6 +74,7 @@
     "settings": "Configurações",
     "theme": "Alternar tema",
     "language": "Idioma",
+    "selectLanguage": "Selecionar idioma",
     "signIn": "Entrar",
     "signOut": "Sair"
   },
@@ -418,7 +419,7 @@
     "notLinked": "Não vinculado",
     "unlinkConfirm": "Tem certeza de que deseja desconectar esta conta?",
     "walletLinkDesc": "Assine uma mensagem com sua carteira para conectá-la à sua conta",
-    "language": "Idioma",
+    "language": "Idioma", "selectLanguage": "Seleccionar idioma",
     "theme": "Tema",
     "themeDark": "Escuro",
     "themeLight": "Claro",
