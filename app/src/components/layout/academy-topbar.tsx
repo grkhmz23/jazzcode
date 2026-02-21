@@ -32,22 +32,22 @@ export function AcademyTopBar() {
   const wallet = session?.user?.walletAddress;
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/10 bg-[#05070D]/85 px-5 backdrop-blur-2xl md:px-8">
-      <h2 className="text-xl font-semibold capitalize tracking-wide text-white md:text-2xl">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border bg-background/85 px-5 backdrop-blur-2xl md:px-8">
+      <h2 className="text-xl font-semibold capitalize tracking-wide text-foreground md:text-2xl">
         {title}
       </h2>
 
       <div className="hidden items-center gap-4 md:flex">
-        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#0F1322] px-4 py-2.5">
-          <div className="flex items-center gap-2 text-sm text-slate-300">
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-2.5">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Flame className="h-4 w-4 text-amber-500" />
             <span>
               {streak.currentStreak} {tc("days")}
             </span>
           </div>
-          <div className="h-5 w-px bg-white/10" />
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <Sparkles className="h-4 w-4 text-purple-400" />
+          <div className="h-5 w-px bg-border" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Sparkles className="h-4 w-4 text-solana-purple" />
             <span>
               {tc("level")} {level}
             </span>
@@ -56,7 +56,7 @@ export function AcademyTopBar() {
 
         <Link
           href="/settings"
-          className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-slate-200"
+          className="inline-flex items-center gap-2 rounded-2xl border border-border bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           <Wallet className="h-4 w-4" />
           {wallet ? `${wallet.slice(0, 4)}...${wallet.slice(-4)}` : tc("connectWallet")}

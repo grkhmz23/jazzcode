@@ -50,7 +50,7 @@ export default function LeaderboardPage() {
         return <Medal className="h-5 w-5 text-amber-600" />;
       default:
         return (
-          <span className="w-5 text-center text-sm font-medium text-slate-500">
+          <span className="w-5 text-center text-sm font-medium text-muted-foreground">
             {rank}
           </span>
         );
@@ -101,7 +101,7 @@ export default function LeaderboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <LuxuryBadge color="amber">{t("title")}</LuxuryBadge>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">{t("subtitle")}</h1>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">{t("subtitle")}</h1>
         </div>
         <div className="flex gap-2">
           {timeframes.map((tf) => (
@@ -112,8 +112,8 @@ export default function LeaderboardPage() {
               onClick={() => setTimeframe(tf.value)}
               className={
                 timeframe === tf.value
-                  ? "border border-purple-500/40 bg-purple-500/20 text-purple-200"
-                  : "border border-white/10 text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  ? "border border-primary bg-primary/10 text-primary"
+                  : ""
               }
             >
               {tf.label}
@@ -125,11 +125,11 @@ export default function LeaderboardPage() {
 
       {/* User Rank */}
       {userRank !== null && userRank > 0 && (
-        <Card className="mb-6 border-amber-500/30 bg-amber-500/10 text-slate-200">
+        <Card className="mb-6 border-amber-500/30 bg-amber-500/10">
           <CardContent className="flex items-center gap-4 p-4">
-            <Trophy className="h-6 w-6 text-amber-400" />
+            <Trophy className="h-6 w-6 text-amber-500" />
             <div>
-              <p className="text-sm text-slate-400">{t("yourRank")}</p>
+              <p className="text-sm text-muted-foreground">{t("yourRank")}</p>
               <p className="text-2xl font-bold">#{userRank}</p>
             </div>
           </CardContent>
@@ -137,13 +137,13 @@ export default function LeaderboardPage() {
       )}
 
       {/* On-Chain Toggle */}
-      <Card className="mb-6 border-white/10 bg-[#0F1322]/70 text-slate-200">
+      <Card className="mb-6">
         <CardContent className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <Database className="h-5 w-5 text-emerald-300" />
+            <Database className="h-5 w-5 text-emerald-500" />
             <div>
               <p className="font-medium">{t("showOnChain")}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {t("showOnChainDesc")}
               </p>
             </div>
@@ -155,8 +155,8 @@ export default function LeaderboardPage() {
             disabled={!onChainAvailable}
             className={
               showOnChain
-                ? "gap-2 border border-emerald-500/30 bg-emerald-500/15 text-emerald-200"
-                : "gap-2 border border-white/10 text-slate-300 hover:bg-white/5"
+                ? "gap-2 border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                : "gap-2"
             }
           >
             {showOnChain ? (
@@ -179,7 +179,7 @@ export default function LeaderboardPage() {
         <Card className="mb-6 border-dashed border-amber-500/30 bg-amber-500/10">
           <CardContent className="flex items-center gap-3 p-4">
             <Info className="h-5 w-5 text-amber-600" />
-            <p className="text-sm text-amber-200">
+            <p className="text-sm text-amber-700 dark:text-amber-300">
               {t("onChainUnavailable")}
             </p>
           </CardContent>
@@ -188,25 +188,25 @@ export default function LeaderboardPage() {
 
       {/* Leaderboard */}
       <GlassCard glowColor="indigo">
-        <CardHeader className="border-b border-white/10">
+        <CardHeader className="border-b border-border">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base text-white">{t("title")}</CardTitle>
-            <span className="text-xs text-slate-500">
+            <CardTitle className="text-base">{t("title")}</CardTitle>
+            <span className="text-xs text-muted-foreground">
               {entries.length > 0 && t("learnerCount", { count: entries.length })}
             </span>
           </div>
         </CardHeader>
-        <CardContent className="divide-y divide-white/10 p-0">
+        <CardContent className="divide-y divide-border p-0">
           {isLoading ? (
             <SkeletonEntries />
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-slate-400">{t("loadError")}</p>
+              <p className="text-muted-foreground">{t("loadError")}</p>
             </div>
           ) : entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Trophy className="mb-4 h-12 w-12 text-slate-700" />
-              <p className="text-slate-400">{t("noData")}</p>
+              <Trophy className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <p className="text-muted-foreground">{t("noData")}</p>
             </div>
           ) : (
             entries.map((entry) => {
@@ -214,7 +214,7 @@ export default function LeaderboardPage() {
               return (
                 <div
                   key={entry.userId}
-                  className={`flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/5 ${rankBg(
+                  className={`flex items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/50 ${rankBg(
                     entry.rank,
                     isCurrentUser
                   )}`}
@@ -232,12 +232,12 @@ export default function LeaderboardPage() {
                     <p className="truncate text-sm font-medium">
                       {entry.username}
                       {isCurrentUser && (
-                        <Badge variant="outline" className="ml-2 border-amber-500/30 text-[10px] text-amber-200">
+                        <Badge variant="outline" className="ml-2 border-amber-500/30 text-[10px] text-amber-600 dark:text-amber-400">
                           {t("you")}
                         </Badge>
                       )}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       {tc("level")} {entry.level}
                     </p>
                   </div>
@@ -253,18 +253,18 @@ export default function LeaderboardPage() {
                       <span className="font-medium">
                         {entry.totalXP.toLocaleString()}
                       </span>
-                      <span className="text-sm text-slate-500">
+                      <span className="text-sm text-muted-foreground">
                         {tc("xp")}
                       </span>
                     </div>
                     {/* On-Chain XP Column */}
                     {showOnChain && onChainAvailable && (
-                      <div className="flex items-center gap-1 border-l border-white/10 pl-3">
-                        <Database className="h-3.5 w-3.5 text-slate-500" />
-                        <span className="text-sm font-medium text-slate-400">
+                      <div className="flex items-center gap-1 border-l border-border pl-3">
+                        <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">
                           {entry.onChainXP?.toLocaleString() ?? "—"}
                         </span>
-                        <span className="text-xs text-slate-500">{t("onChainLabel")}</span>
+                        <span className="text-xs text-muted-foreground">{t("onChainLabel")}</span>
                       </div>
                     )}
                   </div>

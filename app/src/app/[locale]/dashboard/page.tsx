@@ -142,7 +142,7 @@ function DashboardContent() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -153,18 +153,18 @@ function DashboardContent() {
     <div className="academy-fade-up container py-8 md:py-10">
       <GlassCard className="mb-8 p-6 md:p-8" glowColor="purple">
         <LuxuryBadge color="purple">{t("xpBalance")}</LuxuryBadge>
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-white">
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
           {userName ? t("welcome", { name: userName }) : t("welcomeDefault")}
         </h1>
       </GlassCard>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* XP Card */}
-        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+        <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <XPDisplay xp={xp} size="sm" showProgress={false} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-500">{t("xpBalance")}</p>
+              <p className="text-sm text-muted-foreground">{t("xpBalance")}</p>
               <p className="text-2xl font-bold">{xp.toLocaleString()}</p>
               {/* On-chain XP display */}
               {!isLoadingOnChain && (
@@ -175,14 +175,14 @@ function DashboardContent() {
                         {t("onChainXP")}: {(onChainXP.balance ?? 0).toLocaleString()} {tc("xp")}
                       </p>
                     ) : (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {t("onChainPending")}
                       </p>
                     )
                   ) : (
                     <Link
                       href="/settings"
-                      className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-purple-300"
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                     >
                       <Wallet className="h-3 w-3" />
                       {t("linkWalletForXP")}
@@ -195,17 +195,17 @@ function DashboardContent() {
         </Card>
 
         {/* Level Card */}
-        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+        <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-solana-purple/10">
               <Star className="h-6 w-6 text-solana-purple" />
             </div>
             <div className="flex-1">
-              <p className="text-sm text-slate-500">{tc("level")}</p>
+              <p className="text-sm text-muted-foreground">{tc("level")}</p>
               <p className="text-2xl font-bold">{level}</p>
               <div className="mt-1">
-                <Progress value={levelProgress.percent} className="h-1 bg-white/10" />
-                <p className="mt-1 text-xs text-slate-500">
+                <Progress value={levelProgress.percent} className="h-1" />
+                <p className="mt-1 text-xs text-muted-foreground">
                   {t("xpToNext")}:{" "}
                   {Math.max(levelProgress.required - Math.round(levelProgress.current), 0)} ({tc("level")} {level + 1})
                 </p>
@@ -215,19 +215,19 @@ function DashboardContent() {
         </Card>
 
         {/* Streak Card */}
-        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+        <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/10">
               <Flame className="h-6 w-6 text-orange-500" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {t("currentStreak")}
               </p>
               <p className="text-2xl font-bold">
                 {streak.currentStreak} {tc("days")}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {t("longestStreak", { days: streak.longestStreak })}
               </p>
             </div>
@@ -235,13 +235,13 @@ function DashboardContent() {
         </Card>
 
         {/* Rank Card */}
-        <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+        <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10">
               <Trophy className="h-6 w-6 text-amber-500" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">{t("yourRank")}</p>
+              <p className="text-sm text-muted-foreground">{t("yourRank")}</p>
               <p className="text-2xl font-bold">
                 {isLoadingRank ? "—" : userRank ? `#${userRank}` : "—"}
               </p>
@@ -258,18 +258,18 @@ function DashboardContent() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold">{t("currentCourses")}</h2>
               <Link href="/courses">
-                <Button variant="ghost" size="sm" className="gap-1 text-purple-300 hover:bg-white/5">
+                <Button variant="ghost" size="sm" className="gap-1 text-primary hover:bg-accent">
                   {tc("viewAll")} <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             </div>
             {progressList.length === 0 ? (
-              <Card className="border-white/10 bg-[#0F1322]/70 text-slate-300">
+              <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                  <BookOpen className="mb-4 h-12 w-12 text-slate-700" />
-                  <p className="text-slate-400">{t("noCourses")}</p>
+                  <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">{t("noCourses")}</p>
                   <Link href="/courses" className="mt-4">
-                    <Button variant="ghost" size="sm" className="border border-purple-500/30 bg-purple-500/20 text-purple-200 hover:bg-purple-500/30">
+                    <Button variant="ghost" size="sm" className="border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20">
                       {t("startLearning")}
                     </Button>
                   </Link>
@@ -279,24 +279,24 @@ function DashboardContent() {
               <div className="space-y-3">
                 {progressList.map((cp) => (
                   <Link key={cp.courseSlug} href={`/courses/${cp.courseSlug}`}>
-                    <Card className="cursor-pointer border-white/10 bg-[#0F1322]/70 text-slate-200 transition-all hover:border-purple-500/40">
+                    <Card className="cursor-pointer transition-all hover:border-primary/40">
                       <CardContent className="flex items-center gap-4 p-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-black/20">
-                          <BookOpen className="h-5 w-5 text-slate-500" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-muted/50">
+                          <BookOpen className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="truncate font-medium">{cp.courseSlug}</p>
                           <div className="mt-1 flex items-center gap-2">
                             <Progress
                               value={cp.completionPercent}
-                              className="h-1.5 flex-1 bg-white/10"
+                              className="h-1.5 flex-1"
                             />
-                            <span className="whitespace-nowrap text-xs text-slate-500">
+                            <span className="whitespace-nowrap text-xs text-muted-foreground">
                               {cp.completionPercent}%
                             </span>
                           </div>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-slate-500" />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       </CardContent>
                     </Card>
                   </Link>
@@ -309,14 +309,14 @@ function DashboardContent() {
           <section>
             <h2 className="mb-4 text-xl font-semibold">{t("recentActivity")}</h2>
             {activity.length === 0 ? (
-              <Card className="border-white/10 bg-[#0F1322]/70">
-                <CardContent className="py-8 text-center text-slate-400">
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
                   {t("noActivity")}
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-white/10 bg-[#0F1322]/70">
-                <CardContent className="divide-y divide-white/10 p-0">
+              <Card>
+                <CardContent className="divide-y divide-border p-0">
                   {activity.slice(0, 8).map((item) => (
                     <div
                       key={item.id}
@@ -329,7 +329,7 @@ function DashboardContent() {
                         <p className="text-sm truncate">
                           {t("activityCompletedIn", { course: item.courseSlug })}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {new Date(item.completedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -347,7 +347,7 @@ function DashboardContent() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* XP Level Display */}
-          <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">{t("xpBalance")}</CardTitle>
             </CardHeader>
@@ -357,7 +357,7 @@ function DashboardContent() {
           </Card>
 
           {/* Streak Calendar */}
-          <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">{t("streakCalendar")}</CardTitle>
             </CardHeader>
@@ -366,7 +366,7 @@ function DashboardContent() {
                 currentStreak={streak.currentStreak}
                 longestStreak={streak.longestStreak}
               />
-              <div className="border-t border-white/10 pt-4">
+              <div className="border-t border-border pt-4">
                 <StreakCalendar
                   streakHistory={streak.streakHistory}
                   currentStreak={streak.currentStreak}
@@ -377,13 +377,13 @@ function DashboardContent() {
           </Card>
 
           {/* Achievements */}
-          <Card className="border-white/10 bg-[#0F1322]/70 text-slate-200">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">{t("achievements")}</CardTitle>
             </CardHeader>
             <CardContent>
               {achievements.filter((a) => a.unlocked).length === 0 ? (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {t("noAchievements")}
                 </p>
               ) : (
@@ -400,7 +400,7 @@ function DashboardContent() {
                     ))}
                 </div>
               )}
-              <div className="mt-3 text-center text-xs text-slate-500">
+              <div className="mt-3 text-center text-xs text-muted-foreground">
                 {achievements.filter((a) => a.unlocked).length} /{" "}
                 {achievements.length} {tc("unlocked").toLowerCase()}
               </div>

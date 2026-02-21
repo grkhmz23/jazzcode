@@ -28,54 +28,54 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   const navItems = [
-    { href: "/", label: t("home"), icon: <Compass className="h-5 w-5 flex-shrink-0 text-slate-500" /> },
+    { href: "/", label: t("home"), icon: <Compass className="h-5 w-5 flex-shrink-0 text-muted-foreground" /> },
     {
       href: "/dashboard",
       label: t("dashboard"),
-      icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/courses",
       label: t("courses"),
-      icon: <BookOpen className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <BookOpen className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/playground",
       label: t("playground"),
-      icon: <Code2 className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <Code2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/devlab",
       label: t("devlab"),
-      icon: <BrainCircuit className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <BrainCircuit className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/leaderboard",
       label: t("leaderboard"),
-      icon: <Medal className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <Medal className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/profile",
       label: t("profile"),
-      icon: <User className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <User className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
     {
       href: "/settings",
       label: tc("settings"),
-      icon: <Settings className="h-5 w-5 flex-shrink-0 text-slate-500" />,
+      icon: <Settings className="h-5 w-5 flex-shrink-0 text-muted-foreground" />,
     },
   ];
 
   return (
-    <div className="relative flex min-h-0 flex-1 overflow-hidden bg-[#05070D] text-slate-300">
+    <div className="relative flex min-h-0 flex-1 overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute left-0 right-0 top-0 h-[400px] bg-gradient-to-b from-purple-900/10 to-transparent" />
-        <div className="absolute -left-[15%] bottom-[-30%] h-[50%] w-[50%] rounded-full bg-indigo-900/20 blur-[150px]" />
-        <div className="absolute -right-[10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-amber-900/10 blur-[150px]" />
+        <div className="absolute left-0 right-0 top-0 h-[400px] bg-gradient-to-b from-primary/5 to-transparent" />
+        <div className="absolute -left-[15%] bottom-[-30%] h-[50%] w-[50%] rounded-full bg-indigo-500/10 blur-[150px] dark:bg-indigo-900/20" />
+        <div className="absolute -right-[10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-amber-500/10 blur-[150px] dark:bg-amber-900/10" />
       </div>
 
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="z-20 justify-between gap-10 border-r border-white/10 bg-[#0A0D18]/80 backdrop-blur-2xl">
+        <SidebarBody className="z-20 justify-between gap-10 border-r border-border bg-card/80 backdrop-blur-2xl">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             <Link href="/" className="flex items-center gap-2 py-1">
               <Image
@@ -94,14 +94,14 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
                   className={cn(
                     "rounded-xl px-3 py-2",
                     pathname === item.href || pathname.startsWith(`${item.href}/`)
-                      ? "bg-white/10 text-white"
-                      : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                   )}
                 />
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-4">
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-muted/50 to-transparent p-4">
             <SidebarLink
               link={{
                 label: session?.user?.name ?? tc("signIn"),
@@ -115,7 +115,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
                     alt={session.user.name ?? "User"}
                   />
                 ) : (
-                  <UserCog className="h-5 w-5 flex-shrink-0 text-slate-300" />
+                  <UserCog className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                 ),
               }}
             />
@@ -129,7 +129,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#05070D]/90 p-3 backdrop-blur-2xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 p-3 backdrop-blur-2xl lg:hidden">
         <div className="flex items-center justify-around">
           {navItems.slice(0, 6).map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -139,7 +139,7 @@ export function AppSidebarShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center gap-1 rounded-xl p-2 text-[10px] uppercase tracking-widest",
-                  active ? "text-amber-400" : "text-slate-500"
+                  active ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 {item.icon}
