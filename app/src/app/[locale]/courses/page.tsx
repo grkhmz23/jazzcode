@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -263,8 +264,19 @@ export default function CourseCatalogPage() {
                 glowColor="indigo"
               >
                 <div className="flex h-full flex-col p-6">
-                  <div className="mb-4 flex h-32 items-center justify-center rounded-xl border border-border bg-muted/50">
-                    <BookOpen className="h-12 w-12 text-muted-foreground/50" />
+                  <div className="mb-4 relative h-32 rounded-xl border border-border bg-muted/50 overflow-hidden">
+                    {course.imageUrl ? (
+                      <Image 
+                        src={course.imageUrl} 
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-muted-foreground/50" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge className={`text-xs ${difficultyColor(course.difficulty)}`}>
