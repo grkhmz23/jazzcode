@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/config";
 import { getProgressService } from "@/lib/services/progress-factory";
-import { handleApiError } from "@/lib/api/errors";
+import { Errors, handleApiError } from "@/lib/api/errors";
 import { logger, generateRequestId } from "@/lib/logging/logger";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/progress/[courseSlug]
@@ -20,7 +22,7 @@ export async function GET(
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      throw new Error("Unauthorized");
+      throw Errors.unauthorized("You must be signed in to view course progress");
     }
 
     // Get progress

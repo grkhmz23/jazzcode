@@ -16,7 +16,9 @@ import type { editor } from "monaco-editor";
 import dynamic from "next/dynamic";
 import { EditorLoading } from "./EditorLoading";
 
-// Dynamically import Monaco Editor with SSR disabled
+// Dynamically import Monaco Editor with SSR disabled.
+// Uses the default CDN loader from @monaco-editor/react which handles
+// workers, CSS, and module loading automatically.
 const MonacoEditor = dynamic(
   () => import("@monaco-editor/react").then((mod) => mod.Editor),
   {
@@ -90,6 +92,13 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // Handle hydration - only render on client
     useEffect(() => {
       setMounted(true);
+    }, []);
+
+    useEffect(() => {
+      if (!mounted || editorReady) {
+        return;
+      }
+
       fallbackTimeoutRef.current = setTimeout(() => {
         if (!editorRef.current) {
           setEditorFailed(true);
@@ -99,9 +108,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       return () => {
         if (fallbackTimeoutRef.current) {
           clearTimeout(fallbackTimeoutRef.current);
+          fallbackTimeoutRef.current = null;
         }
       };
-    }, []);
+    }, [editorReady, mounted]);
 
     // Expose imperative handle
     useImperativeHandle(

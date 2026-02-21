@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/db/client";
 import { verifyWalletSignature } from "@/lib/auth/wallet-verify";
 import { logger } from "@/lib/logging/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/api/middleware";
 
 interface LinkWalletRequest {
   walletAddress: string;
@@ -17,6 +19,27 @@ interface LinkWalletRequest {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
+    const ip = getClientIp(request);
+    const rate = await checkRateLimit(`auth-link-wallet:${ip}`, {
+      limit: 20,
+      windowSeconds: 60,
+    });
+    if (!rate.success) {
+      const retryAfter = Math.max(1, rate.reset - Math.floor(Date.now() / 1000));
+      return NextResponse.json(
+        { error: "Too many wallet link attempts. Please try again shortly." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(rate.limit),
+            "X-RateLimit-Remaining": String(rate.remaining),
+            "X-RateLimit-Reset": String(rate.reset),
+          },
+        }
+      );
+    }
+
     // Verify the user is authenticated
     const session = await getServerSession(authOptions);
 
@@ -38,11 +61,35 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Verify the message format matches expected pattern
-    const expectedMessage = `Link wallet to Superteam Academy: ${session.user.id}`;
-    if (message !== expectedMessage) {
+    // Verify the message format and extract one-time nonce
+    const messagePrefix = `Link wallet to Superteam Academy: ${session.user.id}:`;
+    if (!message.startsWith(messagePrefix)) {
       return NextResponse.json(
         { error: "Invalid message format" },
+        { status: 400 }
+      );
+    }
+    const nonce = message.slice(messagePrefix.length).trim();
+    if (!nonce) {
+      return NextResponse.json(
+        { error: "Missing nonce in signed message" },
+        { status: 400 }
+      );
+    }
+
+    const nonceRecord = await prisma.walletNonce.findFirst({
+      where: {
+        address: walletAddress,
+        nonce,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { expiresAt: "desc" },
+    });
+
+    if (!nonceRecord) {
+      return NextResponse.json(
+        { error: "Invalid or expired nonce" },
         { status: 400 }
       );
     }
@@ -84,6 +131,19 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     await prisma.$transaction(async (tx) => {
+      const markUsed = await tx.walletNonce.updateMany({
+        where: {
+          id: nonceRecord.id,
+          used: false,
+          expiresAt: { gt: new Date() },
+        },
+        data: { used: true },
+      });
+
+      if (markUsed.count !== 1) {
+        throw new Error("Nonce is no longer valid");
+      }
+
       await tx.user.update({
         where: { id: session.user.id },
         data: { walletAddress },
@@ -113,10 +173,19 @@ export async function POST(request: NextRequest): Promise<Response> {
       walletAddress,
     });
 
-    return NextResponse.json({
-      success: true,
-      walletAddress,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        walletAddress,
+      },
+      {
+        headers: {
+          "X-RateLimit-Limit": String(rate.limit),
+          "X-RateLimit-Remaining": String(rate.remaining),
+          "X-RateLimit-Reset": String(rate.reset),
+        },
+      }
+    );
   } catch (error) {
     logger.error("Error linking wallet", { error });
     return NextResponse.json(
@@ -139,6 +208,20 @@ export async function DELETE(): Promise<Response> {
       return NextResponse.json(
         { error: "Unauthorized - Please sign in first" },
         { status: 401 }
+      );
+    }
+
+    const linkedOAuthCount = await prisma.account.count({
+      where: { userId: session.user.id },
+    });
+
+    if (linkedOAuthCount === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot unlink wallet: link GitHub first so you still have a sign-in method.",
+        },
+        { status: 400 }
       );
     }
 

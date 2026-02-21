@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/config";
 import { getAchievementEngine } from "@/lib/services/achievements";
-import { handleApiError } from "@/lib/api/errors";
+import { Errors, handleApiError } from "@/lib/api/errors";
 import { logger, generateRequestId } from "@/lib/logging/logger";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/achievements
@@ -16,7 +18,7 @@ export async function GET(): Promise<Response> {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      throw new Error("Unauthorized");
+      throw Errors.unauthorized("You must be signed in to view achievements");
     }
 
     // Get achievements with status

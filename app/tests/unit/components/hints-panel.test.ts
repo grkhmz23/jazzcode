@@ -1,11 +1,42 @@
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
 import { HintsPanel, nextRevealCount, normalizeHints } from "@/components/lessons/HintsPanel";
+
+const lessonMessages = {
+  hintsTitle: "Hints",
+  revealNextHint: "Reveal next",
+  revealAllHints: "Reveal all",
+  noHintsYet: "No hints were provided for this challenge yet.",
+  reportHintDataIssue: "If this looks wrong, report the challenge so we can fix the lesson data.",
+  reportIssue: "Report issue",
+  hintsAvailable: "Hints are available for this challenge.",
+  useRevealNextHint: "Use \"Reveal next\" to see one hint at a time.",
+};
+
+function renderHintsPanel(props: React.ComponentProps<typeof HintsPanel>) {
+  const Provider =
+    NextIntlClientProvider as React.ComponentType<
+      React.PropsWithChildren<{
+        locale: string;
+        timeZone: string;
+        messages: { lesson: typeof lessonMessages };
+      }>
+    >;
+
+  return renderToStaticMarkup(
+    React.createElement(
+      Provider,
+      { locale: "en", timeZone: "UTC", messages: { lesson: lessonMessages } },
+      React.createElement(HintsPanel, props)
+    )
+  );
+}
 
 describe("HintsPanel", () => {
   it("renders non-empty state when no hints are provided", () => {
-    const html = renderToStaticMarkup(React.createElement(HintsPanel, { hints: [], defaultOpen: true }));
+    const html = renderHintsPanel({ hints: [], defaultOpen: true });
 
     expect(html).toContain("No hints were provided for this challenge yet.");
     expect(html).toContain("Report issue");
@@ -26,12 +57,10 @@ describe("HintsPanel", () => {
   });
 
   it("supports markdown content safely", () => {
-    const html = renderToStaticMarkup(
-      React.createElement(HintsPanel, {
-        hints: ["Use code:\n```ts\nconst amount = 1;\n```"],
-        defaultOpen: true,
-      }),
-    );
+    const html = renderHintsPanel({
+      hints: ["Use code:\n```ts\nconst amount = 1;\n```"],
+      defaultOpen: true,
+    });
 
     expect(html).toContain("Use code:");
     expect(html).toContain("const amount = 1;");

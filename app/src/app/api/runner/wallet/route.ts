@@ -14,7 +14,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         publicKey: wallet.publicKey,
-        keypairPath: wallet.keypairPath,
         // secrets never returned by design
       },
       {

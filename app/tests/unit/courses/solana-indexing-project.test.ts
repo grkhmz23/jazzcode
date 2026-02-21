@@ -98,7 +98,7 @@ describe("solana indexing project helpers", () => {
 
   describe("analytics checkpoint challenge (lesson 8)", () => {
     it("has valid test cases for analytics aggregation", () => {
-      expect(lesson8TestCases).toHaveLength(1);
+      expect(lesson8TestCases.length).toBeGreaterThanOrEqual(1);
       
       const [test1] = lesson8TestCases;
       
@@ -108,6 +108,13 @@ describe("solana indexing project helpers", () => {
       expect(test1.expectedOutput).toContain("wallets");
       expect(test1.expectedOutput).toContain("totalEvents");
       expect(test1.expectedOutput).toContain("uniqueWallets");
+
+      const emptyStreamCase = lesson8TestCases.find((testCase) =>
+        testCase.name.toLowerCase().includes("empty")
+      );
+      expect(emptyStreamCase).toBeDefined();
+      expect(emptyStreamCase?.expectedOutput).toContain('"totalEvents":0');
+      expect(emptyStreamCase?.expectedOutput).toContain('"uniqueWallets":0');
     });
 
     it("has solution code with analytics aggregation", () => {

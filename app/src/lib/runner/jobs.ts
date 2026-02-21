@@ -2,7 +2,8 @@ import { createInitialTerminalState, runTerminalCommand, TerminalSimState } from
 import { executeCommandWithLimits } from "@/lib/runner/executor";
 import { createIsolatedWorkdir, cleanupWorkdir } from "@/lib/runner/workdir";
 import { RunnerJobRequest, RunnerResult } from "@/lib/runner/types";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const MAX_OUTPUT_BYTES = 512_000;
 
@@ -91,6 +92,29 @@ async function readOutputFile(workdir: string, relativePath: string): Promise<st
   }
 }
 
+async function collectJsonOutputFiles(
+  workdir: string,
+  relativeDir: string,
+  outputFiles: Record<string, string>
+): Promise<void> {
+  try {
+    const absoluteDir = join(workdir, relativeDir);
+    const entries = await readdir(absoluteDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile() || !entry.name.endsWith(".json")) {
+        continue;
+      }
+      const relativePath = `${relativeDir}/${entry.name}`;
+      const content = await readOutputFile(workdir, relativePath);
+      if (content !== null) {
+        outputFiles[relativePath] = content;
+      }
+    }
+  } catch {
+    // Directory may not exist for some jobs; ignore.
+  }
+}
+
 function parseProgramIdFromOutput(stdout: string): string | undefined {
   const match =
     stdout.match(/Program Id:\s*([1-9A-HJ-NP-Za-km-z]+)/i) ??
@@ -118,15 +142,8 @@ async function runAnchorDeployJob(
     });
 
     const outputFiles: Record<string, string> = {};
-    const deployJson = await readOutputFile(workdir, "target/deploy/deploy.json");
-    if (deployJson !== null) {
-      outputFiles["target/deploy/deploy.json"] = deployJson;
-    }
-
-    const idlJson = await readOutputFile(workdir, "target/idl/idl.json");
-    if (idlJson !== null) {
-      outputFiles["target/idl/idl.json"] = idlJson;
-    }
+    await collectJsonOutputFiles(workdir, "target/deploy", outputFiles);
+    await collectJsonOutputFiles(workdir, "target/idl", outputFiles);
 
     const programId = parseProgramIdFromOutput(result.stdout);
 
@@ -165,10 +182,7 @@ async function runAnchorIdlBuildJob(
     });
 
     const outputFiles: Record<string, string> = {};
-    const idlJson = await readOutputFile(workdir, "target/idl/idl.json");
-    if (idlJson !== null) {
-      outputFiles["target/idl/idl.json"] = idlJson;
-    }
+    await collectJsonOutputFiles(workdir, "target/idl", outputFiles);
 
     return {
       ...makeResult(request, startedAt, {

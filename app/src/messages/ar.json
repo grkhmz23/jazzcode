@@ -59,7 +59,8 @@
     "connectWallet": "Connect Wallet",
     "linkWallet": "Link Wallet",
     "errorSupportMessage": "تم إبلاغنا بالمشكلة ونعمل على إصلاحها.",
-    "achievementUnlocked": "تم فتح إنجاز جديد!"
+    "achievementUnlocked": "تم فتح إنجاز جديد!",
+    "settings": "الإعدادات"
   },
   "nav": {
     "home": "Home",
@@ -186,6 +187,7 @@
     "completeLesson": "Mark as Complete",
     "dayStreak": "Day Streak",
     "signInToTrack": "Sign in to track progress",
+    "categoryNft": "NFT & Metaplex",
     "categories": {
       "all": "كل الفئات",
       "solana": "أساسيات سولانا",
@@ -710,6 +712,7 @@
     "newFolder": "مجلد جديد",
     "noActiveFile": "لا يوجد ملف نشط",
     "editorPaneAriaLabel": "لوحة المحرر",
+    "explorer": "المستكشف",
     "fileExplorerAriaLabel": "مستكشف الملفات",
     "createFileAriaLabel": "إنشاء ملف",
     "searchFilesPlaceholder": "اكتب للبحث عن الملفات...",

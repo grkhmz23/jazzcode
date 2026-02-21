@@ -4,6 +4,7 @@ import { getClientIp } from "@/lib/api/middleware";
 import { enforceRunnerRateLimit, runRunnerJob, runnerJobSchema } from "@/lib/runner";
 import { resolveRequestActorId } from "@/lib/security/request-identity";
 import { redactRunnerLogs } from "@/lib/runner/redaction";
+import { createRunnerJobAccessToken } from "@/lib/runner/job-token";
 import {
   createWorkspaceArchiveBase64,
   extractOutputArchiveBase64,
@@ -44,8 +45,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
 
       if (stream) {
+        const accessToken = createRunnerJobAccessToken(submitted.jobId, actorId);
         return NextResponse.json(
-          { jobId: submitted.jobId },
+          { jobId: accessToken },
           {
             headers: {
               "X-RateLimit-Limit": String(rate.limit),

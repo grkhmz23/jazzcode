@@ -15,6 +15,7 @@ import { logger } from "@/lib/logging/logger";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  dbSignalHandlersRegistered?: boolean;
 };
 
 /**
@@ -87,7 +88,9 @@ export async function disconnectDatabase(): Promise<void> {
 }
 
 // Handle graceful shutdown
-if (typeof process !== "undefined") {
+if (typeof process !== "undefined" && !globalForPrisma.dbSignalHandlersRegistered) {
+  globalForPrisma.dbSignalHandlersRegistered = true;
+
   process.on("SIGTERM", async () => {
     logger.info("SIGTERM received, disconnecting database...");
     await disconnectDatabase();

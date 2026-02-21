@@ -7,6 +7,8 @@ import { validate, Schemas } from "@/lib/api/validation";
 import { Errors, handleApiError } from "@/lib/api/errors";
 import { logger, generateRequestId } from "@/lib/logging/logger";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Schema for enrollment request
  */

@@ -59,7 +59,8 @@
     "connectWallet": "Connect Wallet",
     "linkWallet": "Link Wallet",
     "errorSupportMessage": "我们已收到通知，正在修复该问题。",
-    "achievementUnlocked": "成就已解锁！"
+    "achievementUnlocked": "成就已解锁！",
+    "settings": "设置"
   },
   "nav": {
     "home": "Home",
@@ -186,6 +187,7 @@
     "completeLesson": "Mark as Complete",
     "dayStreak": "Day Streak",
     "signInToTrack": "Sign in to track progress",
+    "categoryNft": "NFT & Metaplex",
     "categories": {
       "all": "所有分类",
       "solana": "Solana 核心",
@@ -710,6 +712,7 @@
     "newFolder": "新建文件夹",
     "noActiveFile": "没有活动文件",
     "editorPaneAriaLabel": "编辑器面板",
+    "explorer": "资源管理器",
     "fileExplorerAriaLabel": "文件浏览器",
     "createFileAriaLabel": "创建文件",
     "searchFilesPlaceholder": "输入以搜索文件...",

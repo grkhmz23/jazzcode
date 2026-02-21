@@ -5,7 +5,7 @@ import { withApiMiddleware } from "@/lib/api/middleware";
 import { validateQuery } from "@/lib/api/validation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
-import { leaderboardService } from "@/lib/services/registry";
+import { getProgressService } from "@/lib/services/progress-factory";
 import { getOnChainLeaderboard } from "@/lib/services/onchain";
 import { prisma } from "@/lib/db/client";
 import { logger, generateRequestId } from "@/lib/logging/logger";
@@ -13,11 +13,12 @@ import { logger, generateRequestId } from "@/lib/logging/logger";
 // Use inline type to avoid conflicts
 interface LocalLeaderboardEntry {
   rank: number;
-  wallet: string;
-  username: string | null;
+  userId: string;
+  wallet: string | null;
+  username: string;
   avatarUrl: string | null;
-  xp: number;
   level: number;
+  xp: number;
   streak: number;
 }
 
@@ -26,9 +27,7 @@ interface EnrichedEntry extends LocalLeaderboardEntry {
 }
 
 export const runtime = "nodejs";
-
-// Revalidate cache every 5 minutes
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 const QuerySchema = z.object({
   timeframe: z.enum(["weekly", "monthly", "alltime"]).optional().default("alltime"),
@@ -52,13 +51,37 @@ export const GET = withApiMiddleware(
     logger.info("Fetching leaderboard", { timeframe, limit, requestId });
 
     // Fetch local leaderboard (always available)
-    const localEntries = (await leaderboardService.getLeaderboard(
-      timeframe,
-      limit
-    )) as LocalLeaderboardEntry[];
+    const progressService = getProgressService();
+    const localBaseEntries = await progressService.getLeaderboard(timeframe, limit);
+
+    const userIds = localBaseEntries.map((entry) => entry.userId);
+    const wallets = await prisma.userWallet.findMany({
+      where: { userId: { in: userIds } },
+      select: { userId: true, address: true, isPrimary: true },
+    });
+
+    // Prefer primary wallet when users have multiple addresses.
+    const userWalletMap = new Map<string, string>();
+    wallets
+      .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary))
+      .forEach((w) => {
+        if (!userWalletMap.has(w.userId)) {
+          userWalletMap.set(w.userId, w.address);
+        }
+      });
+
+    const localEntries: LocalLeaderboardEntry[] = localBaseEntries.map((entry) => ({
+      ...entry,
+      wallet: userWalletMap.get(entry.userId) ?? null,
+      username: entry.username,
+      xp: entry.totalXP,
+      streak: entry.currentStreak,
+    }));
 
     // Enrich with usernames from DB where possible
-    const walletAddresses = localEntries.map((e) => e.wallet);
+    const walletAddresses = localEntries
+      .map((e) => e.wallet)
+      .filter((wallet): wallet is string => Boolean(wallet));
     const walletsWithUsers = await prisma.userWallet.findMany({
       where: { address: { in: walletAddresses } },
       include: {
@@ -94,8 +117,8 @@ export const GET = withApiMiddleware(
     // Merge local and on-chain data
     // Start with local entries and add on-chain XP where available
     const enriched: EnrichedEntry[] = localEntries.map((entry) => {
-      const userInfo = walletUserMap.get(entry.wallet);
-      const onChainXP = walletToOnChainXP.get(entry.wallet);
+      const userInfo = entry.wallet ? walletUserMap.get(entry.wallet) : undefined;
+      const onChainXP = entry.wallet ? walletToOnChainXP.get(entry.wallet) : undefined;
 
       return {
         ...entry,
@@ -116,21 +139,8 @@ export const GET = withApiMiddleware(
     // User rank
     let userRank: number | null = null;
     const session = await getServerSession(authOptions);
-    if (session?.user && "id" in session.user) {
-      const userId = (session.user as { id: string }).id;
-      const userWallets = await prisma.userWallet.findMany({
-        where: { userId },
-        select: { address: true },
-      });
-
-      const userWalletSet = new Set(userWallets.map((w) => w.address));
-
-      for (let i = 0; i < enriched.length; i++) {
-        if (userWalletSet.has(enriched[i].wallet)) {
-          userRank = i + 1;
-          break;
-        }
-      }
+    if (session?.user?.id) {
+      userRank = await progressService.getUserRank(session.user.id, timeframe);
     }
 
     const response: LeaderboardResponse = {
@@ -144,7 +154,7 @@ export const GET = withApiMiddleware(
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+          "Cache-Control": "private, no-store",
         },
       }
     );

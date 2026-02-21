@@ -46,7 +46,7 @@ interface SettingsData {
 function SettingsContent() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
-  useSession();
+  const { data: session } = useSession();
   const { publicKey, signMessage, connected } = useWallet();
   const { theme: currentTheme, setTheme } = useTheme();
   const router = useRouter();
@@ -117,21 +117,28 @@ function SettingsContent() {
 
   const handleLinkWallet = useCallback(async () => {
     if (!connected || !publicKey || !signMessage) return;
+    if (!session?.user?.id) {
+      setError("Not authenticated");
+      return;
+    }
 
     setIsLinkingWallet(true);
     setError(null);
 
     try {
-      // Get user ID from session - we need this for the message format
-      const sessionResponse = await fetch("/api/auth/session");
-      const sessionData = (await sessionResponse.json()) as { user?: { id?: string } };
-      
-      if (!sessionData.user?.id) {
-        throw new Error("Not authenticated");
+      const walletAddress = publicKey.toBase58();
+      const nonceResponse = await fetch("/api/auth/nonce", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: walletAddress }),
+      });
+      if (!nonceResponse.ok) {
+        throw new Error("Failed to get wallet link nonce");
       }
+      const noncePayload = (await nonceResponse.json()) as { nonce: string };
 
       // Construct the message for linking
-      const message = `Link wallet to Superteam Academy: ${sessionData.user.id}`;
+      const message = `Link wallet to Superteam Academy: ${session.user.id}:${noncePayload.nonce}`;
 
       // Sign the message
       const messageBytes = new TextEncoder().encode(message);
@@ -143,7 +150,7 @@ function SettingsContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          walletAddress: publicKey.toBase58(),
+          walletAddress,
           signature: signatureB58,
           message: message,
         }),
@@ -171,7 +178,7 @@ function SettingsContent() {
     } finally {
       setIsLinkingWallet(false);
     }
-  }, [connected, publicKey, signMessage, t]);
+  }, [connected, publicKey, session?.user?.id, signMessage, t]);
 
   const handleUnlinkWallet = useCallback(async () => {
     setIsLinkingWallet(true);

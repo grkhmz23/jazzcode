@@ -59,7 +59,8 @@
     "connectWallet": "Connect Wallet",
     "linkWallet": "Link Wallet",
     "errorSupportMessage": "Nous avons été informés et travaillons à corriger le problème.",
-    "achievementUnlocked": "Succès débloqué !"
+    "achievementUnlocked": "Succès débloqué !",
+    "settings": "Paramètres"
   },
   "nav": {
     "home": "Home",
@@ -186,6 +187,7 @@
     "completeLesson": "Mark as Complete",
     "dayStreak": "Day Streak",
     "signInToTrack": "Sign in to track progress",
+    "categoryNft": "NFT & Metaplex",
     "categories": {
       "all": "Toutes les catégories",
       "solana": "Noyau Solana",
@@ -710,6 +712,7 @@
     "newFolder": "Nouveau dossier",
     "noActiveFile": "Aucun fichier actif",
     "editorPaneAriaLabel": "Panneau éditeur",
+    "explorer": "Explorateur",
     "fileExplorerAriaLabel": "Explorateur de fichiers",
     "createFileAriaLabel": "Créer un fichier",
     "searchFilesPlaceholder": "Tapez pour rechercher des fichiers...",

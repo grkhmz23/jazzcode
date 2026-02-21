@@ -307,6 +307,36 @@ describe("PrismaLearningProgressService", () => {
       expect(result.previousLevel).toBe(result.newLevel);
       expect(result.leveledUp).toBe(false);
     });
+
+    it("returns idempotent result when concurrent unique conflict occurs", async () => {
+      mockPrisma.$transaction.mockRejectedValueOnce({ code: "P2002" });
+      mockPrisma.userXP.findUnique.mockResolvedValue({
+        totalXP: 250,
+      });
+
+      const result = await service.completeLesson("user-1", "test-course", "lesson-1");
+
+      expect(result.xpAwarded).toBe(0);
+      expect(result.totalXP).toBe(250);
+      expect(result.previousLevel).toBe(result.newLevel);
+      expect(result.leveledUp).toBe(false);
+      expect(result.isNewCompletion).toBe(false);
+    });
+  });
+
+  describe("enrollInCourse idempotency", () => {
+    it("uses enrollment upsert to avoid duplicate-row race failures", async () => {
+      await service.enrollInCourse("user-1", "test-course");
+
+      expect(mockPrisma.enrollment.upsert).toHaveBeenCalledWith({
+        where: { userId_courseSlug: { userId: "user-1", courseSlug: "test-course" } },
+        update: {},
+        create: expect.objectContaining({
+          userId: "user-1",
+          courseSlug: "test-course",
+        }),
+      });
+    });
   });
 
   describe("getLeaderboard", () => {

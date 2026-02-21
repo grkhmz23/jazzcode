@@ -4,8 +4,10 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/db/client";
 import { validateQuery } from "@/lib/api/validation";
-import { handleApiError } from "@/lib/api/errors";
+import { Errors, handleApiError } from "@/lib/api/errors";
 import { logger, generateRequestId } from "@/lib/logging/logger";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Schema for activity query params
@@ -34,7 +36,7 @@ export async function GET(request: Request): Promise<Response> {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      throw new Error("Unauthorized");
+      throw Errors.unauthorized("You must be signed in to view activity");
     }
 
     // Parse query params

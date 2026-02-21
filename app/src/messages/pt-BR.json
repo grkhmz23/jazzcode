@@ -59,7 +59,8 @@
     "connectWallet": "Conectar Carteira",
     "linkWallet": "Vincular Carteira",
     "errorSupportMessage": "Fomos notificados e estamos trabalhando para corrigir o problema.",
-    "achievementUnlocked": "Conquista desbloqueada!"
+    "achievementUnlocked": "Conquista desbloqueada!",
+    "settings": "Configurações"
   },
   "nav": {
     "home": "Início",
@@ -186,6 +187,7 @@
     "completeLesson": "Marcar como Concluída",
     "dayStreak": "Dias em Sequência",
     "signInToTrack": "Entre para acompanhar seu progresso",
+    "categoryNft": "NFT & Metaplex",
     "categories": {
       "all": "Todas as categorias",
       "solana": "Núcleo Solana",
@@ -710,6 +712,7 @@
     "newFolder": "Nova pasta",
     "noActiveFile": "Nenhum arquivo ativo",
     "editorPaneAriaLabel": "Painel do editor",
+    "explorer": "Explorador",
     "fileExplorerAriaLabel": "Explorador de arquivos",
     "createFileAriaLabel": "Criar arquivo",
     "searchFilesPlaceholder": "Digite para buscar arquivos...",

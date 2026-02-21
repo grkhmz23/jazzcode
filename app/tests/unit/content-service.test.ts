@@ -88,11 +88,25 @@ describe('CourseContentService', () => {
     });
 
     it('filters by search query in description', async () => {
-      const results = await service.searchCourses('accounts', {});
+      const sourceCourse = allCourses.find((course) => {
+        const descriptionWords = course.description
+          .toLowerCase()
+          .split(/[^a-z0-9]+/)
+          .filter((word) => word.length >= 6);
+        return descriptionWords.some((word) => !course.title.toLowerCase().includes(word));
+      });
+
+      const queryWord = sourceCourse?.description
+        .toLowerCase()
+        .split(/[^a-z0-9]+/)
+        .find((word) => word.length >= 6 && !sourceCourse.title.toLowerCase().includes(word));
+
+      expect(queryWord).toBeTruthy();
+      const results = await service.searchCourses(queryWord ?? '', {});
       expect(results.length).toBeGreaterThan(0);
       expect(results.every(c => 
-        c.title.toLowerCase().includes('accounts') || 
-        c.description.toLowerCase().includes('accounts')
+        c.title.toLowerCase().includes(queryWord ?? '') || 
+        c.description.toLowerCase().includes(queryWord ?? '')
       )).toBe(true);
     });
 

@@ -7,6 +7,10 @@ import { logger, generateRequestId } from "@/lib/logging/logger";
 import { getOnChainLeaderboard } from "@/lib/services/onchain";
 import { prisma } from "@/lib/db/client";
 import type { LeaderboardEntry } from "@/types/progress";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth/config";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Schema for leaderboard query params
@@ -22,6 +26,7 @@ interface EnrichedEntry extends LeaderboardEntry {
 
 interface LeaderboardResponse {
   entries: EnrichedEntry[];
+  userRank: number | null;
   onChainAvailable: boolean;
 }
 
@@ -74,8 +79,15 @@ export async function GET(request: Request): Promise<Response> {
       };
     });
 
+    let userRank: number | null = null;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      userRank = await progressService.getUserRank(session.user.id, timeframe);
+    }
+
     const response: LeaderboardResponse = {
       entries: enriched,
+      userRank,
       onChainAvailable,
     };
 
@@ -84,7 +96,7 @@ export async function GET(request: Request): Promise<Response> {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+          "Cache-Control": "private, no-store",
         },
       }
     );

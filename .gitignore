@@ -13,3 +13,23 @@ app/.next/
 *.swp
 .DS_Store
 app/tsconfig.tsbuildinfo
+
+# AI tool configs
+.codex/
+.claude/
+
+# Editor settings
+.vscode/
+
+# Internal dev docs
+AGENTS.md
+ARCHITECTURE.md
+CMS_GUIDE.md
+COMPONENT_HUB.md
+CUSTOMIZATION.md
+PLAYGROUND_FIXES.md
+ROADMAP.md
+
+# Raw data dumps
+solana_courses_10_18.json
+solana_courses_43_51.json

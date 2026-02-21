@@ -31,7 +31,6 @@ export async function GET() {
       database: {
         status: health.healthy ? "up" : "down",
         latencyMs: health.latencyMs,
-        ...(health.error && { error: health.error }),
       },
     },
   };

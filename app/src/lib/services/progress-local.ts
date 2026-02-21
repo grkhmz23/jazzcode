@@ -45,18 +45,11 @@ export class PrismaLearningProgressService implements LearningProgressService {
   async enrollInCourse(userId: string, courseSlug: string): Promise<void> {
     try {
       await prisma.$transaction(async (tx) => {
-        // Check if already enrolled
-        const existingEnrollment = await tx.enrollment.findUnique({
+        // Idempotent enrollment under concurrency.
+        await tx.enrollment.upsert({
           where: { userId_courseSlug: { userId, courseSlug } },
-        });
-
-        if (existingEnrollment) {
-          return;
-        }
-
-        // Create enrollment
-        await tx.enrollment.create({
-          data: {
+          update: {},
+          create: {
             userId,
             courseSlug,
             enrolledAt: new Date(),
@@ -463,6 +456,30 @@ export class PrismaLearningProgressService implements LearningProgressService {
 
       return result;
     } catch (error) {
+      const prismaCode =
+        typeof error === "object" && error && "code" in error
+          ? String((error as { code?: string }).code)
+          : null;
+
+      // If a concurrent request inserted the same completion first, treat as idempotent success.
+      if (prismaCode === "P2002") {
+        const userXP = await prisma.userXP.findUnique({ where: { userId } });
+        const totalXP = userXP?.totalXP ?? 0;
+        const level = calculateLevel(totalXP);
+        return {
+          xpAwarded: 0,
+          totalXP,
+          newLevel: level,
+          previousLevel: level,
+          leveledUp: false,
+          isFirstOfDay: false,
+          streakUpdated: false,
+          newAchievements: [],
+          isNewCompletion: false,
+          isCourseComplete: false,
+        };
+      }
+
       logger.error("Failed to complete lesson", { userId, courseSlug, lessonId, error });
       throw error;
     }
