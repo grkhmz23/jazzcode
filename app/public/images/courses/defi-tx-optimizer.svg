@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="bg-defi-tx-optimizer" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1a2e"/>
+      <stop offset="100%" stop-color="#0a1f2e"/>
+    </linearGradient>
+    <linearGradient id="accent-defi-tx-optimizer" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D1FF"/>
+      <stop offset="100%" stop-color="#00D1FFdd"/>
+    </linearGradient>
+    <filter id="glow-defi-tx-optimizer" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="225" fill="url(#bg-defi-tx-optimizer)"/>
+  <circle cx="200" cy="95" r="55" fill="none" stroke="url(#accent-defi-tx-optimizer)" stroke-width="2" opacity="0.3"/>
+  <circle cx="200" cy="95" r="45" fill="none" stroke="url(#accent-defi-tx-optimizer)" stroke-width="1.5" opacity="0.5"/>
+  <text x="200" y="110" text-anchor="middle" fill="url(#accent-defi-tx-optimizer)" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="bold" filter="url(#glow-defi-tx-optimizer)">🔧</text>
+  <text x="200" y="185" text-anchor="middle" fill="#e0e0e0" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600">Transaction Optimizer</text>
+  <text x="200" y="205" text-anchor="middle" fill="#888" font-family="system-ui, -apple-system, sans-serif" font-size="11" text-transform="uppercase" letter-spacing="1">infra</text>
+</svg>

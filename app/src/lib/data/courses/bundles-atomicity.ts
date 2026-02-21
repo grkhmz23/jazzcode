@@ -317,6 +317,6 @@ export const bundlesAtomicityCourse: Course = {
   duration: "9 hours",
   totalXP: 445,
   tags: ["atomicity", "bundles", "defensive-design", "solana"],
-  imageUrl: "/images/courses/bundles-atomicity.jpg",
+  imageUrl: "/images/courses/bundles-atomicity.svg",
   modules: [module1, module2],
 };

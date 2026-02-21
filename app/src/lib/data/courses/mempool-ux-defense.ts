@@ -320,6 +320,6 @@ export const mempoolUxDefenseCourse: Course = {
   duration: "9 hours",
   totalXP: 445,
   tags: ["mempool", "ux", "slippage", "risk-policy"],
-  imageUrl: "/images/courses/mempool-ux-defense.jpg",
+  imageUrl: "/images/courses/mempool-ux-defense.svg",
   modules: [module1, module2],
 };

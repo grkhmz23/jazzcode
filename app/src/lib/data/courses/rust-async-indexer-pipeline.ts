@@ -264,6 +264,6 @@ export const rustAsyncIndexerPipelineCourse: Course = {
   duration: "10 hours",
   totalXP: 445,
   tags: ["rust", "async", "indexer", "pipeline"],
-  imageUrl: "/images/courses/rust-async-indexer-pipeline.jpg",
+  imageUrl: "/images/courses/rust-async-indexer-pipeline.svg",
   modules: [module1, module2],
 };

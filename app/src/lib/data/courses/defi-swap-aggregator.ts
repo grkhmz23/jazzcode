@@ -455,6 +455,6 @@ export const defiSwapAggregatorCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["defi", "swap", "aggregator", "jupiter", "solana"],
-  imageUrl: "/images/courses/defi-swap-aggregator.jpg",
+  imageUrl: "/images/courses/defi-swap-aggregator.svg",
   modules: [module1, module2],
 };

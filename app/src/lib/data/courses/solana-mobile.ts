@@ -286,6 +286,6 @@ export const solanaMobileCourse: Course = {
   duration: '6 hours',
   totalXP: 1200,
   tags: ['mobile', 'saga', 'dapp-store', 'react-native'],
-  imageUrl: '/images/courses/solana-mobile.jpg',
+  imageUrl: '/images/courses/solana-mobile.svg',
   modules: [module1, module2],
 };

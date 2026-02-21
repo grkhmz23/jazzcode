@@ -445,6 +445,6 @@ export const solanaIndexingCourse: Course = {
   duration: "10 hours",
   totalXP: 400,
   tags: ["indexing", "analytics", "events", "tokens", "solana"],
-  imageUrl: "/images/courses/solana-indexing.jpg",
+  imageUrl: "/images/courses/solana-indexing.svg",
   modules: [module1, module2],
 };

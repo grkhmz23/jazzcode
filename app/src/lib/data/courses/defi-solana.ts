@@ -459,7 +459,7 @@ export const defiSolanaCourse: Course = {
   difficulty: "advanced",
   duration: "12 hours",
   totalXP: 335,
-  imageUrl: "/images/courses/defi-solana.jpg",
+  imageUrl: "/images/courses/defi-solana.svg",
   tags: ["defi", "swap", "routing", "jupiter", "offline", "deterministic"],
   modules: [module1, module2],
 };

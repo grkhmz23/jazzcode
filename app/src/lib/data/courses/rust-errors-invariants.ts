@@ -268,6 +268,6 @@ export const rustErrorsInvariantsCourse: Course = {
   duration: "10 hours",
   totalXP: 445,
   tags: ["rust", "errors", "invariants", "reliability"],
-  imageUrl: "/images/courses/rust-errors-invariants.jpg",
+  imageUrl: "/images/courses/rust-errors-invariants.svg",
   modules: [module1, module2],
 };

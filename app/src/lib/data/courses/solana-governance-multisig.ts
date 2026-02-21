@@ -430,6 +430,6 @@ export const solanaGovernanceMultisigCourse: Course = {
   duration: "11 hours",
   totalXP: 400,
   tags: ["governance", "multisig", "dao", "treasury", "solana"],
-  imageUrl: "/images/courses/solana-governance-multisig.jpg",
+  imageUrl: "/images/courses/solana-governance-multisig.svg",
   modules: [module1, module2],
 };

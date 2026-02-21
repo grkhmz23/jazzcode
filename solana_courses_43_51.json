@@ -15,7 +15,7 @@
         "interoperability",
         "messaging"
       ],
-      "imageUrl": "/images/courses/solana-bridges.png",
+      "imageUrl": "/images/courses/solana-bridges.svg",
       "modules": [
         {
           "id": "mod-43-1",
@@ -385,7 +385,7 @@
         "data-validation",
         "aggregation"
       ],
-      "imageUrl": "/images/courses/solana-oracle.png",
+      "imageUrl": "/images/courses/solana-oracle.svg",
       "modules": [
         {
           "id": "mod-44-1",
@@ -761,7 +761,7 @@
         "treasury",
         "automation"
       ],
-      "imageUrl": "/images/courses/solana-dao.png",
+      "imageUrl": "/images/courses/solana-dao.svg",
       "modules": [
         {
           "id": "mod-45-1",
@@ -1136,7 +1136,7 @@
         "turn-based",
         "progression"
       ],
-      "imageUrl": "/images/courses/solana-gaming.png",
+      "imageUrl": "/images/courses/solana-gaming.svg",
       "modules": [
         {
           "id": "mod-46-1",
@@ -1514,7 +1514,7 @@
         "bundling",
         "manifest"
       ],
-      "imageUrl": "/images/courses/solana-storage.png",
+      "imageUrl": "/images/courses/solana-storage.svg",
       "modules": [
         {
           "id": "mod-47-1",
@@ -1774,7 +1774,7 @@
         "rewards",
         "economics"
       ],
-      "imageUrl": "/images/courses/solana-staking.png",
+      "imageUrl": "/images/courses/solana-staking.svg",
       "modules": [
         {
           "id": "mod-48-1",
@@ -2105,7 +2105,7 @@
         "recovery",
         "session-keys"
       ],
-      "imageUrl": "/images/courses/solana-account-abstraction.png",
+      "imageUrl": "/images/courses/solana-account-abstraction.svg",
       "modules": [
         {
           "id": "mod-49-1",
@@ -2470,7 +2470,7 @@
         "bump",
         "deterministic"
       ],
-      "imageUrl": "/images/courses/solana-pda.png",
+      "imageUrl": "/images/courses/solana-pda.svg",
       "modules": [
         {
           "id": "mod-50-1",
@@ -2840,7 +2840,7 @@
         "token-flows",
         "sustainability"
       ],
-      "imageUrl": "/images/courses/solana-economics.png",
+      "imageUrl": "/images/courses/solana-economics.svg",
       "modules": [
         {
           "id": "mod-51-1",

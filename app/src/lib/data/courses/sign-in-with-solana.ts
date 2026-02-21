@@ -624,6 +624,6 @@ export const signInWithSolanaCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["siws", "authentication", "wallet", "session", "solana"],
-  imageUrl: "/images/courses/sign-in-with-solana.jpg",
+  imageUrl: "/images/courses/sign-in-with-solana.svg",
   modules: [module1, module2],
 };

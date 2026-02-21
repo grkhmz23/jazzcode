@@ -263,6 +263,6 @@ export const rustPerfOnchainThinkingCourse: Course = {
   duration: "10 hours",
   totalXP: 445,
   tags: ["rust", "performance", "compute", "solana"],
-  imageUrl: "/images/courses/rust-perf-onchain-thinking.jpg",
+  imageUrl: "/images/courses/rust-perf-onchain-thinking.svg",
   modules: [module1, module2],
 };

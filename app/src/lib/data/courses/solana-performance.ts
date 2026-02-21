@@ -430,6 +430,6 @@ export const solanaPerformanceCourse: Course = {
   duration: "11 hours",
   totalXP: 405,
   tags: ["performance", "optimization", "compute", "serialization", "solana"],
-  imageUrl: "/images/courses/solana-performance.jpg",
+  imageUrl: "/images/courses/solana-performance.svg",
   modules: [module1, module2],
 };

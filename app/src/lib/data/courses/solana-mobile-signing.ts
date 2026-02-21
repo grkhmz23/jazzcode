@@ -629,6 +629,6 @@ export const solanaMobileSigningCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["mobile", "signing", "wallet", "mwa", "solana"],
-  imageUrl: "/images/courses/solana-mobile-signing.jpg",
+  imageUrl: "/images/courses/solana-mobile-signing.svg",
   modules: [module1, module2],
 };

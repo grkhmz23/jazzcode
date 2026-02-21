@@ -557,6 +557,6 @@ export const defiPerpsRiskConsoleCourse: Course = {
   duration: "14 hours",
   totalXP: 400,
   tags: ["defi", "perps", "perpetuals", "risk", "solana"],
-  imageUrl: "/images/courses/defi-perps-risk-console.jpg",
+  imageUrl: "/images/courses/defi-perps-risk-console.svg",
   modules: [module1, module2],
 };

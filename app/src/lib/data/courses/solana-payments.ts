@@ -420,6 +420,6 @@ export const solanaPaymentsCourse: Course = {
   duration: "10 hours",
   totalXP: 400,
   tags: ["payments", "checkout", "webhooks", "transactions", "solana"],
-  imageUrl: "/images/courses/solana-payments.jpg",
+  imageUrl: "/images/courses/solana-payments.svg",
   modules: [module1, module2],
 };

@@ -419,7 +419,7 @@ export const anchorDevelopmentCourse: Course = {
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 310,
-  imageUrl: "/images/courses/anchor-development.jpg",
+  imageUrl: "/images/courses/anchor-development.svg",
   tags: ["anchor", "solana", "pda", "accounts", "testing", "counter"],
   modules: [module1, module2],
 };

@@ -513,6 +513,6 @@ export const solanaSecurityCourse: Course = {
   duration: "10 hours",
   totalXP: 2200,
   tags: ["security", "audit", "vuln-lab", "solana"],
-  imageUrl: "/images/courses/solana-security.jpg",
+  imageUrl: "/images/courses/solana-security.svg",
   modules: [module1, module2],
 };

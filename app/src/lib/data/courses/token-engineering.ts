@@ -416,6 +416,6 @@ export const tokenEngineeringCourse: Course = {
   duration: "10 hours",
   totalXP: 335,
   tags: ["tokens", "token-2022", "launch", "authorities", "simulation"],
-  imageUrl: "/images/courses/token-engineering.jpg",
+  imageUrl: "/images/courses/token-engineering.svg",
   modules: [module1, module2],
 };

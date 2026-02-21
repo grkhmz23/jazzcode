@@ -336,6 +336,6 @@ export const solanaTestingCourse: Course = {
   duration: '6 hours',
   totalXP: 1200,
   tags: ['testing', 'bankrun', 'anchor', 'devnet'],
-  imageUrl: '/images/courses/solana-testing.jpg',
+  imageUrl: '/images/courses/solana-testing.svg',
   modules: [module1, module2],
 };

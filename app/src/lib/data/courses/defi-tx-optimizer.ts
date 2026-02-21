@@ -559,6 +559,6 @@ export const defiTxOptimizerCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["defi", "transactions", "optimization", "compute", "solana"],
-  imageUrl: "/images/courses/defi-tx-optimizer.jpg",
+  imageUrl: "/images/courses/defi-tx-optimizer.svg",
   modules: [module1, module2],
 };

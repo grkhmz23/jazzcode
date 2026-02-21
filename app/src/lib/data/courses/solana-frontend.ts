@@ -456,7 +456,7 @@ export const solanaFrontendCourse: Course = {
   difficulty: "intermediate",
   duration: "10 hours",
   totalXP: 335,
-  imageUrl: "/images/courses/solana-frontend.jpg",
+  imageUrl: "/images/courses/solana-frontend.svg",
   tags: ["frontend", "dashboard", "state-model", "event-replay", "determinism"],
   modules: [module1, module2],
 };

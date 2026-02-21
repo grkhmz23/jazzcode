@@ -498,6 +498,6 @@ export const defiLendingRiskCourse: Course = {
   duration: "14 hours",
   totalXP: 400,
   tags: ["defi", "lending", "liquidation", "risk", "solana"],
-  imageUrl: "/images/courses/defi-lending-risk.jpg",
+  imageUrl: "/images/courses/defi-lending-risk.svg",
   modules: [module1, module2],
 };

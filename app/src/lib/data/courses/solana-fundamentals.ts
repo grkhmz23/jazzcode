@@ -664,7 +664,7 @@ export const solanaFundamentalsCourse: Course = {
   difficulty: 'beginner',
   duration: '8 hours',
   totalXP: 305,
-  imageUrl: '/images/courses/solana-fundamentals.jpg',
+  imageUrl: '/images/courses/solana-fundamentals.svg',
   tags: ['solana', 'fundamentals', 'accounts', 'transactions', 'pdas', 'spl-token'],
   modules: [module1, module2],
 };

@@ -586,6 +586,6 @@ export const defiClmmLiquidityCourse: Course = {
   duration: "14 hours",
   totalXP: 400,
   tags: ["defi", "clmm", "liquidity", "orca", "solana"],
-  imageUrl: "/images/courses/defi-clmm-liquidity.jpg",
+  imageUrl: "/images/courses/defi-clmm-liquidity.svg",
   modules: [module1, module2],
 };

@@ -266,6 +266,6 @@ export const rustDataLayoutBorshCourse: Course = {
   duration: "10 hours",
   totalXP: 445,
   tags: ["rust", "borsh", "data-layout", "solana"],
-  imageUrl: "/images/courses/rust-data-layout-borsh.jpg",
+  imageUrl: "/images/courses/rust-data-layout-borsh.svg",
   modules: [module1, module2],
 };

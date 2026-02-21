@@ -481,6 +481,6 @@ export const solanaPayCommerceCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["solana-pay", "commerce", "payments", "qr", "solana"],
-  imageUrl: "/images/courses/solana-pay-commerce.jpg",
+  imageUrl: "/images/courses/solana-pay-commerce.svg",
   modules: [module1, module2],
 };

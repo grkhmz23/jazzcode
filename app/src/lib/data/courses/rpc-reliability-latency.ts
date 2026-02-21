@@ -323,6 +323,6 @@ export const rpcReliabilityLatencyCourse: Course = {
   duration: "9 hours",
   totalXP: 445,
   tags: ["rpc", "latency", "reliability", "observability"],
-  imageUrl: "/images/courses/rpc-reliability-latency.jpg",
+  imageUrl: "/images/courses/rpc-reliability-latency.svg",
   modules: [module1, module2],
 };

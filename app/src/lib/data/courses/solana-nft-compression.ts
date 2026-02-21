@@ -426,6 +426,6 @@ export const solanaNftCompressionCourse: Course = {
   duration: "12 hours",
   totalXP: 425,
   tags: ["nfts", "compression", "merkle-trees", "cnfts", "solana"],
-  imageUrl: "/images/courses/solana-nft-compression.jpg",
+  imageUrl: "/images/courses/solana-nft-compression.svg",
   modules: [module1, module2],
 };

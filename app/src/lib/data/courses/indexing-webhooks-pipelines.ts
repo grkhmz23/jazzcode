@@ -322,6 +322,6 @@ export const indexingWebhooksPipelinesCourse: Course = {
   duration: "9 hours",
   totalXP: 445,
   tags: ["indexing", "webhooks", "reorgs", "reliability"],
-  imageUrl: "/images/courses/indexing-webhooks-pipelines.jpg",
+  imageUrl: "/images/courses/indexing-webhooks-pipelines.svg",
   modules: [module1, module2],
 };

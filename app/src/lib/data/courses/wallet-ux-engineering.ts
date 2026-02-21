@@ -605,6 +605,6 @@ export const walletUxEngineeringCourse: Course = {
   duration: "12 hours",
   totalXP: 400,
   tags: ["wallet", "ux", "connection", "rpc", "solana"],
-  imageUrl: "/images/courses/wallet-ux-engineering.jpg",
+  imageUrl: "/images/courses/wallet-ux-engineering.svg",
   modules: [module1, module2],
 };

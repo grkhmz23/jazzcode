@@ -265,6 +265,6 @@ export const rustProcMacrosCodegenSafetyCourse: Course = {
   duration: "10 hours",
   totalXP: 445,
   tags: ["rust", "macros", "codegen", "safety"],
-  imageUrl: "/images/courses/rust-proc-macros-codegen-safety.jpg",
+  imageUrl: "/images/courses/rust-proc-macros-codegen-safety.svg",
   modules: [module1, module2],
 };

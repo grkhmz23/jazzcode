@@ -361,6 +361,6 @@ export const anchorUpgradesMigrationsCourse: Course = {
   duration: "8 hours",
   totalXP: 440,
   tags: ["anchor", "solana", "upgrades", "migrations", "program-management"],
-  imageUrl: "/images/courses/anchor-upgrades-migrations.jpg",
+  imageUrl: "/images/courses/anchor-upgrades-migrations.svg",
   modules: [module1, module2],
 };

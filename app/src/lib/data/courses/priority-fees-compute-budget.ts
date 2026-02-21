@@ -323,6 +323,6 @@ export const priorityFeesComputeBudgetCourse: Course = {
   duration: "9 hours",
   totalXP: 445,
   tags: ["solana", "fees", "compute-budget", "reliability"],
-  imageUrl: "/images/courses/priority-fees-compute-budget.jpg",
+  imageUrl: "/images/courses/priority-fees-compute-budget.svg",
   modules: [module1, module2],
 };
